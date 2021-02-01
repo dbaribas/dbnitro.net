@@ -1,8 +1,8 @@
 #!/bin/bash
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.11"
+SoftwareVersion="1.0.13"
 DateCreation="07/01/2021"
-DateModification="26/01/2021"
+DateModification="01/02/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -51,7 +51,7 @@ ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_
 #
 function unset_var()
 {
-for U_VAR in PATH ORACLE_HOSTNAME ORACLE_TERM ORACLE_HOME_ADR ADRCI_HOME ORACLE_UNQNAME ORACLE_SID ORACLE_HOME GRID_HOME OGG_HOME TFA_HOME OCK_HOME BASE OWNER OH DBS TNS OGG TFA OCK ORATOP OPATCH JAVA_HOME LD_LIBRARY_PATH CLASSPATH ALERTDB ALERTDG ALERTGG ALERTASM; do
+for U_VAR in PATH OWNER ORACLE_HOSTNAME ORACLE_TERM ORACLE_HOME_ADR ADRCI_HOME ORACLE_UNQNAME ORACLE_SID ORACLE_HOME GRID_HOME OGG_HOME TFA_HOME OCK_HOME BASE OH DBS TNS OGG TFA OCK ORATOP OPATCH JAVA_HOME LD_LIBRARY_PATH CLASSPATH ALERTDB ALERTDG ALERTGG ALERTASM; do
   unset ${U_VAR} > /dev/null 2>&1
 done
 export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
@@ -204,7 +204,7 @@ function set_HOME()
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
   alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
   # Aliases to connect on SQLPLUS
-  alias sqlplus='rlwrap sqlplus @/tmp/.glogin.sql'
+  alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
   # Aliases to connect on ADRCI
   alias adrci='rlwrap adrci'
@@ -241,7 +241,7 @@ function set_HOME()
   else
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
-  clear
+clear
   echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
@@ -287,7 +287,7 @@ function set_ASM()
   export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-  export HOME_ADR=$(echo "show homes" | adrci | grep "${OPT}")
+  export HOME_ADR=$(echo 'set base $ORACLE_BASE; show homes' | adrci | grep "${OPT}")
   export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${GRID_SID}.log"
   # Aliases to CRSCTL STATUS
   alias rest='crsctl stat res -t -init'
@@ -387,12 +387,12 @@ function set_DB()
   export ORATOP="${ORACLE_HOME}/suptools/oratop"
   export OPATCH="${ORACLE_HOME}/OPatch"
   export JAVA_HOME="${ORACLE_HOME}/jdk"
+  #
   if [[ "${ASM_EXISTS}" = "YES" ]]; then
     export GRID_HOME="${G_HOME}"
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
-	export HOME_ADR=$(echo "show homes" | adrci | grep "${OPT}")
     # Aliases to CRSCTL STATUS
     alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
@@ -403,8 +403,9 @@ function set_DB()
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
-	export HOME_ADR=${ORACLE_BASE}$(echo "show homes" | adrci | grep "${OPT}")
   fi
+  #
+  export HOME_ADR=$(echo 'set base $ORACLE_BASE; show homes' | adrci | grep "${OPT}")
   export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
   export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc${ORACLE_SID}.log"
   export ALERTGG="${OGG_HOME}/ggserr.log"
@@ -485,15 +486,58 @@ function set_DB()
   umask 0022
 }
 #
+function unionAll()
+{
+  # Unset and Unalias
+  unset_var
+  unalias_var
+  #
+  for UALL_VAR in PATH EDITOR ADRCI_HOME ORACLE_SID ORACLE_HOME OMS_HOME AGENT_HOME RDBMS_TRACE NLS_DATE_FORMAT EDITOR; do
+    unset ${UALL_VAR} > /dev/null 2>&1
+	export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+  done
+  #
+  UALL_LIST=$(cat /etc/oratab | egrep ':N|:Y' | egrep -v -i '+apx|-mgmtdb' | cut -f1 -d ':' | uniq)
+  #
+  PS3="Select the Option: "
+  select UALL in ${UALL_LIST} QUIT; do
+  if [[ "${UALL}" = "QUIT" ]]; then
+    echo " -- Exit Menu --"
+  elif [[ "${UALL_LIST[@]}" =~ "${UALL}" ]] && [[ "${UALL}" != "" ]]; then
+  #
+  . /usr/local/bin/oraenv <<< ${UALL} > /dev/null 2>&1
+  export PATH=${PATH}:${ORACLE_HOME}/OPatch
+  export OMS_HOME=${ORACLE_BASE}/middleware2
+  export AGENT_HOME=${ORACLE_BASE}/agent/agent_inst
+  export ADRCI_HOME=$(echo 'set base $ORACLE_BASE; show homes' | adrci | grep ${UALL})
+  export RDBMS_TRACE=${ORACLE_BASE}/${ADRCI_HOME}/trace
+  export NLS_DATE_FORMAT='dd.mm.yyyy hh24:mi:ss'
+  export EDITOR=vi
+  NODE="`hostname`::"
+  export PS1='\u@\h:\w \$ '
+  set -o vi
+  alias tailalert='tail -n 300 -f ${RDBMS_TRACE}/alert*'
+  umask 022
+  #
+  else
+    echo " -- Invalid Option --"
+    continue
+  fi
+  break
+  done
+}
+#
 # Main Menu
 #
 function MainMenu()
 {
 PS3="Select the Option: "
-select OPT in ${ORA_HOMES} ${DBLIST} QUIT; do
+select OPT in ${ORA_HOMES} ${DBLIST} UALL QUIT; do
 if [[ "${OPT}" = "QUIT" ]]; then
   # Exit Menu
   echo " -- Exit Menu --"
+elif [[ "${OPT}" = "UALL" ]]; then
+  unionAll
 elif [[ "${OPT}" == "+ASM"* ]]; then
   if [[ "${ASM_USER}" = "YES" ]]; then
     # Set ASM
