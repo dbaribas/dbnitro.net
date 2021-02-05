@@ -2,7 +2,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.15"
 DateCreation="07/01/2021"
-DateModification="04/02/2021"
+DateModification="05/02/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -46,24 +46,6 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin"
 ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}" | grep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
-#
-# Unsetting and Setting OS and ORATAB Variables
-#
-function unset_var()
-{
-for U_VAR in PATH ORACLE_HOSTNAME ORACLE_TERM ORACLE_HOME_ADR ADRCI_HOME ORACLE_UNQNAME ORACLE_SID ORACLE_HOME GRID_HOME OGG_HOME TFA_HOME OCK_HOME BASE OWNER OH DBS TNS OGG TFA OCK ORATOP OPATCH JAVA_HOME LD_LIBRARY_PATH CLASSPATH ALERTDB ALERTDG ALERTGG ALERTASM; do
-  unset ${U_VAR} > /dev/null 2>&1
-done
-export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
-export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
-}
-#
-function unalias_var()
-{
-for U_ALIAS in rest res base oh dbs tns ogg tfa ock dblog dglog gglog asmlog sqlplus s asmcmd a rman r dgmgrl d adrci ad oggsci o p tns t l orat; do
-  unalias ${U_ALIAS} > /dev/null 2>&1
-done
-}
 #
 # Verify OS Parameters
 #
@@ -117,9 +99,14 @@ if [[ ! -f ${ORATAB} ]]; then
   exit 1
 fi
 #
+# DBLIST
+#
+DBLIST=$(cat ${ORATAB} | egrep ":N|:Y" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq)
+#
 # Verify ASM
 #
-if [[ $(cat ${ORATAB} | egrep ':N|:Y' | grep -i "+ASM*" | egrep -v -i '+apx|-mgmtdb' | cut -f1 -d ':' | uniq | wc -l) = 0 ]]; then
+ASM=$(cat ${ORATAB} | egrep ":N|:Y" | grep -i "+ASM*" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq | wc -l)
+if [[ ${ASM} = 0 ]]; then
   # ASM DO NOT EXISTS
   ASM_EXISTS="NO"
 else
@@ -138,9 +125,26 @@ else
   fi
 fi
 #
-# Setting Variables
+# Unsetting and Setting OS and ORATAB Variables
 #
-DBLIST=$(cat ${ORATAB} | egrep ':N|:Y' | egrep -v -i '+apx|-mgmtdb' | cut -f1 -d ':' | uniq)
+function unset_var()
+{
+UALL_VAR="ADRCI_HOME AGENT_HOME GRID_HOME HOME_ADR JAVA_HOME OCK_HOME OGG_HOME OMS_HOME ORACLE_HOME ORACLE_HOSTNAME ORACLE_TERM TFA_HOME RDBMS_TRACE NLS_DATE_FORMAT EDITOR NODE"
+VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "ORACLE_BASE|HISTCONTROL|HISTSIZE|HOME|HOSTNAME|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
+for U_VAR in ${VARIABLES} ${UALL_VAR}; do
+  unset ${U_VAR} > /dev/null 2>&1
+done
+export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+}
+#
+function unalias_var()
+{
+ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v "db|egrep|fgrep|grep|l.|ll|ls|vi|which")
+for U_ALIAS in ${ALIASES}; do
+  unalias ${U_ALIAS} > /dev/null 2>&1
+done
+}
 #
 # Setting Functions
 #
@@ -235,10 +239,10 @@ function set_HOME()
   #
   OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
   #
-  HOME=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ':N:|:Y:' | cut -f4 -d ':' | uniq)
-  if [[ ${HOME} = "Y" ]]; then
+  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+  if [[ ${HOME_STATUS} = "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif  [[ ${HOME} = "N" ]]; then
+  elif  [[ ${HOME_STATUS} = "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -294,7 +298,7 @@ function set_ASM()
   export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-  export HOME_ADR=$(echo 'set base $ORACLE_BASE; show homes' | adrci | grep "${OPT}")
+  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "${OPT}")
   export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${GRID_SID}.log"
   # Aliases to CRSCTL STATUS
   alias rest='crsctl stat res -t -init'
@@ -342,10 +346,10 @@ function set_ASM()
   U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
   F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   #
-  HOME=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ':N:|:Y:' | cut -f4 -d ':' | uniq)
-  if [[ ${HOME} = "Y" ]]; then
+  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+  if [[ ${HOME_STATUS} = "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif  [[ ${HOME} = "N" ]]; then
+  elif  [[ ${HOME_STATUS} = "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -384,7 +388,6 @@ function set_DB()
   local OPT=$1
   export ORACLE_HOSTNAME="${HOST}"
   export ORACLE_TERM=xterm
-  export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
   export ORACLE_SID="${OPT}"
   export ORACLE_BASE="${ORACLE_BASE}"
   export ORACLE_HOME=$(cat ${ORATAB} | grep "${OPT}" | cut -f2 -d ':')
@@ -419,7 +422,8 @@ function set_DB()
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
   fi
   #
-  export HOME_ADR=$(echo 'set base $ORACLE_BASE; show homes' | adrci | grep "${OPT}")
+  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "${OPT}")
+  export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
   export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
   export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc${ORACLE_SID}.log"
   export ALERTGG="${OGG_HOME}/ggserr.log"
@@ -476,10 +480,10 @@ function set_DB()
   U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
   F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   #
-  HOME=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ':N:|:Y:' | cut -f4 -d ':' | uniq)
-  if [[ ${HOME} = "Y" ]]; then
+  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+  if [[ ${HOME_STATUS} = "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif  [[ ${HOME} = "N" ]]; then
+  elif  [[ ${HOME_STATUS} = "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -548,17 +552,18 @@ cat > /home/oracle/.bash_profile <<EOF
 # .bash_profile
 
 # Get the aliases and functions
-if [ -f ~/.bashrc ]; then
-      . ~/.bashrc
+if [[ -f ~/.bashrc ]]; then
+       . ~/.bashrc
 fi
-
+#
 # User specific environment and startup programs
-
+#
 export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
-umask 0022
-
+#
 echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
 echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
-alias db='. /home/oracle/.menu.sh'
+alias db='. /home/oracle/.bash_menu.sh'
+#
+umask 0022
 EOF
