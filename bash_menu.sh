@@ -216,7 +216,6 @@ function set_HOME()
   # Aliases to check PROCESSES
   alias p='ps -ef | grep pmon | grep -v grep'
   # Aliases to check LSNRCTL
-  alias tns='rlwrap lsnrctl'
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
   # Aliases to check MEMINFO
@@ -323,7 +322,6 @@ function set_ASM()
   # Aliases to check PROCESSES
   alias p='ps -ef | grep pmon | grep -v grep'
   # Aliases to check LSNRCTL
-  alias tns='rlwrap lsnrctl'
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
   # Aliases to connect on ORATOP
@@ -457,7 +455,6 @@ function set_DB()
   # Aliases to check PROCESSES
   alias p='ps -ef | grep pmon | grep -v grep'
   # Aliases to check LSNRCTL
-  alias tns='rlwrap lsnrctl'
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
   # Aliases to connect on ORATOP
