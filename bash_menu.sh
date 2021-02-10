@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.17"
 DateCreation="07/01/2021"
@@ -11,7 +11,7 @@ WEBSITE="http://dbnitro.net"
 #
 if [[ $(whoami) = "root" ]]; then
   clear
-  echo "----------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
   echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
   exit 1
@@ -22,7 +22,7 @@ fi
 export ORACLE_BASE="/u01/app/oracle"
 if [[ ! -d ${ORACLE_BASE} ]]; then
   clear
-  echo "----------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- YOU DO NOT HAVE THE ORACLE_BASE CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
   exit 1
@@ -33,7 +33,7 @@ fi
 ORA_INST="/etc/oraInst.loc"
 if [[ ! -f ${ORA_INST} ]]; then
   clear
-  echo "----------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
   exit 1
 fi
@@ -93,7 +93,7 @@ fi
 #
 if [[ ! -f ${ORATAB} ]]; then
   clear
-  echo "----------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
   exit 1
@@ -253,10 +253,10 @@ function set_HOME()
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
   clear
-  echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | ONWER: [${RED} ${OWNER} ${BLA}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   #
   export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
@@ -368,10 +368,10 @@ function set_ASM()
   fi
   #
   clear
-  echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   #
   export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
@@ -502,10 +502,10 @@ function set_DB()
   fi
   #
   clear
-  echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  echo "+-----------------------------------------------------------------------------------------------------------------------------------------"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   #
   export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
@@ -529,10 +529,11 @@ elif [[ "${OPT}" == "+ASM"* ]]; then
     set_ASM_USER
     continue
   fi
-elif [[ "${ORA_HOMES[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set HOME
   set_HOME ${OPT}
-elif [[ "${DBLIST[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+### elif [[ "${DBLIST[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then  ### If you have an ORACLE XE
+elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set DATABASE
   set_DB ${OPT}
 else
