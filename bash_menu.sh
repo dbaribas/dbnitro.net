@@ -1,8 +1,8 @@
 #!/bin/bash
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.15"
+SoftwareVersion="1.0.17"
 DateCreation="07/01/2021"
-DateModification="05/02/2021"
+DateModification="10/02/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -127,7 +127,7 @@ fi
 #
 # Unsetting and Setting OS and ORATAB Variables
 #
-function unset_var()
+function unset_var() 
 {
 UALL_VAR="ADRCI_HOME AGENT_HOME GRID_HOME HOME_ADR JAVA_HOME OCK_HOME OGG_HOME OMS_HOME ORACLE_HOME ORACLE_HOSTNAME ORACLE_TERM TFA_HOME RDBMS_TRACE NLS_DATE_FORMAT EDITOR NODE"
 VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "ORACLE_BASE|HISTCONTROL|HISTSIZE|HOME|HOSTNAME|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
@@ -208,7 +208,7 @@ function set_HOME()
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
   alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
   # Aliases to connect on SQLPLUS
-  alias sqlplus='rlwrap sqlplus @/tmp/.glogin.sql'
+  alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
   # Aliases to connect on ADRCI
   alias adrci='rlwrap adrci'
@@ -390,7 +390,7 @@ function set_DB()
   export ORACLE_TERM=xterm
   export ORACLE_SID="${OPT}"
   export ORACLE_BASE="${ORACLE_BASE}"
-  export ORACLE_HOME=$(cat ${ORATAB} | grep "${OPT}" | cut -f2 -d ':')
+  export ORACLE_HOME=$(cat ${ORATAB} | grep "${ORACLE_SID}" | cut -f2 -d ':')
   export OGG_HOME="${ORACLE_BASE}/product/ogg_19c"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
   export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
@@ -529,10 +529,10 @@ elif [[ "${OPT}" == "+ASM"* ]]; then
     set_ASM_USER
     continue
   fi
-elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+elif [[ "${ORA_HOMES[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set HOME
   set_HOME ${OPT}
-elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+elif [[ "${DBLIST[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set DATABASE
   set_DB ${OPT}
 else
@@ -545,6 +545,8 @@ done
 MainMenu
 
 
+
+chmod a+x /home/oracle/.bash_menu.sh
 
 
 
