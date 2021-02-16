@@ -22,4 +22,8 @@ chmod a+x /opt/.OracleMenu.sh
 
 chmod g+w /opt/.OracleMenu.sh
 
-After you download and change like this example, you can just connect as grid or as oracle, and execute the alias " db ", it will show you all options to work with this script.
+After you download and change like this example, you can just connect as grid or as oracle, and execute the:
+
+alias " db "
+
+It will show you all options to work with this script.
