@@ -28,9 +28,9 @@ It will show you all options to work with this script.
 # PS: The only line you have to take care is: export ORACLE_BASE, this is mandatory, if the variable/folder doesn't exists, you will out of the script. So, please modify this variable as your environment is.
 
 A special thank to:
-  Fabio Specht
-  Ricardo Portilho
-  Fred Denis
-  Leonardo Lopes
+* Fabio Specht
+* Ricardo Portilho
+* Fred Denis
+* Leonardo Lopes
 
 With your help, patient and some laughs, we did this easier!!!
