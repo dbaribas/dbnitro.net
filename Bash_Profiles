@@ -1,9 +1,9 @@
-- Save the Content on this file
+Save the Content on this file
 
 vim /opt/.OracleMenu.sh
 
 
-- Modify the permissions of this file
+Modify the permissions of this file
 
 chmod a+x /opt/.OracleMenu.sh
 chmod g+w /opt/.OracleMenu.sh
