@@ -3,7 +3,7 @@ The only mandatory parameter to check and change if necessary is the ORACLE_BASE
 
 Download the Profile Script
 
-wget https://github.com/dbaribas/dbnitro/blob/main/OracleMenu.sh –P /opt/
+https://github.com/dbaribas/dbnitro/blob/main/OracleMenu.sh
 
 Modify the Name of the Profile Script
 
