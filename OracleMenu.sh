@@ -2,7 +2,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.17"
 DateCreation="07/01/2021"
-DateModification="10/02/2021"
+DateModification="17/02/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -14,7 +14,7 @@ if [[ $(whoami) = "root" ]]; then
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
   echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
-  exit 1
+  return 1
 fi
 #
 # Verify ORACLE_BASE
@@ -25,7 +25,7 @@ if [[ ! -d ${ORACLE_BASE} ]]; then
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- YOU DO NOT HAVE THE ORACLE_BASE CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
-  exit 1
+  return 1
 fi
 #
 # Verify oraInst.loc file
@@ -35,7 +35,7 @@ if [[ ! -f ${ORA_INST} ]]; then
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
-  exit 1
+  return 1
 fi
 #
 # Set ORACLE Inventory
@@ -116,7 +116,7 @@ else
   G_HOME=$(cat ${ORATAB} | grep -i "+ASM*" | cut -f2 -d ':')
   #
   ASM_OWNER=$(ls -l ${GRID_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
-  if [[ "${ASM_OWNER}" = $(whoami) ]]; then
+  if [[ "${ASM_OWNER}" = "$(whoami)" ]]; then
     # ASM IS ON THE ORACLE USER
     ASM_USER="YES"
   else
@@ -130,12 +130,13 @@ fi
 function unset_var() 
 {
 UALL_VAR="ADRCI_HOME AGENT_HOME GRID_HOME HOME_ADR JAVA_HOME OCK_HOME OGG_HOME OMS_HOME ORACLE_HOME ORACLE_HOSTNAME ORACLE_TERM TFA_HOME RDBMS_TRACE NLS_DATE_FORMAT EDITOR NODE"
-VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "ORACLE_BASE|HISTCONTROL|HISTSIZE|HOME|HOSTNAME|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
+VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "ORACLE_BASE|HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
 for U_VAR in ${VARIABLES} ${UALL_VAR}; do
   unset ${U_VAR} > /dev/null 2>&1
 done
 export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
 export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
 }
 #
 function unalias_var()
@@ -518,7 +519,7 @@ if [[ "${OPT}" = "QUIT" ]]; then
   # Exit Menu
   echo " -- Exit Menu --"
 elif [[ "${OPT}" == "+ASM"* ]]; then
-  if [[ "${ASM_USER}" = "YES" ]]; then
+  if [[ "${ASM_USER}" == "YES" ]]; then
     # Set ASM
     set_ASM ${OPT}
   else
