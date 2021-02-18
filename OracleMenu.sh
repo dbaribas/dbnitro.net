@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.17"
+SoftwareVersion="1.0.19"
 DateCreation="07/01/2021"
-DateModification="17/02/2021"
+DateModification="18/02/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -191,6 +191,14 @@ function set_HOME()
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
+    export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
+    export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "crs")
+    export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+    export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+    # Alias CRS Logs
+    alias asmlog='tail -f ${ALERTASM}'
+    # Aliases to tail LOGS
+    alias crslog='tail -f ${ALERTCRS}'
     # Aliases to CRSCTL STATUS
     alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
@@ -298,8 +306,14 @@ function set_ASM()
   export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "${OPT}")
-  export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${GRID_SID}.log"
+  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
+  export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "crs")
+  export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+  export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+  # Alias CRS Logs
+  alias asmlog='tail -f ${ALERTASM}'
+  # Aliases to tail LOGS
+  alias crslog='tail -f ${ALERTCRS}'
   # Aliases to CRSCTL STATUS
   alias rest='crsctl stat res -t -init'
   alias res='crsctl stat res -t'
@@ -312,8 +326,6 @@ function set_ASM()
   alias tns='cd ${ORACLE_HOME}/network/admin'
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
   alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
-  # Aliases to tail LOGS
-  alias asmlog='tail -f ${ALERTASM}'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysasm @/tmp/.glogin.sql'
@@ -409,6 +421,14 @@ function set_DB()
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
+    export HOME_ADR_ASM=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
+    export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "crs")
+    export ALERTASM="${ORACLE_BASE}/${HOME_ADR_ASM}/trace/alert_+ASM*.log"
+    export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+    # Alias CRS Logs
+    alias asmlog='tail -f ${ALERTASM}'
+    # Aliases to tail LOGS
+    alias crslog='tail -f ${ALERTCRS}'
     # Aliases to CRSCTL STATUS
     alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
@@ -424,7 +444,7 @@ function set_DB()
   export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "${OPT}")
   export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
   export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
-  export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc${ORACLE_SID}.log"
+  export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
   export ALERTGG="${OGG_HOME}/ggserr.log"
   # Aliases to go to folder
   alias base='cd ${ORACLE_BASE}'
