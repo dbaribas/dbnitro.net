@@ -17,17 +17,6 @@ if [[ $(whoami) = "root" ]]; then
   return 1
 fi
 #
-# Verify ORACLE_BASE
-#
-export ORACLE_BASE="/u01/app/oracle"
-if [[ ! -d ${ORACLE_BASE} ]]; then
-  clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo " -- YOU DO NOT HAVE THE ORACLE_BASE CONFIGURED --"
-  echo " -- PLEASE CHECK YOUR CONFIGURATION --"
-  return 1
-fi
-#
 # Verify oraInst.loc file
 #
 ORA_INST="/etc/oraInst.loc"
@@ -130,7 +119,7 @@ fi
 function unset_var() 
 {
 UALL_VAR="ADRCI_HOME AGENT_HOME GRID_HOME HOME_ADR JAVA_HOME OCK_HOME OGG_HOME OMS_HOME ORACLE_HOME ORACLE_HOSTNAME ORACLE_TERM TFA_HOME RDBMS_TRACE NLS_DATE_FORMAT EDITOR NODE"
-VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "ORACLE_BASE|HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
+VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
 for U_VAR in ${VARIABLES} ${UALL_VAR}; do
   unset ${U_VAR} > /dev/null 2>&1
 done
@@ -171,8 +160,8 @@ function set_HOME()
   # SET HOME
   local OPT=$1
   export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_BASE="${ORACLE_BASE}"
   export ORACLE_HOME="${OPT}"
+  export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
   export OGG_HOME="${ORACLE_BASE}/product/ogg_19c"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
   export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
@@ -188,13 +177,14 @@ function set_HOME()
   export JAVA_HOME="${ORACLE_HOME}/jdk"
   if [[ "${ASM_EXISTS}" = "YES" ]]; then
     export GRID_HOME=${G_HOME}
+    export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
-    export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
-    export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "crs")
-    export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
-    export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+    export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "+ASM*")
+    export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep "crs")
+    export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+    export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
     # Alias CRS Logs
     alias asmlog='tail -f ${ALERTASM}'
     # Aliases to tail LOGS
@@ -286,11 +276,11 @@ function set_ASM()
   # SET ASM/GRID
   local OPT=$1
   export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_BASE="${ORACLE_BASE}"
   export ORACLE_TERM=xterm
   export ORACLE_SID="${OPT}"
   export ORACLE_HOME="${G_HOME}"
-  export GRID_HOME="${G_HOME}"
+  export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
+  export GRID_HOME="${ORACLE_HOME}"
   export GRID_SID="${OPT}"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
   export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
@@ -400,8 +390,8 @@ function set_DB()
   export ORACLE_HOSTNAME="${HOST}"
   export ORACLE_TERM=xterm
   export ORACLE_SID="${OPT}"
-  export ORACLE_BASE="${ORACLE_BASE}"
   export ORACLE_HOME=$(cat ${ORATAB} | grep "${ORACLE_SID}" | cut -f2 -d ':')
+  export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
   export OGG_HOME="${ORACLE_BASE}/product/ogg_19c"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
   export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
@@ -417,18 +407,11 @@ function set_DB()
   export JAVA_HOME="${ORACLE_HOME}/jdk"
   #
   if [[ "${ASM_EXISTS}" = "YES" ]]; then
-    export GRID_HOME="${G_HOME}"
+    export GRID_HOME=${G_HOME}
+    export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
-    export HOME_ADR_ASM=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
-    export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "crs")
-    export ALERTASM="${ORACLE_BASE}/${HOME_ADR_ASM}/trace/alert_+ASM*.log"
-    export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
-    # Alias CRS Logs
-    alias asmlog='tail -f ${ALERTASM}'
-    # Aliases to tail LOGS
-    alias crslog='tail -f ${ALERTCRS}'
     # Aliases to CRSCTL STATUS
     alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
