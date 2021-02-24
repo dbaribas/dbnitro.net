@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.19"
+SoftwareVersion="1.0.21"
 DateCreation="07/01/2021"
-DateModification="18/02/2021"
+DateModification="25/02/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -148,6 +148,7 @@ COLUMN FILE_NAME FORMAT A80
 SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
 EOF
+chmod 777 /tmp/.glogin.sql
 }
 #
 function set_HOME()
@@ -194,7 +195,7 @@ function set_HOME()
     alias res='crsctl stat res -t'
     # Aliases to connect on ASMCMD
     alias asmcmd='rlwrap asmcmd'
-    alias a='rlwrap asmcmd'
+    alias a='rlwrap asmcmd -p'
   else
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
@@ -218,7 +219,7 @@ function set_HOME()
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
   # Aliases to check MEMINFO
-  alias meminfo='free -m -l -t'
+  alias meminfo='free -g -h -l -t'
   # Aliases to check PSMEM
   alias psmem='ps auxf | sort -nr -k 4'
   alias psmem10='ps auxf | sort -nr -k 4 | head -10'
@@ -240,7 +241,7 @@ function set_HOME()
   HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
   if [[ ${HOME_STATUS} = "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif  [[ ${HOME_STATUS} = "N" ]]; then
+  elif [[ ${HOME_STATUS} = "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -309,7 +310,7 @@ function set_ASM()
   alias res='crsctl stat res -t'
   # Aliases to connect on ASMCMD
   alias asmcmd='rlwrap asmcmd'
-  alias a='rlwrap asmcmd'
+  alias a='rlwrap asmcmd -p'
   # Aliases to go to folder
   alias oh='cd ${ORACLE_HOME}'
   alias dbs='cd ${ORACLE_HOME}/dbs'
@@ -330,7 +331,7 @@ function set_ASM()
   # Aliases to connect on ORATOP
   alias orat='${ORATOP}/oratop -f -i 10 / as sysasm'
   # Aliases to check MEMINFO
-  alias meminfo='free -m -l -t'
+  alias meminfo='free -g -h -l -t'
   # Aliases to check PSMEM
   alias psmem='ps auxf | sort -nr -k 4'
   alias psmem10='ps auxf | sort -nr -k 4 | head -10'
@@ -350,7 +351,7 @@ function set_ASM()
   HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
   if [[ ${HOME_STATUS} = "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif  [[ ${HOME_STATUS} = "N" ]]; then
+  elif [[ ${HOME_STATUS} = "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -417,7 +418,7 @@ function set_DB()
     alias res='crsctl stat res -t'
     # Aliases to connect on ASMCMD
     alias asmcmd='rlwrap asmcmd'
-    alias a='rlwrap asmcmd'
+    alias a='rlwrap asmcmd -p'
   else
     export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
@@ -464,7 +465,7 @@ function set_DB()
   # Aliases to connect on ORATOP
   alias orat='${ORATOP}/oratop -f -i 10 / as sysdba'
   # Aliases to check MEMINFO
-  alias meminfo='free -m -l -t'
+  alias meminfo='free -g -h -l -t'
   # Aliases to check PSMEM
   alias psmem='ps auxf | sort -nr -k 4'
   alias psmem10='ps auxf | sort -nr -k 4 | head -10'
@@ -484,7 +485,7 @@ function set_DB()
   HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
   if [[ ${HOME_STATUS} = "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif  [[ ${HOME_STATUS} = "N" ]]; then
+  elif [[ ${HOME_STATUS} = "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
