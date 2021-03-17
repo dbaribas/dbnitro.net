@@ -105,7 +105,7 @@ else
   G_HOME=$(cat ${ORATAB} | grep -i "+ASM*" | cut -f2 -d ':')
   #
   ASM_OWNER=$(ls -l ${GRID_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
-  if [[ "${ASM_OWNER}" = "$(whoami)" ]]; then
+  if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then
     # ASM IS ON THE ORACLE USER
     ASM_USER="YES"
   else
@@ -149,6 +149,7 @@ SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
 EOF
 chmod 777 /tmp/.glogin.sql
+chown oracle.oinstall /tmp/.glogin.sql
 }
 #
 function set_HOME()
@@ -519,7 +520,7 @@ function MainMenu()
 {
 PS3="Select the Option: "
 select OPT in ${ORA_HOMES} ${DBLIST} QUIT; do
-if [[ "${OPT}" = "QUIT" ]]; then
+if [[ "${OPT}" == "QUIT" ]]; then
   # Exit Menu
   echo " -- Exit Menu --"
 elif [[ "${OPT}" == "+ASM"* ]]; then
@@ -534,7 +535,6 @@ elif [[ "${OPT}" == "+ASM"* ]]; then
 elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set HOME
   set_HOME ${OPT}
-### elif [[ "${DBLIST[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then  ### If you have an ORACLE XE
 elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set DATABASE
   set_DB ${OPT}
