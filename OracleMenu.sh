@@ -1,17 +1,24 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.21"
+SoftwareVersion="1.0.25"
 DateCreation="07/01/2021"
-DateModification="25/02/2021"
+DateModification="05/04/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
+#
+# Separate Line Function
+#
+function SepLine() 
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+}
 #
 # Verify ROOT User
 #
 if [[ $(whoami) = "root" ]]; then
   clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
   echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
   return 1
@@ -22,7 +29,7 @@ fi
 ORA_INST="/etc/oraInst.loc"
 if [[ ! -f ${ORA_INST} ]]; then
   clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
   return 1
 fi
@@ -82,7 +89,7 @@ fi
 #
 if [[ ! -f ${ORATAB} ]]; then
   clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
   exit 1
@@ -118,28 +125,30 @@ fi
 #
 function unset_var() 
 {
-UALL_VAR="ADRCI_HOME AGENT_HOME GRID_HOME HOME_ADR JAVA_HOME OCK_HOME OGG_HOME OMS_HOME ORACLE_HOME ORACLE_HOSTNAME ORACLE_TERM TFA_HOME RDBMS_TRACE NLS_DATE_FORMAT EDITOR NODE"
-VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v "HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID")
-for U_VAR in ${VARIABLES} ${UALL_VAR}; do
-  unset ${U_VAR} > /dev/null 2>&1
-done
-export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
-export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
-umask 0022
+  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
+  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
 }
 #
 function unalias_var()
 {
-ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v "db|egrep|fgrep|grep|l.|ll|ls|vi|which")
-for U_ALIAS in ${ALIASES}; do
-  unalias ${U_ALIAS} > /dev/null 2>&1
-done
+  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
+  ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
+  for UN_ALIAS in ${ALIASES}; do
+    unalias ${UN_ALIAS} > /dev/null 2>&1
+  done
 }
 #
 # Setting Functions
 #
 function set_GLOGIN()
 {
+if [[ ! -f /tmp/.glogin.sql ]]; then
 cat > /tmp/.glogin.sql <<EOF
 set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
 COLUMN NAME FORMAT A20
@@ -148,8 +157,9 @@ COLUMN FILE_NAME FORMAT A80
 SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
 EOF
-chmod 777 /tmp/.glogin.sql
-chown oracle.oinstall /tmp/.glogin.sql
+# chmod 777 /tmp/.glogin.sql
+# chown oracle.oinstall /tmp/.glogin.sql
+fi
 }
 #
 function set_HOME()
@@ -164,7 +174,7 @@ function set_HOME()
   export ORACLE_HOSTNAME="${HOST}"
   export ORACLE_HOME="${OPT}"
   export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export OGG_HOME="${ORACLE_BASE}/product/ogg_19c"
+  export OGG_HOME="/u02/goldengate/19.1.0.4/ogg"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
   export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
   export BASE="${ORACLE_BASE}"
@@ -184,7 +194,7 @@ function set_HOME()
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
     export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "+ASM*")
-    export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep "crs")
+    export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "crs")
     export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
     export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
     # Alias CRS Logs
@@ -253,10 +263,10 @@ function set_HOME()
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
   clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | ONWER: [${RED} ${OWNER} ${BLA}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   #
   export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
@@ -299,7 +309,7 @@ function set_ASM()
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
   export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
-  export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "crs")
+  export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "crs")
   export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
   export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   # Alias CRS Logs
@@ -371,10 +381,10 @@ function set_ASM()
   fi
   #
   clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   #
   export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
@@ -394,7 +404,7 @@ function set_DB()
   export ORACLE_SID="${OPT}"
   export ORACLE_HOME=$(cat ${ORATAB} | grep "${ORACLE_SID}" | cut -f2 -d ':')
   export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export OGG_HOME="${ORACLE_BASE}/product/ogg_19c"
+  export OGG_HOME="/u02/goldengate/19.1.0.4/ogg"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
   export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
   export BASE="${ORACLE_BASE}"
@@ -436,7 +446,7 @@ function set_DB()
   alias oh='cd ${ORACLE_HOME}'
   alias dbs='cd ${ORACLE_HOME}/dbs'
   alias tns='cd ${ORACLE_HOME}/network/admin'
-  alias ogg='cd ${ORACLE_BASE}/product/ogg_19c'
+  alias ogg='cd ${OGG_HOME}'
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
   alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
   # Aliases to tail LOGS
@@ -505,10 +515,10 @@ function set_DB()
   fi
   #
   clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  SepLine
   #
   export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
