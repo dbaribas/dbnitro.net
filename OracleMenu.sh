@@ -125,6 +125,17 @@ fi
 #
 function unset_var() 
 {
+  if [[ $(whoami) = "grid" ]]; then
+  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
+  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
+  #
+  elif [[ $(whoami) = "oracle" ]]; then
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
   for U_VAR in ${VARIABLES}; do
@@ -133,6 +144,7 @@ function unset_var()
   export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
+  fi
 }
 #
 function unalias_var()
