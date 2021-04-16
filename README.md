@@ -1,5 +1,4 @@
 The OracleMenu.sh is a script to select different Oracle Homes, Oracle SIDs and Oracle Environments.
-The only mandatory parameter to check and change if necessary is the ORACLE_BASE, everything else will works deppending on the installation you have.
 
 Download the Profile Script
 
