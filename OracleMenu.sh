@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.25"
+SoftwareVersion="1.0.27"
 DateCreation="07/01/2021"
-DateModification="05/04/2021"
+DateModification="08/04/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -17,7 +17,7 @@ function SepLine()
 # Verify ROOT User
 #
 if [[ $(whoami) = "root" ]]; then
-  clear
+  clear -x 
   SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
   echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
@@ -28,11 +28,15 @@ fi
 #
 ORA_INST="/etc/oraInst.loc"
 if [[ ! -f ${ORA_INST} ]]; then
-  clear
+  clear -x
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
   return 1
 fi
+#
+# IGNORE ERRORS
+#
+IGNORE_ERRORS="OGG-00987"
 #
 # Set ORACLE Inventory
 #
@@ -59,7 +63,7 @@ if [[ $(uname) = "SunOS" ]]; then
   BLA="\033[m"
 elif [[ $(uname) = "AIX" ]]; then
   OS="AIX"
-  ORATAB="/var/opt/oracle/oratab"
+  ORATAB="/etc/oratab"
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
@@ -88,7 +92,7 @@ fi
 # Verify ORATAB
 #
 if [[ ! -f ${ORATAB} ]]; then
-  clear
+  clear -x
   SepLine
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
@@ -131,7 +135,7 @@ function unset_var()
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
-  export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   #
@@ -141,7 +145,7 @@ function unset_var()
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
-  export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   fi
@@ -165,6 +169,8 @@ cat > /tmp/.glogin.sql <<EOF
 set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
 COLUMN NAME FORMAT A20
 COLUMN VALUE FORMAT A40
+COLUMN USERNAME FORMAT A30
+COLUMN PROFILE FORMAT A20
 COLUMN FILE_NAME FORMAT A80
 SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
@@ -210,9 +216,9 @@ function set_HOME()
     export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
     export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
     # Alias CRS Logs
-    alias asmlog='tail -f ${ALERTASM}'
+    alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
     # Aliases to tail LOGS
-    alias crslog='tail -f ${ALERTCRS}'
+    alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
     # Aliases to CRSCTL STATUS
     alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
@@ -274,7 +280,7 @@ function set_HOME()
   else
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
-  clear
+  clear -x
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | ONWER: [${RED} ${OWNER} ${BLA}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
@@ -325,9 +331,9 @@ function set_ASM()
   export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
   export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   # Alias CRS Logs
-  alias asmlog='tail -f ${ALERTASM}'
+  alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
   # Aliases to tail LOGS
-  alias crslog='tail -f ${ALERTCRS}'
+  alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
   # Aliases to CRSCTL STATUS
   alias rest='crsctl stat res -t -init'
   alias res='crsctl stat res -t'
@@ -392,7 +398,7 @@ function set_ASM()
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
   #
-  clear
+  clear -x
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
@@ -448,7 +454,7 @@ function set_DB()
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
   fi
   #
-  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep "${OPT}")
+  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -w "${OPT}")
   export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
   export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
   export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
@@ -462,9 +468,9 @@ function set_DB()
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
   alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
   # Aliases to tail LOGS
-  alias dblog='tail -f ${ALERTDB}'
-  alias dglog='tail -f ${ALERTDG}'
-  alias gglog='tail -f ${ALERTGG}'
+  alias dblog='tail -f -n 100 ${ALERTDB} | grep -v -i ${IGNORE_ERRORS}'
+  alias dglog='tail -f -n 100 ${ALERTDG} | grep -v -i ${IGNORE_ERRORS}'
+  alias gglog='tail -f -n 100 ${ALERTGG} | grep -v -i ${IGNORE_ERRORS}'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
@@ -526,7 +532,7 @@ function set_DB()
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
   #
-  clear
+  clear -x
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
