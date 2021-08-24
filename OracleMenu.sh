@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.27"
+SoftwareVersion="1.0.33"
 DateCreation="07/01/2021"
-DateModification="08/04/2021"
+DateModification="17/08/2021"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -14,10 +14,17 @@ function SepLine()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
 }
 #
+# Clear Screen Function
+#
+function SetClear()
+{
+  printf "\033c"
+}
+#
 # Verify ROOT User
 #
 if [[ $(whoami) = "root" ]]; then
-  clear -x 
+  SetClear 
   SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
   echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
@@ -28,7 +35,7 @@ fi
 #
 ORA_INST="/etc/oraInst.loc"
 if [[ ! -f ${ORA_INST} ]]; then
-  clear -x
+  SetClear
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
   return 1
@@ -44,7 +51,7 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin"
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin" # agent - working on it.
 ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}" | grep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
 #
 # Verify OS Parameters
@@ -92,7 +99,7 @@ fi
 # Verify ORATAB
 #
 if [[ ! -f ${ORATAB} ]]; then
-  clear -x
+  SetClear
   SepLine
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
@@ -115,7 +122,7 @@ else
   G_SID=$(cat ${ORATAB} | grep -i "+ASM*" | cut -f1 -d ':')
   G_HOME=$(cat ${ORATAB} | grep -i "+ASM*" | cut -f2 -d ':')
   #
-  ASM_OWNER=$(ls -l ${GRID_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
   if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then
     # ASM IS ON THE ORACLE USER
     ASM_USER="YES"
@@ -208,7 +215,7 @@ function set_HOME()
   if [[ "${ASM_EXISTS}" = "YES" ]]; then
     export GRID_HOME=${G_HOME}
     export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
-    export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
+    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
     export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "+ASM*")
@@ -226,7 +233,7 @@ function set_HOME()
     alias asmcmd='rlwrap asmcmd'
     alias a='rlwrap asmcmd -p'
   else
-    export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
+    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
   fi
@@ -280,7 +287,7 @@ function set_HOME()
   else
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
-  clear -x
+  SetClear
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | ONWER: [${RED} ${OWNER} ${BLA}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
@@ -323,7 +330,7 @@ function set_ASM()
   export ORATOP="${ORACLE_HOME}/suptools/oratop"
   export OPATCH="${ORACLE_HOME}/OPatch"
   export JAVA_HOME="${ORACLE_HOME}/jdk"
-  export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
+  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
   export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
@@ -398,7 +405,7 @@ function set_ASM()
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
   #
-  clear -x
+  SetClear
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
@@ -439,7 +446,7 @@ function set_DB()
   if [[ "${ASM_EXISTS}" = "YES" ]]; then
     export GRID_HOME=${G_HOME}
     export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
-    export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib
+    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
     # Aliases to CRSCTL STATUS
@@ -449,7 +456,7 @@ function set_DB()
     alias asmcmd='rlwrap asmcmd'
     alias a='rlwrap asmcmd -p'
   else
-    export LD_LIBRARY_PATH=/lib:/usr/lib:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib
+    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
   fi
@@ -532,7 +539,7 @@ function set_DB()
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
   #
-  clear -x
+  SetClear
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
   echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
