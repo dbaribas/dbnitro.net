@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.33"
+SoftwareVersion="1.0.41"
 DateCreation="07/01/2021"
-DateModification="17/08/2021"
+DateModification="20/01/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -51,8 +51,17 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin" # agent - working on it.
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin" # agent - Working on it.
 ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}" | grep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
+#
+# Scripts Folders
+#
+SCRIPTS="/u00/Scripts"
+#
+if [[ ${SCRIPTS} == "" ]]; then
+  echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  exit 1
+fi
 #
 # Verify OS Parameters
 #
@@ -187,6 +196,85 @@ EOF
 fi
 }
 #
+function set_GLOGIN_PDB()
+{
+if [[ ! -f /tmp/.glogin_pdb.sql ]]; then
+cat > /tmp/.glogin_pdb.sql <<EOF
+COLUMN NAME FORMAT A20
+COLUMN VALUE FORMAT A40
+COLUMN USERNAME FORMAT A30
+COLUMN PROFILE FORMAT A20
+COLUMN FILE_NAME FORMAT A80
+SET SQLPROMPT '&_user@&_connect_identifier> '
+DEFINE _EDITOR=vi
+define gname=idle
+set heading off termout off
+column global_name new_value gname
+col global_name noprint
+-- select upper(sys_context('userenv', 'con_name') || '@' || sys_context('userenv', 'db_name')) global_name from dual;
+-- select upper(sys_context('userenv', 'db_name') || '@' || sys_context('userenv', 'db_name')) global_name from dual;
+select upper(sys_context('userenv', 'session_user') || '@' || sys_context('userenv', 'con_name') || '@' || sys_context('userenv', 'cdb_name')) global_name from dual;
+SET SQLPROMPT '&gname> '
+EOF
+# chmod 777 /tmp/.glogin_pdb.sql
+# chown oracle.oinstall /tmp/.glogin_pdb.sql
+fi
+}
+#
+# Check and Set the Database Version, Container and Pluggable Databases
+#
+function set_PDB()
+{
+if [[ ${ORACLE_SID} = "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  break 1
+else
+VERSION=$(
+{
+  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
+  echo 'select substr(version,1,2) as version from v\$instance;'
+} | sqlplus -S / as sysdba
+)
+#
+CONTAINER=$(
+{
+  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
+  echo 'select cdb from v\$database;'
+} | sqlplus -S / as sysdba
+)
+#
+if [[ ${VERSION} < 12 ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY --"
+  break 1
+elif
+  [[ ${CONTAINER} = "NO" ]]; then
+    echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY CONFIGURED YET --"
+    break 1
+else
+sqlplus -S '/ as sysdba' > /tmp/.Pluggable.${ORACLE_SID}.var <<EOF | tail -2
+set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
+select name from v\$containers where con_id not in (0,1,2) order by 1;
+quit;
+EOF
+#
+echo "Select the Option:"
+select PDBS in $(cat /tmp/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
+if [[ "${PDBS}" == "CDB" ]]; then
+  export ORACLE_PDB_SID=""
+  break 1
+elif [[ "${PDBS}" == "QUIT" ]]; then
+  echo " -- Exit Menu --"
+  break 1
+else
+  export ORACLE_PDB_SID=${PDBS}
+  break 1
+fi
+done
+#
+fi
+fi
+}
+#
 function set_HOME()
 {
   # Unset and Unalias
@@ -227,16 +315,26 @@ function set_HOME()
     # Aliases to tail LOGS
     alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
     # Aliases to CRSCTL STATUS
-    alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
+    alias rest='crsctl stat res -t -init'
+    alias resp='crsctl stat res -p -init'
     # Aliases to connect on ASMCMD
     alias asmcmd='rlwrap asmcmd'
     alias a='rlwrap asmcmd -p'
+    # Alias to Scripts
+    alias rac-status='${SCRIPTS}/rac-status.sh -a'
+    alias asmdu='${SCRIPTS}/asmdu.sh -g'
   else
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
   fi
+  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+  export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+  # Alias to tail Listener Log
+  alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
+  # Alias to list lahrt
+  alias lt='ls -lahrt'
   # Aliases to go to folder
   alias oh='cd ${ORACLE_HOME}'
   alias dbs='cd ${ORACLE_HOME}/dbs'
@@ -254,6 +352,10 @@ function set_HOME()
   # Aliases to check LSNRCTL
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
+  # Aliases to grep,egrep,fgrep
+  alias grep='grep --color=auto'
+  alias egrep='egrep --color=auto'
+  alias fgrep='fgrep --color=auto'
   # Aliases to check MEMINFO
   alias meminfo='free -g -h -l -t'
   # Aliases to check PSMEM
@@ -335,15 +437,27 @@ function set_ASM()
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
   export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
   export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "crs")
+  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
   export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
   export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+  export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
   # Alias CRS Logs
   alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
-  # Aliases to tail LOGS
+  # Alias to tail LOGS
   alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
+  # Alias to tail Listener Log
+  alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
+  # Alias to edit the Alert Log DB
+  alias vlog='vim ${ALERTASM}'
+  # Alias to list lahrt
+  alias lt='ls -lahrt'
   # Aliases to CRSCTL STATUS
-  alias rest='crsctl stat res -t -init'
   alias res='crsctl stat res -t'
+  alias rest='crsctl stat res -t -init'
+  alias resp='crsctl stat res -p -init'
+  # Alias to Scripts
+  alias rac-status='${SCRIPTS}/rac-status.sh -a'
+  alias asmdu='${SCRIPTS}/asmdu.sh -g'
   # Aliases to connect on ASMCMD
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
@@ -364,6 +478,10 @@ function set_ASM()
   # Aliases to check LSNRCTL
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
+  # Aliases to grep,egrep,fgrep
+  alias grep='grep --color=auto'
+  alias egrep='egrep --color=auto'
+  alias fgrep='fgrep --color=auto'
   # Aliases to connect on ORATOP
   alias orat='${ORATOP}/oratop -f -i 10 / as sysasm'
   # Aliases to check MEMINFO
@@ -450,8 +568,12 @@ function set_DB()
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
     # Aliases to CRSCTL STATUS
-    alias rest='crsctl stat res -t -init'
     alias res='crsctl stat res -t'
+    alias rest='crsctl stat res -t -init'
+    alias resp='crsctl stat res -p -init'
+    # Alias to Scripts
+    alias rac-status='${SCRIPTS}/rac-status.sh -a'
+    alias asmdu='${SCRIPTS}/asmdu.sh -g'
     # Aliases to connect on ASMCMD
     alias asmcmd='rlwrap asmcmd'
     alias a='rlwrap asmcmd -p'
@@ -461,11 +583,19 @@ function set_DB()
     export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
   fi
   #
+  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
   export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -w "${OPT}")
   export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
   export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
   export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
   export ALERTGG="${OGG_HOME}/ggserr.log"
+  export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+  # Alias to tail Listener Log
+  alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
+  # Alias to edit the Alert Log DB
+  alias vlog='vim ${ALERTDB}'
+  # Alias to list lahrt
+  alias lt='ls -lahrt'
   # Aliases to go to folder
   alias base='cd ${ORACLE_BASE}'
   alias oh='cd ${ORACLE_HOME}'
@@ -498,6 +628,10 @@ function set_DB()
   # Aliases to check LSNRCTL
   alias t='rlwrap lsnrctl'
   alias l='rlwrap lsnrctl status'
+  # Aliases to grep,egrep,fgrep
+  alias grep='grep --color=auto'
+  alias egrep='egrep --color=auto'
+  alias fgrep='fgrep --color=auto'
   # Aliases to connect on ORATOP
   alias orat='${ORATOP}/oratop -f -i 10 / as sysdba'
   # Aliases to check MEMINFO
@@ -510,6 +644,8 @@ function set_DB()
   alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
   # Aliases to check CPUINFO
   alias cpuinfo='lscpu'
+  # Alias to Set Pluggable Databases
+  alias pdb='set_PDB'
   #
   T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
   U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
