@@ -2,7 +2,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.41"
 DateCreation="07/01/2021"
-DateModification="20/01/2022"
+DateModification="22/02/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -51,7 +51,7 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin" # agent - Working on it.
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin" # ---> Agent - Working on it.
 ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}" | grep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
 #
 # Scripts Folders
@@ -410,6 +410,8 @@ function set_ASM()
   # Unset and Unalias
   unset_var
   unalias_var
+  # Source Functions
+  source ${SCRIPTS}/Oracle_ASM_Functions
   # Set GLOGIN
   set_GLOGIN
   # SET ASM/GRID
@@ -538,6 +540,8 @@ function set_DB()
   # Unset and Unalias
   unset_var
   unalias_var
+  # Source Functions
+  source ${SCRIPTS}/Oracle_DBA_Functions
   # Set GLOGIN
   set_GLOGIN
   # SET DATABASE
@@ -717,3 +721,8 @@ break
 done
 }
 MainMenu
+#
+# --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
+# THE SCRIPT FINISHES HERE
+# --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
+#
