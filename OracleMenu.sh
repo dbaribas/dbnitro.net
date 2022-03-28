@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.41"
+SoftwareVersion="1.0.43"
 DateCreation="07/01/2021"
-DateModification="22/02/2022"
+DateModification="28/03/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -23,7 +23,7 @@ function SetClear()
 #
 # Verify ROOT User
 #
-if [[ $(whoami) = "root" ]]; then
+if [[ $(whoami) == "root" ]]; then
   SetClear 
   SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
@@ -65,7 +65,7 @@ fi
 #
 # Verify OS Parameters
 #
-if [[ $(uname) = "SunOS" ]]; then
+if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
   ORATAB="/var/opt/oracle/oratab"
   TMP="/tmp"
@@ -77,7 +77,7 @@ if [[ $(uname) = "SunOS" ]]; then
   BLU="\e[96m"
   GRE="\033[1;32m"
   BLA="\033[m"
-elif [[ $(uname) = "AIX" ]]; then
+elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
   ORATAB="/etc/oratab"
   TMP="/tmp"
@@ -89,7 +89,7 @@ elif [[ $(uname) = "AIX" ]]; then
   BLU="\e[96m"
   GRE="\033[1;32m"
   BLA="\033[m"
-elif [[ $(uname) = "Linux" ]]; then
+elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
   ORATAB="/etc/oratab"
   TMP="/tmp"
@@ -122,7 +122,7 @@ DBLIST=$(cat ${ORATAB} | egrep ":N|:Y" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d
 # Verify ASM
 #
 ASM=$(cat ${ORATAB} | egrep ":N|:Y" | grep -i "+ASM*" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq | wc -l)
-if [[ ${ASM} = 0 ]]; then
+if [[ ${ASM} == 0 ]]; then
   # ASM DO NOT EXISTS
   ASM_EXISTS="NO"
 else
@@ -145,7 +145,7 @@ fi
 #
 function unset_var() 
 {
-  if [[ $(whoami) = "grid" ]]; then
+  if [[ $(whoami) == "grid" ]]; then
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
   for U_VAR in ${VARIABLES}; do
@@ -155,7 +155,7 @@ function unset_var()
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   #
-  elif [[ $(whoami) = "oracle" ]]; then
+  elif [[ $(whoami) == "oracle" ]]; then
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
   for U_VAR in ${VARIABLES}; do
@@ -225,54 +225,67 @@ fi
 #
 function set_PDB()
 {
-if [[ ${ORACLE_SID} = "" ]]; then
+if [[ ${ORACLE_SID} == "" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  break 1
+  return 0
+elif [[ $(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
 else
 VERSION=$(
 {
   echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
-  echo 'select substr(version,1,2) as version from v\$instance;'
+  echo 'select substr(version,1,2) as version from v$instance;'
 } | sqlplus -S / as sysdba
 )
 #
 CONTAINER=$(
 {
   echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
-  echo 'select cdb from v\$database;'
+  echo 'select cdb from v$database;'
 } | sqlplus -S / as sysdba
 )
 #
+PLUGGABLES=$(
+{
+  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
+  echo 'select count(NAME) from v$containers where con_id not in (0,1,2);'
+} | sqlplus -S / as sysdba
+)
+fi
+#
 if [[ ${VERSION} < 12 ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY --"
-  break 1
-elif
-  [[ ${CONTAINER} = "NO" ]]; then
-    echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY CONFIGURED YET --"
-    break 1
+  return 0
+elif [[ ${CONTAINER} == "NO" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY CONFIGURED YET --"
+  return 0
+elif [[ ${PLUGGABLES} == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE PLUGGABLE DATABASES YET --"
+  return 0
 else
 sqlplus -S '/ as sysdba' > /tmp/.Pluggable.${ORACLE_SID}.var <<EOF | tail -2
 set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
 select name from v\$containers where con_id not in (0,1,2) order by 1;
 quit;
 EOF
+fi
 #
-echo "Select the Option:"
+echo "Options: "
 select PDBS in $(cat /tmp/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
-if [[ "${PDBS}" == "CDB" ]]; then
+if [[ "${PDBS}" == "BACK TO CDB" ]]; then
   export ORACLE_PDB_SID=""
-  break 1
+  echo "PLUGGABLE DATABASE: CDB\$ROOT"
+  return 1
 elif [[ "${PDBS}" == "QUIT" ]]; then
   echo " -- Exit Menu --"
-  break 1
+  return 1
 else
-  export ORACLE_PDB_SID=${PDBS}
-  break 1
+  export ORACLE_PDB_SID="${PDBS}"
+  echo "PLUGGABLE DATABASE: ${ORACLE_PDB_SID}"
+  return 1
 fi
 done
-#
-fi
-fi
 }
 #
 function set_HOME()
@@ -300,7 +313,7 @@ function set_HOME()
   export ORATOP="${ORACLE_HOME}/suptools/oratop"
   export OPATCH="${ORACLE_HOME}/OPatch"
   export JAVA_HOME="${ORACLE_HOME}/jdk"
-  if [[ "${ASM_EXISTS}" = "YES" ]]; then
+  if [[ "${ASM_EXISTS}" == "YES" ]]; then
     export GRID_HOME=${G_HOME}
     export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
@@ -377,9 +390,9 @@ function set_HOME()
   OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
   #
   HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} = "Y" ]]; then
+  if [[ ${HOME_STATUS} == "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} = "N" ]]; then
+  elif [[ ${HOME_STATUS} == "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -505,9 +518,9 @@ function set_ASM()
   F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   #
   HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} = "Y" ]]; then
+  if [[ ${HOME_STATUS} == "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} = "N" ]]; then
+  elif [[ ${HOME_STATUS} == "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
@@ -565,7 +578,7 @@ function set_DB()
   export OPATCH="${ORACLE_HOME}/OPatch"
   export JAVA_HOME="${ORACLE_HOME}/jdk"
   #
-  if [[ "${ASM_EXISTS}" = "YES" ]]; then
+  if [[ "${ASM_EXISTS}" == "YES" ]]; then
     export GRID_HOME=${G_HOME}
     export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
@@ -659,9 +672,9 @@ function set_DB()
   F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   #
   HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} = "Y" ]]; then
+  if [[ ${HOME_STATUS} == "Y" ]]; then
     HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} = "N" ]]; then
+  elif [[ ${HOME_STATUS} == "N" ]]; then
     HOME_RW=$(echo "${RED} RW ${BLA}")
   fi
   #
