@@ -1,17 +1,17 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.43"
+SoftwareVersion="1.0.45"
 DateCreation="07/01/2021"
-DateModification="28/03/2022"
-EMAIL_1="dba.ribas@gmail.com"
-EMAIL_2="andre.ribas@icloud.com"
-WEBSITE="http://dbnitro.net"
+DateModification="05/05/2022"
+EMAIL_1=dba.ribas@gmail.com
+EMAIL_2=andre.ribas@icloud.com
+WEBSITE=http://dbnitro.net
 #
 # Separate Line Function
 #
-function SepLine() 
+function SepLine()
 {
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
 }
 #
 # Clear Screen Function
@@ -24,7 +24,7 @@ function SetClear()
 # Verify ROOT User
 #
 if [[ $(whoami) == "root" ]]; then
-  SetClear 
+  SetClear
   SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
   echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
@@ -38,7 +38,13 @@ if [[ ! -f ${ORA_INST} ]]; then
   SetClear
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
-  return 1
+ return 1
+fi
+#
+# Verify if all pre-reqs Softwares are installed
+#
+if [[ $(which rlwrap | wc -l | awk '{ print $1 }') == 0 ]]; then
+  echo " -- You need to install rlwrap app --"
 fi
 #
 # IGNORE ERRORS
@@ -51,7 +57,7 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin" # ---> Agent - Working on it.
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|agent|OraHome|/usr/lib/oracle/sbin" # ---> Agent - Working on it.
 ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}" | grep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
 #
 # Scripts Folders
@@ -60,7 +66,7 @@ SCRIPTS="/u00/Scripts"
 #
 if [[ ${SCRIPTS} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
-  exit 1
+  return 1
 fi
 #
 # Verify OS Parameters
@@ -112,7 +118,7 @@ if [[ ! -f ${ORATAB} ]]; then
   SepLine
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
-  exit 1
+  return 1
 fi
 #
 # DBLIST
@@ -143,7 +149,7 @@ fi
 #
 # Unsetting and Setting OS and ORATAB Variables
 #
-function unset_var() 
+function unset_var()
 {
   if [[ $(whoami) == "grid" ]]; then
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
@@ -218,6 +224,52 @@ SET SQLPROMPT '&gname> '
 EOF
 # chmod 777 /tmp/.glogin_pdb.sql
 # chown oracle.oinstall /tmp/.glogin_pdb.sql
+fi
+}
+#
+# Check and Set the GoldenGate Environment
+#
+function set_OGG()
+{
+if [[ ${ORACLE_SID} == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  return 0
+elif [[ $(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
+else
+GOLDENGATE_ACTIVATION=$(
+{
+  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
+  echo 'show parameter enable_goldengate_replication;'
+} | sqlplus -S / as sysdba
+)
+fi
+#
+if [[ $(echo ${GOLDENGATE_ACTIVATION} | awk '{ print $3 }') == "FALSE" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE GOLDENGATE TECHNOLOGY --"
+  return 0
+else
+  GOLDENGATE_HOME=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | grep "OraHome" | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | sed s/LOC=//g | sed s/\"//g)
+#
+echo "Options: "
+select OGGHOME in ${GOLDENGATE_HOME} QUIT; do
+if [[ "${OGGHOME}" == "QUIT" ]]; then
+  echo " -- Exit Menu --"
+  return 1
+else
+  export OGG_HOME="${OGGHOME}"
+  export OGG="${OGGHOME}"
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${OGG_HOME}/lib
+  export PATH=${PATH}:${OGG_HOME}
+  export ALERTGG="${OGG_HOME}/ggserr.log"
+  alias oggsci='rlwrap ${OGG_HOME}/ggsci'
+  alias o='rlwrap ${OGG_HOME}/ggsci'
+  alias ogg='cd ${OGG_HOME}'
+  alias gglog='tail -f -n 100 ${ALERTGG} | grep -v -i ${IGNORE_ERRORS}'
+  return 1
+fi
+done
 fi
 }
 #
@@ -300,17 +352,14 @@ function set_HOME()
   export ORACLE_HOSTNAME="${HOST}"
   export ORACLE_HOME="${OPT}"
   export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export OGG_HOME="/u02/goldengate/19.1.0.4/ogg"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
-  export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
+  export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
   export BASE="${ORACLE_BASE}"
   export OH="${ORACLE_HOME}"
   export DBS="${ORACLE_HOME}/dbs"
   export TNS="${ORACLE_HOME}/network/admin"
-  export OGG="${OGG_HOME}"
   export TFA="${TFA_HOME}"
   export OCK="${OCK_HOME}"
-  export ORATOP="${ORACLE_HOME}/suptools/oratop"
   export OPATCH="${ORACLE_HOME}/OPatch"
   export JAVA_HOME="${ORACLE_HOME}/jdk"
   if [[ "${ASM_EXISTS}" == "YES" ]]; then
@@ -318,11 +367,13 @@ function set_HOME()
     export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
+    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
     export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "+ASM*")
     export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "crs")
     export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
     export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+    # Alias to go to TRACE Folder
+    alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
     # Alias CRS Logs
     alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
     # Aliases to tail LOGS
@@ -340,7 +391,7 @@ function set_HOME()
   else
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
+    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
   fi
   export TNS_ADMIN="${ORACLE_HOME}/network/admin"
   export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
@@ -353,7 +404,7 @@ function set_HOME()
   alias dbs='cd ${ORACLE_HOME}/dbs'
   alias tns='cd ${ORACLE_HOME}/network/admin'
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
-  alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
+  alias ock='${OCK_HOME}/orachk'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
@@ -437,14 +488,13 @@ function set_ASM()
   export GRID_HOME="${ORACLE_HOME}"
   export GRID_SID="${OPT}"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
-  export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
+  export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
   export BASE="${ORACLE_BASE}"
   export OH="${ORACLE_HOME}"
   export DBS="${ORACLE_HOME}/dbs"
   export TNS="${ORACLE_HOME}/network/admin"
   export TFA="${TFA_HOME}"
   export OCK="${OCK_HOME}"
-  export ORATOP="${ORACLE_HOME}/suptools/oratop"
   export OPATCH="${ORACLE_HOME}/OPatch"
   export JAVA_HOME="${ORACLE_HOME}/jdk"
   export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
@@ -456,6 +506,8 @@ function set_ASM()
   export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
   export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+  # Alias to go to TRACE Folder
+  alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
   # Alias CRS Logs
   alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
   # Alias to tail LOGS
@@ -481,7 +533,7 @@ function set_ASM()
   alias dbs='cd ${ORACLE_HOME}/dbs'
   alias tns='cd ${ORACLE_HOME}/network/admin'
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
-  alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
+  alias ock='${OCK_HOME}/orachk'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysasm @/tmp/.glogin.sql'
@@ -537,7 +589,7 @@ function set_ASM()
   else
     DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
   fi
-  #
+ #
   SetClear
   SepLine
   echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
@@ -564,14 +616,12 @@ function set_DB()
   export ORACLE_SID="${OPT}"
   export ORACLE_HOME=$(cat ${ORATAB} | grep "${ORACLE_SID}" | cut -f2 -d ':')
   export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export OGG_HOME="/u02/goldengate/19.1.0.4/ogg"
   export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
-  export OCK_HOME="${ORACLE_HOME}/suptools/orachk/orachk"
+  export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
   export BASE="${ORACLE_BASE}"
   export OH="${ORACLE_HOME}"
   export DBS="${ORACLE_HOME}/dbs"
   export TNS="${ORACLE_HOME}/network/admin"
-  export OGG="${OGG_HOME}"
   export TFA="${TFA_HOME}"
   export OCK="${OCK_HOME}"
   export ORATOP="${ORACLE_HOME}/suptools/oratop"
@@ -583,7 +633,7 @@ function set_DB()
     export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
+    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
     # Aliases to CRSCTL STATUS
     alias res='crsctl stat res -t'
     alias rest='crsctl stat res -t -init'
@@ -597,7 +647,7 @@ function set_DB()
   else
     export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
     export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${OGG_HOME}:${TFA_HOME}/bin:${OCK_HOME}/
+    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
   fi
   #
   export TNS_ADMIN="${ORACLE_HOME}/network/admin"
@@ -605,8 +655,9 @@ function set_DB()
   export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
   export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
   export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
-  export ALERTGG="${OGG_HOME}/ggserr.log"
   export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+  # Alias to go to TRACE Folder
+  alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
   # Alias to tail Listener Log
   alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
   # Alias to edit the Alert Log DB
@@ -618,13 +669,11 @@ function set_DB()
   alias oh='cd ${ORACLE_HOME}'
   alias dbs='cd ${ORACLE_HOME}/dbs'
   alias tns='cd ${ORACLE_HOME}/network/admin'
-  alias ogg='cd ${OGG_HOME}'
   alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
-  alias ock='cd ${ORACLE_HOME}/suptools/orachk/orachk'
+  alias ock='${OCK_HOME}/orachk'
   # Aliases to tail LOGS
   alias dblog='tail -f -n 100 ${ALERTDB} | grep -v -i ${IGNORE_ERRORS}'
   alias dglog='tail -f -n 100 ${ALERTDG} | grep -v -i ${IGNORE_ERRORS}'
-  alias gglog='tail -f -n 100 ${ALERTGG} | grep -v -i ${IGNORE_ERRORS}'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
   alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
@@ -637,9 +686,6 @@ function set_DB()
   # Aliases to connect on ADRCI
   alias adrci='rlwrap adrci'
   alias ad='rlwrap adrci'
-  # Aliases to connect on GGSCI
-  alias oggsci='rlwrap ${OGG_HOME}/ggsci'
-  alias o='rlwrap ${OGG_HOME}/ggsci'
   # Aliases to check PROCESSES
   alias p='ps -ef | grep pmon | grep -v grep'
   # Aliases to check LSNRCTL
@@ -663,6 +709,8 @@ function set_DB()
   alias cpuinfo='lscpu'
   # Alias to Set Pluggable Databases
   alias pdb='set_PDB'
+  # Alias to Set GoldenGate
+  alias gg='set_OGG'
   #
   T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
   U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
@@ -685,7 +733,7 @@ function set_DB()
     DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
   fi
   #
-  LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+ LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
   if [[ "${LSNRCTL}" != 0 ]]; then
     DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
   else
