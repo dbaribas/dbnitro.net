@@ -23,8 +23,11 @@ OR
 # AutoInstallation
 
 wget -O /tmp/dbnitro.sh https://raw.githubusercontent.com/dbaribas/dbnitro/main/dbnitro.sh
+
 vim /tmp/dbnitro.sh
+
 chmod a+x /tmp/dbnitro.sh
+
 sh /tmp/dbnitro.sh
 
 
