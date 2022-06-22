@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.45"
+SoftwareVersion="1.0.47"
 DateCreation="07/01/2021"
-DateModification="05/05/2022"
+DateModification="22/06/2022"
 EMAIL_1=dba.ribas@gmail.com
 EMAIL_2=andre.ribas@icloud.com
 WEBSITE=http://dbnitro.net
@@ -62,7 +62,7 @@ ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_
 #
 # Scripts Folders
 #
-SCRIPTS="/u00/Scripts"
+SCRIPTS="/opt/"
 #
 if [[ ${SCRIPTS} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
