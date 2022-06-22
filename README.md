@@ -2,7 +2,7 @@ The OracleMenu.sh is a script to select different Oracle Homes, Oracle SIDs and 
 
 Download the Profile Script
 
-https://github.com/dbaribas/dbnitro/blob/main/OracleMenu.sh
+https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
 
 Modify the Name of the Profile Script
 
