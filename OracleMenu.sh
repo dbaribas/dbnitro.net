@@ -62,7 +62,7 @@ ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_
 #
 # Scripts Folders
 #
-SCRIPTS="/opt/"
+SCRIPTS="/opt/dbnitro"
 #
 if [[ ${SCRIPTS} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
@@ -186,8 +186,8 @@ function unalias_var()
 #
 function set_GLOGIN()
 {
-if [[ ! -f /tmp/.glogin.sql ]]; then
-cat > /tmp/.glogin.sql <<EOF
+if [[ ! -f ${SCRIPTS}/.glogin.sql ]]; then
+cat > ${SCRIPTS}/.glogin.sql <<EOF
 set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
 COLUMN NAME FORMAT A20
 COLUMN VALUE FORMAT A40
@@ -204,8 +204,8 @@ fi
 #
 function set_GLOGIN_PDB()
 {
-if [[ ! -f /tmp/.glogin_pdb.sql ]]; then
-cat > /tmp/.glogin_pdb.sql <<EOF
+if [[ ! -f ${SCRIPTS}/.glogin_pdb.sql ]]; then
+cat > ${SCRIPTS}/.glogin_pdb.sql <<EOF
 COLUMN NAME FORMAT A20
 COLUMN VALUE FORMAT A40
 COLUMN USERNAME FORMAT A30
@@ -316,7 +316,7 @@ elif [[ ${PLUGGABLES} == 0 ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE PLUGGABLE DATABASES YET --"
   return 0
 else
-sqlplus -S '/ as sysdba' > /tmp/.Pluggable.${ORACLE_SID}.var <<EOF | tail -2
+sqlplus -S '/ as sysdba' > ${SCRIPTS}/.Pluggable.${ORACLE_SID}.var <<EOF | tail -2
 set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
 select name from v\$containers where con_id not in (0,1,2) order by 1;
 quit;
@@ -324,7 +324,7 @@ EOF
 fi
 #
 echo "Options: "
-select PDBS in $(cat /tmp/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
+select PDBS in $(cat ${SCRIPTS}/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
 if [[ "${PDBS}" == "BACK TO CDB" ]]; then
   export ORACLE_PDB_SID=""
   echo "PLUGGABLE DATABASE: CDB\$ROOT"
@@ -475,7 +475,7 @@ function set_ASM()
   unset_var
   unalias_var
   # Source Functions
-  source ${SCRIPTS}/Oracle_ASM_Functions
+  source ${SCRIPTS}/.Oracle_ASM_Functions
   # Set GLOGIN
   set_GLOGIN
   # SET ASM/GRID
@@ -606,7 +606,7 @@ function set_DB()
   unset_var
   unalias_var
   # Source Functions
-  source ${SCRIPTS}/Oracle_DBA_Functions
+  source ${SCRIPTS}/.Oracle_DBA_Functions
   # Set GLOGIN
   set_GLOGIN
   # SET DATABASE
