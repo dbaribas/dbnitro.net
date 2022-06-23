@@ -36,9 +36,9 @@ chown oracle.oinstall ${DBNITRO}/.OracleMenu.sh
 chown oracle.oinstall ${DBNITRO}/.Oracle_ASM_Functions
 chown oracle.oinstall ${DBNITRO}/.Oracle_DBA_Functions
 #
-chmod a+x ${DBNITRO}/dbnitro/.OracleMenu.sh
-chmod g+w ${DBNITRO}/dbnitro/.OracleMenu.sh
-chmod 775 ${DBNITRO}/dbnitro/.OracleMenu.sh
+chmod a+x ${DBNITRO}/.OracleMenu.sh
+chmod g+w ${DBNITRO}/.OracleMenu.sh
+chmod 775 ${DBNITRO}/.OracleMenu.sh
 #
 wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/asmdu.sh
 wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/cell-status.sh
