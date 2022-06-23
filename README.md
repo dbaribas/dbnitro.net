@@ -9,7 +9,7 @@ chmod a+x /tmp/dbnitro.sh
 sh /tmp/dbnitro.sh
 
 
-# After you download and change like this example, you can just connect as grid or as oracle, and execute the alias: 
+After you download and change like this example, you can just connect as grid or as oracle, and execute the alias: 
 
 " db "
 
