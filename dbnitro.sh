@@ -19,25 +19,26 @@ fi
 # Creating and Installing the DBNITRO Components
 #
 FOLDER="/opt"
+DBNITRO="${FOLDER}/dbnitro"
 #
-if [[ ! -d ${FOLDER}/dbnitro/ ]]; then
-  mkdir -p ${FOLDER}/dbnitro/
-  chmod -R 775 ${FOLDER}/dbnitro/
-  chown -R oracle.oinstall ${FOLDER}/dbnitro/
+if [[ ! -d ${DBNITRO}/ ]]; then
+  mkdir -p ${DBNITRO}/
+  chmod -R 775 ${DBNITRO}/
+  chown -R oracle.oinstall ${DBNITRO}/
 fi
-cd ${FOLDER}/dbnitro/
+cd ${DBNITRO}/
 #
-wget -O ${FOLDER}/dbnitro/.OracleMenu.sh https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
-wget -O ${FOLDER}/dbnitro/.Oracle_ASM_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
-wget -O ${FOLDER}/dbnitro/.Oracle_DBA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
+wget -O ${DBNITRO}/.OracleMenu.sh https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
+wget -O ${DBNITRO}/.Oracle_ASM_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
+wget -O ${DBNITRO}/.Oracle_DBA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
 #
-chown oracle.oinstall ${FOLDER}/dbnitro/.OracleMenu.sh
-chown oracle.oinstall ${FOLDER}/dbnitro/.Oracle_ASM_Functions
-chown oracle.oinstall ${FOLDER}/dbnitro/.Oracle_DBA_Functions
+chown oracle.oinstall ${DBNITRO}/.OracleMenu.sh
+chown oracle.oinstall ${DBNITRO}/.Oracle_ASM_Functions
+chown oracle.oinstall ${DBNITRO}/.Oracle_DBA_Functions
 #
-chmod a+x ${FOLDER}/dbnitro/.OracleMenu.sh
-chmod g+w ${FOLDER}/dbnitro/.OracleMenu.sh
-chmod 775 ${FOLDER}/dbnitro/.OracleMenu.sh
+chmod a+x ${DBNITRO}/dbnitro/.OracleMenu.sh
+chmod g+w ${DBNITRO}/dbnitro/.OracleMenu.sh
+chmod 775 ${DBNITRO}/dbnitro/.OracleMenu.sh
 #
 wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/asmdu.sh
 wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/cell-status.sh
@@ -69,10 +70,10 @@ wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/svc-set-f
 wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/svc-show-config.sh
 wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/yal.sh
 #
-chmod a+x ${FOLDER}/dbnitro/*.sh
-chmod a+x ${FOLDER}/dbnitro/oraenv++
+chmod a+x ${DBNITRO}/*.sh
+chmod a+x ${DBNITRO}/oraenv++
 #
-chown -R oracle.oinstall ${FOLDER}/dbnitro/
+chown -R oracle.oinstall ${DBNITRO}/
 #
 # ------------------------------------------------------------------------
 # Add the Content on Grid Profile
@@ -92,7 +93,7 @@ export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 #
 echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
 echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
-alias db='. ${FOLDER}/dbnitro/.OracleMenu.sh'
+alias db='. ${DBNITRO}/.OracleMenu.sh'
 #
 umask 0022
 EOF
@@ -115,7 +116,7 @@ export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 #
 echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
 echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
-alias db='. ${FOLDER}/dbnitro/.OracleMenu.sh'
+alias db='. ${DBNITRO}/.OracleMenu.sh'
 #
 umask 0022
 EOF
