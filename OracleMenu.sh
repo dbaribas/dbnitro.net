@@ -771,7 +771,7 @@ elif [[ "${OPT}" == "+ASM"* ]]; then
 elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set HOME
   set_HOME ${OPT}
-elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+elif [[ "${DBLIST[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set DATABASE
   set_DB ${OPT}
 else
