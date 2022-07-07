@@ -330,13 +330,16 @@ select PDBS in $(cat ${SCRIPTS}/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT
 if [[ "${PDBS}" == "BACK TO CDB" ]]; then
   export ORACLE_PDB_SID=""
   echo "PLUGGABLE DATABASE: CDB\$ROOT"
+  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   return 1
 elif [[ "${PDBS}" == "QUIT" ]]; then
   echo " -- Exit Menu --"
+  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   return 1
 else
   export ORACLE_PDB_SID="${PDBS}"
   echo "PLUGGABLE DATABASE: ${ORACLE_PDB_SID}"
+  export PS1=$'[ ${ORACLE_SID} ]|[ ${ORACLE_PDB_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   return 1
 fi
 done
@@ -409,7 +412,7 @@ function set_HOME()
   alias ock='${OCK_HOME}/orachk'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
-  alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
+  alias s='rlwrap sqlplus / as sysdba @${SCRIPTS}/.glogin.sql'
   # Aliases to connect on ADRCI
   alias adrci='rlwrap adrci'
   alias ad='rlwrap adrci'
@@ -538,7 +541,7 @@ function set_ASM()
   alias ock='${OCK_HOME}/orachk'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
-  alias s='rlwrap sqlplus / as sysasm @/tmp/.glogin.sql'
+  alias s='rlwrap sqlplus / as sysasm @${SCRIPTS}/.glogin.sql'
   # Aliases to connect on ADRCI
   alias adrci='rlwrap adrci'
   alias ad='rlwrap adrci'
@@ -678,7 +681,7 @@ function set_DB()
   alias dglog='tail -f -n 100 ${ALERTDG} | grep -v -i ${IGNORE_ERRORS}'
   # Aliases to connect on SQLPLUS
   alias sqlplus='rlwrap sqlplus'
-  alias s='rlwrap sqlplus / as sysdba @/tmp/.glogin.sql'
+  alias s='rlwrap sqlplus / as sysdba @${SCRIPTS}/.glogin.sql'
   # Aliases to connect on RMAN
   alias rman='rlwrap rman'
   alias r='rlwrap rman target /'
