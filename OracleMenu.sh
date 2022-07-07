@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.47"
+SoftwareVersion="1.0.49"
 DateCreation="07/01/2021"
-DateModification="22/06/2022"
+DateModification="07/07/2022"
 EMAIL_1=dba.ribas@gmail.com
 EMAIL_2=andre.ribas@icloud.com
 WEBSITE=http://dbnitro.net
@@ -57,8 +57,10 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|agent|OraHome|/usr/lib/oracle/sbin" # ---> Agent - Working on it.
-ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}" | grep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|/usr/lib/oracle/sbin" # ---> Agent - Working on it.
+ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware"              | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
+ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|middleware" | egrep -i "agent" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
+ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE}|agent" | egrep -i "middleware" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
 #
 # Scripts Folders
 #
@@ -750,12 +752,139 @@ function set_DB()
   umask 0022
 }
 #
+function set_OMS()
+{
+  # Unset and Unalias
+  unset_var
+  unalias_var
+  # Set GLOGIN
+  set_GLOGIN
+  # SET HOME
+  local OPT=$1
+  export ORACLE_HOSTNAME="${HOST}"
+  export ORACLE_HOME="${OPT}"
+  export OH="${ORACLE_HOME}"
+  export OPATCH="${ORACLE_HOME}/OPatch"
+  export JAVA_HOME="${ORACLE_HOME}/jdk"
+  export CLASSPATH=${ORACLE_HOME}/jlib
+  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
+  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
+  # Alias to list lahrt
+  alias lt='ls -lahrt'
+  # Aliases to go to folder
+  alias oh='cd ${ORACLE_HOME}'
+  # Aliases to connect on ADRCI
+  alias adrci='rlwrap adrci'
+  alias ad='rlwrap adrci'
+  # Aliases to check PROCESSES
+  alias p='ps -ef | grep pmon | grep -v grep'
+  # Aliases to check LSNRCTL
+  alias t='rlwrap lsnrctl'
+  alias l='rlwrap lsnrctl status'
+  # Aliases to grep,egrep,fgrep
+  alias grep='grep --color=auto'
+  alias egrep='egrep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  # Aliases to check MEMINFO
+  alias meminfo='free -g -h -l -t'
+  # Aliases to check PSMEM
+  alias psmem='ps auxf | sort -nr -k 4'
+  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+  # Aliases to check PSCPU
+  alias pscpu='ps auxf | sort -nr -k 3'
+  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+  # Aliases to check CPUINFO
+  alias cpuinfo='lscpu'
+  #
+  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+  #
+  OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+  #
+  SetClear
+  SepLine
+  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+  echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+  SepLine
+  #
+  export PS1=$'[ OMS ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
+}
+#
+function set_AGENT()
+{
+  # Unset and Unalias
+  unset_var
+  unalias_var
+  # Set GLOGIN
+  set_GLOGIN
+  # SET HOME
+  local OPT=$1
+  export ORACLE_HOSTNAME="${HOST}"
+  export ORACLE_HOME="${OPT}"
+  export OH="${ORACLE_HOME}"
+  export OPATCH="${ORACLE_HOME}/OPatch"
+  export JAVA_HOME="${ORACLE_HOME}/jdk"
+  export CLASSPATH=${ORACLE_HOME}/jlib
+  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
+  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
+  # Alias to list lahrt
+  alias lt='ls -lahrt'
+  # Aliases to go to folder
+  alias oh='cd ${ORACLE_HOME}'
+  # Aliases to connect on ADRCI
+  alias adrci='rlwrap adrci'
+  alias ad='rlwrap adrci'
+  # Aliases to check PROCESSES
+  alias p='ps -ef | grep pmon | grep -v grep'
+  # Aliases to check LSNRCTL
+  alias t='rlwrap lsnrctl'
+  alias l='rlwrap lsnrctl status'
+  # Aliases to grep,egrep,fgrep
+  alias grep='grep --color=auto'
+  alias egrep='egrep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  # Aliases to check MEMINFO
+  alias meminfo='free -g -h -l -t'
+  # Aliases to check PSMEM
+  alias psmem='ps auxf | sort -nr -k 4'
+  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+  # Aliases to check PSCPU
+  alias pscpu='ps auxf | sort -nr -k 3'
+  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+  # Aliases to check CPUINFO
+  alias cpuinfo='lscpu'
+  #
+  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+  #
+  OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+  #
+  SetClear
+  SepLine
+  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+  echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+  SepLine
+  #
+  export PS1=$'[ AGENT ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
+}
+#
+#
 # Main Menu
 #
 function MainMenu()
 {
 PS3="Select the Option: "
-select OPT in ${ORA_HOMES} ${DBLIST} QUIT; do
+select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} QUIT; do
 if [[ "${OPT}" == "QUIT" ]]; then
   # Exit Menu
   echo " -- Exit Menu --"
@@ -771,7 +900,13 @@ elif [[ "${OPT}" == "+ASM"* ]]; then
 elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set HOME
   set_HOME ${OPT}
-elif [[ "${DBLIST[@]}" == "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+elif [[ "${ORA_OMS[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  # Set OMS
+  set_OMS ${OPT}
+elif [[ "${ORA_AGENT[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  # Set Agent
+  set_AGENT ${OPT}
+elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   # Set DATABASE
   set_DB ${OPT}
 else
