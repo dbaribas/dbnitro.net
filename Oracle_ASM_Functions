@@ -21,20 +21,19 @@ function ASM_help() {
 SetClear
 SepLine
 echo -e "\
-| [ ASM_001 ] VERIFY ASM INSTANCE PARAMETERS                |#| [ ASM_002 ] VERIFY ASM OPERATION                       |
-| [ ASM_003 ] VERIFY ASM DISKS AND GROUPS                   |#| [ ASM_004 ] VERIFY ASM DISK STATE AND COMPATIBILITY    |
-| [ ASM_005 ] VERIFY ASM GENERAL INFO                       |#| [ ASM_006 ] VERIFY ASM LIBRARY                         |
-| [ ASM_007 ]                                               |#| [ ASM_008 ]
-| [ ASM_009 ]                                               |#| [ ASM_010 ]
-| [ ASM_011 ]                                               |#| [ ASM_012 ]
-| [ ASM_013 ]                                               |#| [ ASM_014 ]
-| [ ASM_015 ]                                               |#| [ ASM_016 ]
-| [ ASM_017 ]                                               |#| [ ASM_018 ]
-| [ ASM_019 ]                                               |#| [ ASM_020 ]
-| [ ASM_021 ]                                               |#| [ ASM_022 ]
-| [ ASM_023 ]                                               |#| [ ASM_024 ]
-| [ ASM_025 ]                                               |#| [ ASM_026 ]
-"
+|#[ ASM_001 ] ASM: VERIFY INSTANCE PARAMETERS                         |#|[ ASM_002 ] ASM: VERIFY OPERATION                        |#|
+|#[ ASM_003 ] ASM: VERIFY DISKS AND GROUPS                            |#|[ ASM_004 ] ASM: VERIFY DISK STATE AND COMPATIBILITY     |#|
+|#[ ASM_005 ] ASM: VERIFY GENERAL INFO                                |#|[ ASM_006 ] ASM: VERIFY LIBRARY                          |#|
+|#[ ASM_007 ] ASM: VERIFY DISK GROUP SUMMARY                          |#|[ ASM_008 ] ASM: VERIFY DISK GROUP USAGE                 |#|
+|#[ ASM_009 ]                                                         |#|[ ASM_010 ] ASM: VERIFY DISK GROUP SIZE AND USAGE        |#|
+|#[ ASM_011 ] ASM: VERIFY DISK GROUP SIZE AND USAGE DETAILS           |#|[ ASM_012 ] ASM: VERIFY ALL DISKGROUPS CONTENTS          |#|
+|#[ ASM_013 ] ASM: VERIFY OPERATION DETAIL                            |#|[ ASM_014 ] ASM: VERIFY DISKS SIZE AND STATUS            |#|
+|#[ ASM_015 ]                                                         |#|[ ASM_016 ] ASM: VERIFY DISKS TYPE AND STATUS            |#|
+|#[ ASM_017 ] ASM: VERIFY DISKS READ AND WRITE VALUES                 |#|[ ASM_018 ]                                              |#|
+|#[ ASM_019 ] ASM: VERIFY DISK GROUP % USAGE                          |#|[ ASM_020 ] ASM: VERIFY DISK GROUPS FREE SPACE           |#|
+|#[ ASM_021 ]                                                         |#|[ ASM_022 ] ASM: VERIFY CANDIDATE DISKS                  |#|
+|#[ ASM_023 ] ASM: VERIFY PATH AND ALOCATED SIZE                      |#|[ ASM_024 ]                                              |#|
+|#[ ASM_025 ]                                                         |#|[ ASM_026 ]                                              |#|"
 }
 #
 #########################################################################################################
@@ -42,7 +41,7 @@ echo -e "\
 # ASM Funtions
 #
 #########################################################################################################
-# VERIFY ASM INSTANCE PARAMETERS
+# ASM: VERIFY INSTANCE PARAMETERS
 #########################################################################################################
 #
 function ASM_001() {
@@ -50,14 +49,14 @@ sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 col name for a40
 col value for a60
-col description for a80
+col description for a75
 select name, type, value, description from v\$parameter order by 1;
 quit;
 EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM OPERATION
+# ASM: VERIFY OPERATION
 #########################################################################################################
 #
 function ASM_002() {
@@ -69,7 +68,7 @@ EOF
 }
 
 #########################################################################################################
-# VERIFY ASM DISKS AND GROUPS
+# ASM: VERIFY DISKS AND GROUPS
 #########################################################################################################
 #
 function ASM_003() {
@@ -93,7 +92,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM DISK STATE AND COMPATIBILITY
+# ASM: VERIFY DISK STATE AND COMPATIBILITY
 #########################################################################################################
 #
 function ASM_004() {
@@ -114,7 +113,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM GENERAL INFO
+# ASM: VERIFY GENERAL INFO
 #########################################################################################################
 #
 function ASM_005() {
@@ -132,7 +131,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM LIBRARY
+# ASM: VERIFY LIBRARY
 #########################################################################################################
 #
 function ASM_006() {
@@ -149,7 +148,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM DISK GROUP INFO DETAIL
+# ASM: VERIFY DISK GROUP SUMMARY
 #########################################################################################################
 #
 function ASM_007() {
@@ -180,7 +179,7 @@ EOF
 }
 #
 #########################################################################################################
-# 
+# ASM: VERIFY DISK GROUP USAGE
 #########################################################################################################
 #
 function ASM_008() {
@@ -207,7 +206,7 @@ EOF
 # 
 #########################################################################################################
 #
-function ASM_008() {
+function ASM_009() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 
@@ -216,7 +215,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM DISK GROUP SIZE AND USAGE
+# ASM: VERIFY DISK GROUP SIZE AND USAGE
 #########################################################################################################
 #
 function ASM_010() {
@@ -234,13 +233,15 @@ EOF
 }
 
 #########################################################################################################
-# VERIFY ASM DISK GROUP SIZE AND USAGE DETAIL
+# ASM: VERIFY DISK GROUP SIZE AND USAGE DETAILS
 #########################################################################################################
 #
 function ASM_011() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-col path for a80
+col name for a15
+col lable for a15
+col path for a70
 select mount_status
   , header_status
   , mode_status
@@ -254,9 +255,9 @@ from v\$asm_disk;
 quit;
 EOF
 }
-
+#
 #########################################################################################################
-# VERIFY ASM ALL DISKGROUPS CONTENTS
+# ASM: VERIFY ALL DISKGROUPS CONTENTS
 #########################################################################################################
 #
 function ASM_012() {
@@ -275,7 +276,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM OPERATION DETAIL
+# ASM: VERIFY OPERATION DETAIL
 #########################################################################################################
 #
 function ASM_013() {
@@ -293,7 +294,7 @@ EOF
 }
 #
 #########################################################################################################
-# 
+# ASM: VERIFY DISKS SIZE AND STATUS
 #########################################################################################################
 #
 function ASM_014() {
@@ -327,7 +328,7 @@ EOF
 }
 #
 #########################################################################################################
-#
+# ASM: VERIFY DISKS TYPE AND STATUS
 #########################################################################################################
 #
 function ASM_016() {
@@ -353,7 +354,7 @@ EOF
 }
 
 #########################################################################################################
-# 
+# ASM: VERIFY DISKS READ AND WRITE VALUES
 #########################################################################################################
 #
 function ASM_017() {
@@ -389,7 +390,7 @@ EOF
 }
 
 #########################################################################################################
-# VERIFY ASM DISK GROUP % USAGE
+# ASM: VERIFY DISK GROUP % USAGE
 #########################################################################################################
 #
 function ASM_019() {
@@ -416,9 +417,9 @@ GROUP BY g.name, g.type;
 quit;
 EOF
 }
-
+#
 #########################################################################################################
-# 
+# ASM: VERIFY DISK GROUPS FREE SPACE
 #########################################################################################################
 #
 function ASM_020() {
@@ -439,21 +440,19 @@ EOF
 }
 #
 #########################################################################################################
-# ASM VERIFY DATABASE VERSION
+# ASM: 
 #########################################################################################################
 #
 function ASM_021() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 
-
-
 quit;
 EOF
 }
 #
 #########################################################################################################
-# VERIFY ASM CANDIDATE DISKS
+# ASM: VERIFY CANDIDATE DISKS
 #########################################################################################################
 #
 function ASM_022() {
@@ -476,7 +475,7 @@ EOF
 }
 #
 #########################################################################################################
-# 
+# ASM: VERIFY PATH AND ALOCATED SIZE
 #########################################################################################################
 #
 function ASM_023() {
@@ -509,23 +508,8 @@ EOF
 function ASM_024() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-col "DISK_NAME"   format a30
-col group_number heading GROUP|NUMBER
-col header_status format a15
-col "GROUP_NAME"  format a10
-col path          format a40
-select g.name "GROUP_NAME"
-  , g.group_number
-  , d.header_status
-  , sum(d.total_mb) "TOTAL_MB"
-  , sum(d.free_mb) "FREE_MB"
-  , sum(d.total_mb)-sum(d.free_mb) "USED_MB"
-  , (sum(d.total_mb)-sum(d.free_mb)) / sum(d.total_mb) * 100 "PERCENT_USED"
-from v\$asm_disk d, v\$asm_diskgroup g
-where d.group_number = g.group_number (+)
-and d.header_status = 'MEMBER'
-group by g.name, g.group_number, d.header_status
-order by g.name;
+
+
 quit;
 EOF
 }
