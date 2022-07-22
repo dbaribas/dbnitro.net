@@ -17,7 +17,7 @@ function SetClear()
   printf "\033c"
 }
 #
-function ASM_help() {
+function ASM_HELP() {
 SetClear
 SepLine
 echo -e "\
