@@ -21,20 +21,32 @@ fi
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
 #
+if [[ -d ${DBNITRO}/ ]]; then
+  rm -rf ${DBNITRO}/
+fi
+#
 if [[ ! -d ${DBNITRO}/ ]]; then
   mkdir -p ${DBNITRO}/
   chmod -R 775 ${DBNITRO}/
-  chown -R oracle.oinstall ${DBNITRO}/
+  #chown -R oracle.oinstall ${DBNITRO}/
 fi
 cd ${DBNITRO}/
 #
-wget -O ${DBNITRO}/.OracleMenu.sh https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
+wget -O ${DBNITRO}/.OracleMenu.sh        https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
 wget -O ${DBNITRO}/.Oracle_ASM_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
 wget -O ${DBNITRO}/.Oracle_DBA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
+wget -O ${DBNITRO}/.Oracle_RAC_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RAC_Functions
+wget -O ${DBNITRO}/.Oracle_EXA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_EXA_Functions
+wget -O ${DBNITRO}/.Oracle_ODG_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODG_Functions
+wget -O ${DBNITRO}/.Oracle_OGG_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_OGG_Functions
+wget -O ${DBNITRO}/.Oracle_STR_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_STR_Functions
+wget -O ${DBNITRO}/.Oracle_WALL_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
+wget -O ${DBNITRO}/.Oracle_RMAN_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
+wget -O ${DBNITRO}/.Oracle_PDB_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_PDB_Functions
+wget -O ${DBNITRO}/.Oracle_ODA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
 #
 chown oracle.oinstall ${DBNITRO}/.OracleMenu.sh
-chown oracle.oinstall ${DBNITRO}/.Oracle_ASM_Functions
-chown oracle.oinstall ${DBNITRO}/.Oracle_DBA_Functions
+chown oracle.oinstall ${DBNITRO}/.Oracle_*_Functions
 #
 chmod a+x ${DBNITRO}/.OracleMenu.sh
 chmod g+w ${DBNITRO}/.OracleMenu.sh

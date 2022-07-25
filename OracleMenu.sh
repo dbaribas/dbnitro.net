@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.49"
+SoftwareVersion="1.0.51"
 DateCreation="07/01/2021"
-DateModification="07/07/2022"
+DateModification="25/07/2022"
 EMAIL_1=dba.ribas@gmail.com
 EMAIL_2=andre.ribas@icloud.com
 WEBSITE=http://dbnitro.net
@@ -80,6 +80,7 @@ if [[ $(uname) == "SunOS" ]]; then
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+  PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
@@ -92,6 +93,7 @@ elif [[ $(uname) == "AIX" ]]; then
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+  PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
@@ -104,6 +106,7 @@ elif [[ $(uname) == "Linux" ]]; then
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+  PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   RED="\e[1;31;40m"
   RED="\e[1;31;40m"
   YEL="\e[1;33;40m"
@@ -481,6 +484,10 @@ function set_ASM()
   unalias_var
   # Source Functions
   source ${SCRIPTS}/.Oracle_ASM_Functions
+  source ${SCRIPTS}/.Oracle_RAC_Functions
+  source ${SCRIPTS}/.Oracle_EXA_Functions
+  source ${SCRIPTS}/.Oracle_ASM_Functions
+  source ${SCRIPTS}/.Oracle_ODA_Functions
   # Set GLOGIN
   set_GLOGIN
   # SET ASM/GRID
@@ -612,6 +619,16 @@ function set_DB()
   unalias_var
   # Source Functions
   source ${SCRIPTS}/.Oracle_DBA_Functions
+  source ${SCRIPTS}/.Oracle_RAC_Functions
+  source ${SCRIPTS}/.Oracle_EXA_Functions
+  source ${SCRIPTS}/.Oracle_ODG_Functions
+  source ${SCRIPTS}/.Oracle_OGG_Functions
+  source ${SCRIPTS}/.Oracle_STR_Functions
+  source ${SCRIPTS}/.Oracle_WALL_Functions
+  source ${SCRIPTS}/.Oracle_RMAN_Functions
+  source ${SCRIPTS}/.Oracle_PDB_Functions
+  source ${SCRIPTS}/.Oracle_ASM_Functions
+  source ${SCRIPTS}/.Oracle_ODA_Functions
   # Set GLOGIN
   set_GLOGIN
   # SET DATABASE
@@ -925,3 +942,146 @@ MainMenu
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
+
+
+
+
+
+
+
+
+
+# Add the Content on Grid Profile
+
+cat > /home/grid/.bash_profile <<EOF
+# .bash_profile
+
+# Get the aliases and functions
+if [[ -f ~/.bashrc ]]; then
+       . ~/.bashrc
+fi
+#
+# User specific environment and startup programs
+#
+export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
+#
+echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
+echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
+alias db='. /opt/.OracleMenu.sh'
+#
+umask 0022
+EOF
+
+
+# Add the Content on Oracle Profile
+
+cat > /home/oracle/.bash_profile <<EOF
+# .bash_profile
+
+# Get the aliases and functions
+if [[ -f ~/.bashrc ]]; then
+       . ~/.bashrc
+fi
+#
+# User specific environment and startup programs
+#
+export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
+#
+echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
+echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
+alias db='. /opt/.OracleMenu.sh'
+#
+umask 0022
+EOF
+
+
+
+
+
+
+
+
+
+
+echo 'select status from v$instance;' | sqlplus -S / as sysdba
+
+
+
+{
+echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
+echo 'select status from v$instance;'
+} | sqlplus -S / as sysdba
+
+
+
+STATUS=$(
+{
+  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
+  echo 'select status from v$instance;'
+} | sqlplus -S / as sysdba
+)
+echo $STATUS
+
+
+
+
+create an alias for oracle base = ob
+
+
+
+
+
+
+define gname=idle
+column global_name new_value gname
+set heading off termout off
+col global_name noprint
+select upper(sys_context('userenv', 'con_name') || '@' || sys_context('userenv', 'cdb_name')) global_name from dual;
+set sqlprompt '&gname> '
+set heading on termout on
+
+
+
+
+
+
+
+set trimspool on long 5000 linesize 100 pagesize 9999
+col table_name for a30
+col global_name new_value gname
+set termout off
+define gname=idle
+select user || '@' || SUBSTR(global_name, 1, decode (dot, 0, length(global_name), dot-1)) as global_name from (select global_name, instr(global_name,'.') as dot from global_name);
+set sqlprompt '&gname> '
+set termout on
+
+
+
+
+
+
+set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
+alter session set nls_date_format = 'YYYY-MM-DD hh24:mi:ss';
+alter session set cursor_sharing = 'EXACT';
+set pages 100 lines 100 heading on
+select           'You Are ............: ' || upper(user) "Welcome to WorldLine Database system" from dual
+union all select 'Logged Into ........: ' || upper(sys_context('userenv','db_name')) from dual
+union all select 'Database Role ......: ' || upper(sys_context('userenv', 'database_role')) from dual
+union all select 'Database Version ...: ' || banner from v$version where rownum <= 2;
+set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
+
+
+
+
+
+
+
+
+
+
+
+
+
+
