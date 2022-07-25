@@ -7,23 +7,19 @@ EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
 #
-function SepLine() 
-{
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+function SepLine() {
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
 }
 #
-function SetClear()
-{
-  printf "\033c"
+function SetClear() {
+printf "\033c"
 }
 #
 function EXA_HELP() {
 SetClear
 SepLine
 echo -e "\
-|#[ EXA_001 ] EXA: VERIFY DATABASE VERSION                            |#|[ EXA_002 ] EXA: VERIFY INSTALLED PATCHES - DETAILS      |#|
-
-"
+|#[ EXA_001 ] EXA: VERIFY DATABASE VERSION                            |#|[ EXA_002 ] EXA: VERIFY INSTALLED PATCHES - DETAILS      |#|"
 SepLine
 }
 #
@@ -45,3 +41,4 @@ SepLine
 #########################################################################################################
 # Finish of the System
 #########################################################################################################
+#

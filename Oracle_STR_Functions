@@ -22,6 +22,7 @@ SetClear
 SepLine
 echo -e "\
 |#[ STR_001 ] STR: VERIFY DATABASE VERSION                            |#|[ STR_002 ] STR: VERIFY INSTALLED PATCHES - DETAILS      |#|
+|#[ STR_001 ] STR: VERIFY STREAMS PROCESSES                           |#|[ STR_002 ]   |#|
 "
 SepLine
 }
@@ -31,20 +32,21 @@ SepLine
 # STREAMS Funtions
 #
 #########################################################################################################
-# VERIFY STREAMS PROCESSES
+# STR: VERIFY STREAMS PROCESSES
 #########################################################################################################
 #
 function STR_001() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-prompt ##############################################################
-prompt # VERIFY STREAMS PROCESSES                                   #
-prompt ##############################################################
 COLUMN APPLY_NAME HEADING 'Apply|Process|Name' FORMAT A30
 COLUMN QUEUE_NAME HEADING 'Apply|Process|Queue' FORMAT A30
 COLUMN RULE_SET_NAME HEADING 'Positive|Rule Set' FORMAT A30
 COLUMN NEGATIVE_RULE_SET_NAME HEADING 'Negative|Rule Set' FORMAT A30
 COLUMN STATUS HEADING 'Apply|Process|Status' FORMAT A30
+prompt ##############################################################
+prompt # STR: VERIFY STREAMS PROCESSES
+prompt ##############################################################
+prompt
 SELECT APPLY_NAME
   , QUEUE_NAME
   , RULE_SET_NAME
@@ -55,13 +57,20 @@ quit;
 EOF
 }
 #
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_002() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 COLUMN APPLY_NAME HEADING 'Apply Process Name' FORMAT A20
 COLUMN APPLY_CAPTURED HEADING 'Applies Captured LCRs?' FORMAT A30
 COLUMN APPLY_USER HEADING 'Apply User' FORMAT A20
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT APPLY_NAME
   , APPLY_CAPTURED
   , APPLY_USER
@@ -70,14 +79,22 @@ quit;
 quit;
 EOF
 }
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_003() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 COLUMN APPLY_NAME HEADING 'Apply Process|Name' FORMAT A25
 COLUMN PARAMETER HEADING 'Parameter' FORMAT A30
 COLUMN VALUE HEADING 'Value' FORMAT A30
 COLUMN SET_BY_USER HEADING 'Set by User?' FORMAT A15
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT APPLY_NAME
   , PARAMETER
   , VALUE
@@ -87,8 +104,12 @@ quit;
 quit;
 EOF
 }
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_004() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 COLUMN OBJECT_OWNER HEADING 'Table|Owner' FORMAT A15
@@ -96,6 +117,10 @@ COLUMN OBJECT_NAME HEADING 'Table Name' FORMAT A30
 COLUMN OPERATION_NAME HEADING 'Operation' FORMAT A20
 COLUMN USER_PROCEDURE HEADING 'Handler Procedure' FORMAT A60
 COLUMN APPLY_NAME HEADING 'Apply Process|Name' FORMAT A25
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT OBJECT_OWNER
   , OBJECT_NAME
   , OPERATION_NAME
@@ -108,8 +133,12 @@ quit;
 quit;
 EOF
 }
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_005() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 COLUMN APPLY_NAME HEADING 'Apply Process|Name' FORMAT A15
@@ -117,6 +146,10 @@ COLUMN APPLY_CAPTURED HEADING 'Dequeues Captured|Messages?' FORMAT A17
 COLUMN PROCESS_NAME HEADING 'Process|Name' FORMAT A7
 COLUMN STATE HEADING 'State' FORMAT A17
 COLUMN TOTAL_MESSAGES_DEQUEUED HEADING 'Total Messages|Dequeued' FORMAT 99999999
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT r.APPLY_NAME
   , ap.APPLY_CAPTURED
   , SUBSTR(s.PROGRAM,INSTR(s.PROGRAM,'(')+1,4) PROCESS_NAME
@@ -130,14 +163,22 @@ quit;
 quit;
 EOF
 }
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_006() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 COLUMN APPLY_NAME HEADING 'Apply Name' FORMAT A20
 COLUMN 'Transaction ID' HEADING 'Transaction ID' FORMAT A15
 COLUMN FIRST_SCN HEADING 'First SCN'   FORMAT 99999999
 COLUMN MESSAGE_COUNT HEADING 'Message Count' FORMAT 99999999
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT APPLY_NAME
   , XIDUSN ||'.'|| XIDSLT ||'.'|| XIDSQN "Transaction ID"
   , FIRST_SCN
@@ -147,10 +188,18 @@ quit;
 quit;
 EOF
 }
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_007() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT APPLY_NAME
   , (APPLY_TIME-APPLIED_MESSAGE_CREATE_TIME)*86400 "Latency in Seconds"
   , TO_CHAR(APPLIED_MESSAGE_CREATE_TIME,'HH24:MI:SS MM/DD/YY') "Message Creation"
@@ -161,10 +210,18 @@ quit;
 quit;
 EOF
 }
-#--------------------------------------------------------------------------------------------
-function STR_001() {
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
+function STR_008() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # STR: 
+prompt ##############################################################
+prompt
 SELECT idx
   , schema
   , what
@@ -176,7 +233,11 @@ quit;
 quit;
 EOF
 }
-
+#
+#########################################################################################################
+# STR: 
+#########################################################################################################
+#
 
 
 

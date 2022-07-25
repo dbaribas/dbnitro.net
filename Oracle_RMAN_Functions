@@ -7,14 +7,12 @@ EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
 #
-function SepLine() 
-{
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+function SepLine() {
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
 }
 #
-function SetClear()
-{
-  printf "\033c"
+function SetClear() {
+printf "\033c"
 }
 #
 function RMAN_HELP() {
@@ -30,9 +28,7 @@ echo -e "\
 |#[ RMAN_013 ] RMAN: VERIFY DATABASE VERSION                            |#|[ RMAN_014 ] RMAN: VERIFY INSTALLED PATCHES - DETAILS      |#|
 |#[ RMAN_015 ] RMAN: VERIFY DATABASE VERSION                            |#|[ RMAN_016 ] RMAN: VERIFY INSTALLED PATCHES - DETAILS      |#|
 |#[ RMAN_017 ] RMAN: VERIFY DATABASE VERSION                            |#|[ RMAN_018 ] RMAN: VERIFY INSTALLED PATCHES - DETAILS      |#|
-|#[ RMAN_019 ] RMAN: OH MY GOD                                          |#|[ RMAN_020 ] RMAN: VERIFY INSTALLED PATCHES - DETAILS      |#|
-
-"
+|#[ RMAN_019 ] RMAN: OH MY GOD                                          |#|[ RMAN_020 ] RMAN: VERIFY INSTALLED PATCHES - DETAILS      |#|"
 SepLine
 }
 #
