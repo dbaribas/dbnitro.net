@@ -1,0 +1,583 @@
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.3"
+DateCreation="18/08/2021"
+DateModification="16/03/2022"
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
+#
+function SepLine() {
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+}
+#
+function SetClear() {
+printf "\033c"
+}
+#
+function ASM_HELP() {
+SetClear
+SepLine
+echo -e "\
+|#[ ASM_001 ] ASM: VERIFY INSTANCE PARAMETERS                         |#|[ ASM_002 ] ASM: VERIFY OPERATION                        |#|
+|#[ ASM_003 ] ASM: VERIFY DISKS AND GROUPS                            |#|[ ASM_004 ] ASM: VERIFY DISK STATE AND COMPATIBILITY     |#|
+|#[ ASM_005 ] ASM: VERIFY GENERAL INFO                                |#|[ ASM_006 ] ASM: VERIFY LIBRARY                          |#|
+|#[ ASM_007 ] ASM: VERIFY DISK GROUP SUMMARY                          |#|[ ASM_008 ] ASM: VERIFY DISK GROUP USAGE                 |#|
+|#[ ASM_009 ]                                                         |#|[ ASM_010 ] ASM: VERIFY DISK GROUP SIZE AND USAGE        |#|
+|#[ ASM_011 ] ASM: VERIFY DISK GROUP SIZE AND USAGE DETAILS           |#|[ ASM_012 ] ASM: VERIFY ALL DISKGROUPS CONTENTS          |#|
+|#[ ASM_013 ] ASM: VERIFY OPERATION DETAIL                            |#|[ ASM_014 ] ASM: VERIFY DISKS SIZE AND STATUS            |#|
+|#[ ASM_015 ]                                                         |#|[ ASM_016 ] ASM: VERIFY DISKS TYPE AND STATUS            |#|
+|#[ ASM_017 ] ASM: VERIFY DISKS READ AND WRITE VALUES                 |#|[ ASM_018 ]                                              |#|
+|#[ ASM_019 ] ASM: VERIFY DISK GROUP % USAGE                          |#|[ ASM_020 ] ASM: VERIFY DISK GROUPS FREE SPACE           |#|
+|#[ ASM_021 ]                                                         |#|[ ASM_022 ] ASM: VERIFY CANDIDATE DISKS                  |#|
+|#[ ASM_023 ] ASM: VERIFY PATH AND ALOCATED SIZE                      |#|[ ASM_024 ]                                              |#|
+|#[ ASM_025 ]                                                         |#|[ ASM_026 ]                                              |#|"
+}
+#
+#########################################################################################################
+#
+# ASM Funtions
+#
+#########################################################################################################
+# ASM: VERIFY INSTANCE PARAMETERS
+#########################################################################################################
+#
+function ASM_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col name for a40
+col value for a60
+col description for a75
+select name, type, value, description from v\$parameter order by 1;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY OPERATION
+#########################################################################################################
+#
+function ASM_002() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+select * from v\$asm_operation;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISKS AND GROUPS
+#########################################################################################################
+#
+function ASM_003() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col path for a50;
+SELECT GROUP_NUMBER
+  , DISK_NUMBER
+  , NAME
+  , PATH
+  , FAILGROUP 
+  , VOTING_FILE AS VOTING
+  , header_status
+  , MOUNT_STATUS
+  , MODE_STATUS
+  , STATE
+FROM V\$ASM_DISK 
+ORDER BY 1,2,3;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK STATE AND COMPATIBILITY
+#########################################################################################################
+#
+function ASM_004() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col compatibility for a13
+col database_compatibility for a22
+select GROUP_NUMBER
+  , NAME
+  , TOTAL_MB
+  , FREE_MB
+  , STATE
+  , COMPATIBILITY
+  , DATABASE_COMPATIBILITY 
+from v\$asm_diskgroup;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY GENERAL INFO
+#########################################################################################################
+#
+function ASM_005() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col instance_name for a30
+col cluster_name for a30
+col db_name for a20
+col software_version for a20
+col compatible_version for a20
+select * from v\$asm_client
+order by 1,2,3;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY LIBRARY
+#########################################################################################################
+#
+function ASM_006() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col path for a40
+select name
+  , path
+  , library 
+from v\$asm_disk 
+where group_number <> 0;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK GROUP SUMMARY
+#########################################################################################################
+#
+function ASM_007() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col path for a35
+col Diskgroup for a15
+col DiskName for a20
+col disk# for 999
+col total_mb for 999,999,999
+col free_mb for 999,999,999
+compute sum of total_mb on DiskGroup
+compute sum of free_mb on DiskGroup
+break on DiskGroup skip 1 on report
+select a.name DiskGroup
+  , b.disk_number Disk
+  , b.name DiskName
+  , b.os_mb
+  , b.total_mb
+  , b.free_mb
+  , b.path
+  , b.header_status
+from v\$asm_disk b, v\$asm_diskgroup a
+where a.group_number (+) = b.group_number
+order by b.group_number, b.disk_number, b.name;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK GROUP USAGE
+#########################################################################################################
+#
+function ASM_008() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col diskgroup for a15
+col diskname for a15
+col path for a35
+select a.name DiskGroup
+  , b.name DiskName
+  , b.header_status
+  , b.total_mb
+  , (b.total_mb - b.free_mb) Used_MB
+  , b.free_mb
+  , b.path
+from v\$asm_disk b, v\$asm_diskgroup a
+where a.group_number (+) = b.group_number
+order by b.group_number, b.name;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+function ASM_009() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK GROUP SIZE AND USAGE
+#########################################################################################################
+#
+function ASM_010() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+SELECT name
+  , type
+  , total_mb
+  , free_mb
+  , required_mirror_free_mb
+  , usable_file_mb 
+FROM V\$ASM_DISKGROUP;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK GROUP SIZE AND USAGE DETAILS
+#########################################################################################################
+#
+function ASM_011() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col name for a15
+col lable for a15
+col path for a70
+select mount_status
+  , header_status
+  , mode_status
+  , state
+  , total_mb
+  , free_mb
+  , name
+  , label
+  , path
+from v\$asm_disk;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY ALL DISKGROUPS CONTENTS
+#########################################################################################################
+#
+function ASM_012() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col full_path format a150
+col full_alias_path format a150
+SELECT concat('+' || gname, sys_connect_by_path(aname, '/')) full_alias_path
+FROM (SELECT g.name gname, a.parent_index pindex, a.name aname, a.reference_index rindex FROM v\$asm_alias a, v\$asm_diskgroup g WHERE a.group_number = g.group_number)
+START WITH (mod(pindex, power(2, 24))) = 0 
+CONNECT BY PRIOR 
+rindex = pindex
+order by 1;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY OPERATION DETAIL
+#########################################################################################################
+#
+function ASM_013() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+select GROUP_NUMBER
+  , OPERATION
+  , STATE
+  , ACTUAL
+  , SOFAR
+  , EST_MINUTES 
+from v\$asm_operation
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISKS SIZE AND STATUS
+#########################################################################################################
+#
+function ASM_014() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col NAME for a15
+select GROUP_NUMBER DG#
+  , name
+  , ALLOCATION_UNIT_SIZE AU_SZ
+  , STATE
+  , TYPE
+  , TOTAL_MB
+  , FREE_MB
+  , OFFLINE_DISKS 
+from v\$asm_diskgroup;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+function ASM_015() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISKS TYPE AND STATUS
+#########################################################################################################
+#
+function ASM_016() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col PATH for a15
+col DG_NAME for a15
+col DG_STATE for a10
+col FAILGROUP for a10
+select dg.name dg_name
+  , dg.state dg_state
+  , dg.type
+  , d.disk_number dsk_no
+  , d.path
+  , d.mount_status
+  , d.FAILGROUP
+  , d.state
+from v\$asm_diskgroup dg, v\$asm_disk d
+where dg.group_number = d.group_number
+order by dg_name, dsk_no;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISKS READ AND WRITE VALUES
+#########################################################################################################
+#
+function ASM_017() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+SELECT SUBSTR(dgs.name,1,10) AS diskgroup
+  , SUBSTR(ds.name,1,10) AS asmdisk
+  , ds.mount_status
+  , ds.state
+  , ds.reads
+  , ds.writes
+  , ds.read_time
+  , ds.write_time
+  , bytes_read
+  , bytes_written
+FROM V\$ASM_DISKGROUP_STAT dgs, V\$ASM_DISK_STAT ds
+WHERE dgs.group_number = ds.group_number;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+function ASM_018() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK GROUP % USAGE
+#########################################################################################################
+#
+function ASM_019() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+column "Diskgroup" format A30
+column "Imbalance" format 99.9 Heading "Percent|Imbalance"
+column "Variance" format 99.9 Heading "Percent|Disk Size|Variance"
+column "MinFree" format 999.99 heading "Minimum|Percent|Free"
+column "DiskCnt" format 9999 Heading "Disk|Count"
+column "Type" format A10 Heading "Diskgroup|Redundancy"
+SELECT g.name "Diskgroup"
+  , 100*(max((d.total_mb-d.free_mb)/d.total_mb)-min((d.total_mb-d.free_mb)/d.total_mb))/max((d.total_mb-d.free_mb)/d.total_mb) "Imbalance"
+  , 100*(max(d.total_mb)-min(d.total_mb))/max(d.total_mb) "Variance"
+  , 100*(min(d.free_mb/d.total_mb)) "MinFree"
+  , count(*) "DiskCnt"
+  , g.type "Type"
+FROM v\$asm_disk d, v\$asm_diskgroup g
+WHERE d.group_number = g.group_number 
+and d.group_number <> 0 
+-- and d.state = 'NORMAL' 
+and d.mount_status = 'CACHED'
+GROUP BY g.name, g.type; 
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY DISK GROUPS FREE SPACE
+#########################################################################################################
+#
+function ASM_020() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col name for a30
+select NAME
+  , ALLOCATION_UNIT_SIZE
+  , STATE
+  , TYPE
+  , TOTAL_MB
+  , FREE_MB
+  , (FREE_MB/TOTAL_MB)*100 PCt_FREE 
+from v\$asm_diskgroup 
+order by name, PCt_FREE;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: 
+#########################################################################################################
+#
+function ASM_021() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY CANDIDATE DISKS
+#########################################################################################################
+#
+function ASM_022() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+BREAK ON report ON disk_group_name SKIP 1
+col DISK_GROUP_NAME for a20
+col DISK_FILE_PATH for a50
+col DISK_FILE_FAIL_GROUP for a40
+col DISK_FILE_NAME for a25
+SELECT NVL(a.name, '[CANDIDATE]') disk_group_name
+  , b.path disk_file_path
+  , b.name disk_file_name
+  , b.failgroup disk_file_fail_group
+FROM v\$asm_diskgroup a 
+RIGHT OUTER JOIN v\$asm_disk b USING (group_number)
+ORDER BY a.name; 
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM: VERIFY PATH AND ALOCATED SIZE
+#########################################################################################################
+#
+function ASM_023() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col GROUP_NUMBER format 9999 heading "GRP_NO"
+col "GRP_NAME" format a24
+col "DSK_NAME" format a24
+col path format a80
+col ALLOC_MB format 999,999,999
+col FREE_MB format 999,999,999
+col PCT_FREE format 999.00
+select d.GROUP_NUMBER
+  , g.name "GRP_NAME"
+  , d.name "DSK_NAME"
+  , d.path
+  , d.OS_MB "ALLOC_MB"
+  , d.free_MB "FREE_MB"
+  , d.free_MB*100/d.OS_MB "PCT_FREE" 
+from V\$asm_disk d, v\$asm_diskgroup g 
+where d.GROUP_NUMBER = g.GROUP_NUMBER;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+function ASM_024() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM VERIFY DATABASE VERSION
+#########################################################################################################
+#
+function ASM_025() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM VERIFY DATABASE VERSION
+#########################################################################################################
+#
+function ASM_026() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM VERIFY DATABASE VERSION
+#########################################################################################################
+#
+function ASM_027() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+
+quit;
+EOF
+}
+#
+#########################################################################################################
+# ASM VERIFY DATABASE VERSION
+#########################################################################################################
+#
+function ASM_028() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+
+
+
+quit;
+EOF
+}
+#
+
+# Monitoring ASM disk performance using IOSTAT
+# asmcmd -p iostat -t -G DATA 1
+# asmcmd -p iostat -t -G DATA 5
+# asmcmd -p iostat -t -G FRA 1
+# asmcmd -p iostat -t -G FRA 5
+
+
+#
+#########################################################################################################
+# Finish of the System
+#########################################################################################################
+#
