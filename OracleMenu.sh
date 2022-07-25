@@ -9,15 +9,13 @@ WEBSITE=http://dbnitro.net
 #
 # Separate Line Function
 #
-function SepLine()
-{
+function SepLine() {
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
 }
 #
 # Clear Screen Function
 #
-function SetClear()
-{
+function SetClear() {
   printf "\033c"
 }
 #
