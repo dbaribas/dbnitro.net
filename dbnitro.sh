@@ -40,13 +40,13 @@ wget -O ${DBNITRO}/.Oracle_EXA_Functions https://raw.githubusercontent.com/dbari
 wget -O ${DBNITRO}/.Oracle_ODG_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODG_Functions
 wget -O ${DBNITRO}/.Oracle_OGG_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_OGG_Functions
 wget -O ${DBNITRO}/.Oracle_STR_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_STR_Functions
-wget -O ${DBNITRO}/.Oracle_WALL_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
-wget -O ${DBNITRO}/.Oracle_RMAN_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
 wget -O ${DBNITRO}/.Oracle_PDB_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_PDB_Functions
 wget -O ${DBNITRO}/.Oracle_ODA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
+wget -O ${DBNITRO}/.Oracle_WALL_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
+wget -O ${DBNITRO}/.Oracle_RMAN_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
 #
-chown oracle.oinstall ${DBNITRO}/.OracleMenu.sh
-chown oracle.oinstall ${DBNITRO}/.Oracle_*_Functions
+chown oracle.oinstall -R ${DBNITRO}
+chown oracle.oinstall -R ${DBNITRO}/
 #
 chmod a+x ${DBNITRO}/.OracleMenu.sh
 chmod g+w ${DBNITRO}/.OracleMenu.sh
