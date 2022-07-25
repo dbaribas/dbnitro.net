@@ -1,0 +1,248 @@
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.3"
+DateCreation="18/08/2021"
+DateModification="03/03/2022"
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
+#
+function SepLine() 
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+}
+#
+function SetClear()
+{
+  printf "\033c"
+}
+#
+function OGG_HELP() {
+SetClear
+SepLine
+echo -e "\
+|#[ OGG_001 ] OGG: VERIFY DATABASE VERSION                            |#|[ OGG_002 ] OGG: VERIFY INSTALLED PATCHES - DETAILS      |#|
+"
+SepLine
+}
+#
+#########################################################################################################
+#
+# GOLDENGATE Funtions
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+
+VERIFY GOLDENGATE REPLICATIONS
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE PARAMETER
+prompt ##############################################################
+show parameter enable_goldengate_replication;
+quit;
+EOF
+}
+
+
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE CAPTURES, QUEUE AND STATUS
+prompt ##############################################################
+col CAPTURE_NAME for a20;
+col QUEUE_NAME for a15;
+col START_SCN for 9999999999;
+col STATUS for a10;
+col CAPTURED_SCN for 9999999999;
+col APPLIED_SCN for 9999999999;
+col SOURCE_DATABASE for a10;
+col LOGMINER_ID for 9999999;
+col REQUIRED_CHECKPOINTSCN for a30;
+col STATUS_CHANGE_TIME for a15;
+col ERROR_NUMBER for a15;
+col ERROR_MESSAGE for a10;
+col CAPTURE_TYPE for a10;
+col START_TIME for a30
+SELECT CAPTURE_NAME
+  , QUEUE_NAME
+  , START_SCN
+  , STATUS
+  , CAPTURED_SCN
+  , APPLIED_SCN
+  , SOURCE_DATABASE
+  , LOGMINER_ID
+  , REQUIRED_CHECKPOINT_SCN
+  , STATUS_CHANGE_TIME
+  , ERROR_NUMBER
+  , ERROR_MESSAGE
+  , CAPTURE_TYPE
+  , START_TIME
+FROM DBA_CAPTURE;
+quit;
+EOF
+}
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE STATE
+prompt ##############################################################
+col state for a30;
+col capture_name for a30;
+col bytes_of_redo_mined for a30;
+SELECT sid
+  , serial#
+  , capture#
+  , CAPTURE_NAME
+  , STARTUP_TIME
+  , CAPTURE_TIME
+  , state
+  , SGA_USED
+  , BYTES_OF_REDO_MINED
+  , to_char(STATE_CHANGED_TIME, 'mm/dd/yyyy hh24:mi') STATE_CHANGED_TIME
+FROM V\$GOLDENGATE_CAPTURE;
+quit;
+EOF
+}
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE CAPTURE
+prompt ##############################################################
+col capture_message_create_time for a30;
+col enqueue_message_create_time for a27;
+col available_message_create_time for a30;
+SELECT capture_name
+  , to_char(capture_time, 'mm/dd/yyyy hh24:mi') capture_time
+  , capture_message_number
+  , to_char(capture_message_create_time ,'mm/dd/yyyy hh24:mi') capture_message_create_time
+  , to_char(enqueue_time,'mm/dd/yyyy hh24:mi') enqueue_time
+  , enqueue_message_number
+  , to_char(enqueue_message_create_time, 'mm/dd/yyyy hh24:mi') enqueue_message_create_time
+  , available_message_number
+  , to_char(available_message_create_time,'mm/dd/yyyy hh24:mi') available_message_create_time
+FROM GV\$GOLDENGATE_CAPTURE;
+quit;
+EOF
+}
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE CAPTURE DETAILS
+prompt ##############################################################
+SELECT component_name capture_name
+  , count(*) open_transactions
+  , sum(cumulative_message_count) LCRs
+FROM GV\$GOLDENGATE_TRANSACTION
+WHERE component_type='CAPTURE'
+group by component_name;
+quit;
+EOF
+}
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE SCN
+prompt ##############################################################
+col db_name for a15;
+select INST_ID
+  , SESSION_ID
+  , SESSION_NAME
+  , SESSION_STATE
+  , DB_NAME
+  , NUM_PROCESS
+  , START_SCN
+--  , END_SCN
+  , SPILL_SCN
+  , PROCESSED_SCN
+  , PREPARED_SCN
+  , READ_SCN MAX_MEMORY_SIZE
+  , USED_MEMORY_SIZE PINNED_TXN
+  , PINNED_COMMITTED_TXN
+from GV\$LOGMNR_SESSION;
+quit;
+EOF
+}
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE LOGMNR_STATS
+prompt ##############################################################
+col name for a60
+SELECT SESSION_ID
+  , NAME
+  , VALUE
+FROM V\$LOGMNR_STATS;
+quit;
+EOF
+}
+
+
+
+function OGG_001() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # VERIFY GOLDENGATE OWNER, LOG_GROUP, LOG_TYPE
+prompt ##############################################################
+col owner format a20
+col table_name for a20
+col log_group_name format a20
+col log_group_type format a20
+select owner
+  , log_group_name
+  , table_name
+  , log_group_type
+  , always
+  , generated
+from dba_log_groups
+-- where owner = 'WLPAPP'
+-- and log_group_name like 'OGGS%';
+;
+quit;
+EOF
+}
+
+
+#
+#########################################################################################################
+# Finish of the System
+#########################################################################################################

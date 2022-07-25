@@ -1,0 +1,295 @@
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.3"
+DateCreation="18/08/2021"
+DateModification="03/03/2022"
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
+#
+function SepLine() 
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+}
+#
+function SetClear()
+{
+  printf "\033c"
+}
+#
+function PDB_HELP() {
+SetClear
+SepLine
+echo -e "\
+|#[ PDB_001 ] PDB: VERIFY DATABASE VERSION                            |#|[ PDB_002 ] PDB: VERIFY INSTALLED PATCHES - DETAILS      |#|
+"
+SepLine
+}
+#
+#########################################################################################################
+#
+# CDB PDB Funtions
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # PDB: VERIFY PLUGGABLE DATABASES                            #
+prompt ##############################################################
+col NAME for a30
+select CON_ID
+  , NAME
+  , OPEN_MODE
+  , DBID
+  , CON_UID
+  , GUID 
+FROM V\$CONTAINERS 
+ORDER BY CON_ID;
+quit;
+EOF
+}
+
+
+
+
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # PDB: Verify Violations on PDBs Database                    #
+prompt ##############################################################
+col time for a20
+col message for a180
+select to_char(time, 'dd/mm/yyyy hh24:mi:ss') as time
+  , substr(message, 1,180) as message
+from pdb_plug_in_violations;
+quit;
+EOF
+}
+
+
+
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Verify Snapshots on PDBs Database                          #
+prompt ##############################################################
+col pdb_name for a10
+col snapshot_mode for a15
+select p.con_id
+  , p.pdb_name
+  , p.snapshot_mode
+  , p.snapshot_interval
+FROM cdb_pdbs p
+ORDER BY 1;
+quit;
+EOF
+}
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Verify Properties of Snapshots on PDBs Database            #
+prompt ##############################################################
+col property_name for a20
+col pdb_name for a10
+col property_value for a15
+col description for a50
+select pr.con_id
+  , p.pdb_name
+  , pr.property_name
+  , pr.property_value
+  , pr.description 
+FROM cdb_properties pr
+JOIN cdb_pdbs p ON pr.con_id = p.con_id 
+WHERE pr.property_name = 'MAX_PDBA_SNAPSHOTS' 
+ORDER BY pr.property_name;
+quit;
+EOF
+}
+
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+Prompt
+prompt ##############################################################
+prompt # Verify Availabilitt of Snapshots on PDBs Database          #
+prompt ##############################################################
+col con_name for a10
+col snapshot_name for a30
+col snapshot_scn for 9999999
+col full_snapshot_path for a50
+select con_id
+  , con_name
+  , snapshot_name
+  , snapshot_scn
+  , full_snapshot_path 
+FROM cdb_pdb_snapshots
+ORDER BY con_id, snapshot_scn;
+quit;
+EOF
+}
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Verify Snapshots JOBS on PDBs Database                     #
+prompt ##############################################################
+col owner for a10
+col job_name for a30
+col repeat_interval for a50
+select owner
+  , job_name
+  , repeat_interval
+FROM dba_scheduler_jobs
+WHERE job_name LIKE '%SNAPSHOT'
+ORDER BY owner, job_name;
+quit;
+EOF
+}
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt
+prompt ##############################################################
+prompt # Verify Snapshots Refresh on PDBs Database                  #
+prompt ##############################################################
+select status
+  , refresh_mode
+from dba_pdbs;
+quit;
+EOF
+}
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Verify The History of PDBs Database                        #
+prompt ##############################################################
+col db_name for a10 
+col CLONED_FROM_PDB_NAME for a25 
+col pdb_name for a18 
+select DB_NAME
+  , CON_ID
+  , PDB_NAME
+  , OPERATION
+  , to_char(OP_TIMESTAMP, 'dd/mm/yyyy hh24:mi:ss') as time
+  , CLONED_FROM_PDB_NAME
+FROM CDB_PDB_HISTORY;
+quit;
+EOF
+}
+
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Check Undo Mode in Multitenant DB                          #
+prompt ##############################################################
+select * from database_properties where property_name = 'LOCAL_UNDO_ENABLED';
+quit;
+EOF
+}
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Check Startup, uptime and creation time of PDB database
+prompt ##############################################################
+col name for a20
+col open_time for a33
+select con_id
+  , name
+  , dbid
+  , open_mode
+  , open_time 
+from v\$containers;
+quit;
+EOF
+}
+
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Check uptime of PDB database
+prompt ##############################################################
+col name for a20
+col "database uptime" for a30
+select name
+  , floor(sysdate-cast(open_time as date)) || ' Days ' || floor(((sysdate-cast(open_time as date))-floor(sysdate-cast(open_time as date)))*24) || ' hours ' || round(((sysdate-cast(open_time as date)-floor(sysdate-cast(open_time as date))*24)-floor((sysdate-cast(open_time as date)-floor(sysdate-cast(open_time as date))*24)))*60) || ' minutes ' "Database Uptime" 
+from v\$containers;
+quit;
+EOF
+}
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Check creation time and status of PDBS
+prompt ##############################################################
+col pdb_name for a30
+select pdb_name
+  , creation_time
+  , status 
+from dba_pdbs;
+quit;
+EOF
+}
+
+
+function PDB_001() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # Check size of PDBS
+prompt ##############################################################
+select name
+  , open_mode
+  , restricted
+  , creation_time
+  , total_size/1024/1024/1024 as GB
+from v\$PDBS;
+quit;
+EOF
+}
+
+
+#
+#########################################################################################################
+# Finish of the System
+#########################################################################################################

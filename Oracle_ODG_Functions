@@ -1,0 +1,46 @@
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.3"
+DateCreation="18/08/2021"
+DateModification="03/03/2022"
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
+#
+function SepLine() 
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+}
+#
+function SetClear()
+{
+  printf "\033c"
+}
+#
+function ODG_HELP() {
+SetClear
+SepLine
+echo -e "\
+|#[ ODG_001 ] ODG: VERIFY DATABASE VERSION                            |#|[ ODG_002 ] ODG: VERIFY INSTALLED PATCHES - DETAILS      |#|
+"
+SepLine
+}
+#
+#########################################################################################################
+#
+# DATAGUARD Funtions
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+
+
+
+
+
+
+#
+#########################################################################################################
+# Finish of the System
+#########################################################################################################

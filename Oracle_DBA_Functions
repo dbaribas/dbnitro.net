@@ -21,57 +21,57 @@ function DBA_HELP() {
 SetClear
 SepLine
 echo -e "\
-| DATABASE: VERIFY DATABASE VERSION                 [ DBA_001 ]  |#|  VERIFY INSTALLED PATCHES - DETAILS      [ DBA_002 ]
-| INSTANCE INFORMATION + PGA & SGA                  [ DBA_003 ]  |#|  GENERAL TUNING VIEW                     [ DBA_004 ]
-| DATABASE GROWN ON LASTS MONTHS                    [ DBA_005 ]  |#|  CONNECTIONS AVERAGE PER HOUR            [ DBA_006 ]
-| TOP 20 DB-CPU ACTIVITY                            [ DBA_007 ]  |#|  VERIFY SESSIONS PER MEMORY              [ DBA_008 ]
-| DATABASE SIZE                                     [ DBA_009 ]  |#|  VERIFY SESSIONS PER I/O                 [ DBA_010 ]
-| HIT RATIO THE LASTS 30 DAYS                       [ DBA_011 ]  |#|  VERIFY LONG OPERATIONS                  [ DBA_012 ]
-| INVALIDS OBJECTS [ @ ]                            [ DBA_013 ]  |#|  JOBS CONTROL OF THE CLIENT [ @ ]        [ DBA_014 ]
-| MATERIALIZEDS VIEWS DISABLED                      [ DBA_015 ]  |#|  VERIFY RUNNING JOBS                     [ DBA_016 ] 
-| KILL A RUNNING SESSION [ @ ]                      [ DBA_017 ]  |#|  VERIFY PROFILE INFORMATION              [ DBA_018 ] 
-| BACKUP STATISTICS                                 [ DBA_019 ]  |#|  QTD OF ARCHIVES PER HOUR                [ DBA_020 ] 
-| LAST FILE OF LAST BACKUP ARCH - RMAN              [ DBA_021 ]  |#|  LAST FILE OF LAST BACKUP FULL - RMAN    [ DBA_022 ] 
-| ARCHIVES GENERATED PER DAY                        [ DBA_023 ]  |#|  BACKUP LOG OF LAST BACKUP FULL - RMAN   [ DBA_024 ] 
-| BACKUP LOG OF LASTS ARCHIVES - RMAN               [ DBA_025 ]  |#|  ERRORS ON ALERT LOG FILE                [ DBA_026 ] 
-| ORACLE ENTERPRISE MANAGER ALERT                   [ DBA_027 ]  |#|  CAPTURE STATISTICS OF DATA DICTIONARY   [ DBA_028 ] 
-| CAPTURE STATISTICS OF ALL DATABASE                [ DBA_029 ]  |#|  BLOCKING LOCKS                          [ DBA_030 ] 
-| LOCKED OBJECTS                                    [ DBA_031 ]  |#|  BLOCKING LOCKS [ SUMARY ]               [ DBA_032 ] 
-| BLOCKING LOCKS [ USER DETAILS ]                   [ DBA_033 ]  |#|  BLOCKING LOCKS [ WAITING SQL ]          [ DBA_034 ] 
-| LOCKED OBJECTS [ DETAILS ]                        [ DBA_035 ]  |#|  DML AND DDL LOCKS                       [ DBA_036 ] 
-| DML TABLE LOCKS TIME                              [ DBA_037 ]  |#|  VERIFY SESSIONS [ @ ]                   [ DBA_038 ] 
-| TOP 20 DATABASE SESSIONS                          [ DBA_039 ]  |#|  VERIFY TABLESPACES                      [ DBA_040 ] 
-| VERIFY STATISTICS - TABLES [ @ ]                  [ DBA_041 ]  |#|  VERIFY STATISTICS - INDEXES [ @ ]       [ DBA_042 ] 
-| CAPTURE STATISTICS - OWNER [ @ ]                  [ DBA_043 ]  |#|  VALIDATE OBJECTS FROM ONE OWNER [ @ ]   [ DBA_044 ] 
-| VERIFY TABLES SIZE, VALIDATE OBJ - OWNERS [ @ ]   [ DBA_045 ]  |#|  OWNER X OBJECTS X TYPE X QTD            [ DBA_046 ] 
-| VERIFY INSTANCE CHARACTERSET                      [ DBA_047 ]  |#|  CACHE HIT RATIO [ GOOD: > 90% ]         [ DBA_048 ] 
-| VERIFY INSTANCE INSTALLED PRODUCTS                [ DBA_049 ]  |#|  INSTANCE PROPERTIES                     [ DBA_050 ] 
-| INSTANCE OPTIONS                                  [ DBA_051 ]  |#|  INSTANCE DIFFERENTS PARAMETERS          [ DBA_052 ] 
-| INSTANCE MODIFICABLES PARAMETERS                  [ DBA_053 ]  |#|  VERIFY DEAD LOCKS                       [ DBA_054 ] 
-| VERIFY SESSIONS PER I/O CONSUME                   [ DBA_055 ]  |#|  VERIFY FREE SEGMENTS ON DATAFILES       [ DBA_056 ] 
-| VERIFY WHICH DATAFILE CAN BE RESIZED [ @ ]        [ DBA_057 ]  |#|  VERIFY RECYCLEBIN                       [ DBA_058 ] 
-| CLEAR REYICLEBIN                                  [ DBA_059 ]  |#|  VERIFY DATABASE SESSIONS                [ DBA_060 ] 
-| VERIFY ACTIVES SESSIONS PER OWNER                 [ DBA_061 ]  |#|  UNLOCKING A USER [ @ ]                  [ DBA_062 ] 
-| LOCKING A USER [ @ ]                              [ DBA_063 ]  |#|  REDO GROUPS INFORMATIONS                [ DBA_064 ] 
-| SHOW ALL CORRUPTED OBJECTS                        [ DBA_065 ]  |#|  VERIFY SPACE OF FLASH RECOVERY AREA     [ DBA_066 ] 
-| VERIFY PLUGGABLE DATABASES                        [ DBA_067 ]  |#|  VERIFY CONTROLFILES                     [ DBA_068 ] 
-| VERIFY CONSUME PER CPU                            [ DBA_069 ]  |#|  QUICK TUNE                              [ DBA_070 ] 
-| VERIFY RECOMENDATIONS TUNING TOP 20 [ @ ]         [ DBA_071 ]  |#|  VERIFY TOP 20 TUNING HISTORY [ @ ]      [ DBA_072 ] 
-| VERIFY BACKGROUND PROCESSESS                      [ DBA_073 ]  |#|  TOP 100 QUERY RECOMMENDATIONS           [ DBA_074 ] 
-| VERIFY DYNAMICS PARAMETERS [ SPFILE ]             [ DBA_075 ]  |#|  VERIFY DBA FEATURES USAGE STATISTICS    [ DBA_076 ] 
-| VERIFY DBA HIGH WATER MARK STATISTICS             [ DBA_077 ]  |#|  GLOBAL INFORMATION ABOUT I/O            [ DBA_078 ] 
-| WHICH SEG. HAVE TOP LOGICAL I/O - PHYSICAL I/O    [ DBA_079 ]  |#|  VERIFY DBLINKS & FOLDERS INFO           [ DBA_080 ] 
-| IDENTIFYING WHEN A PASSWORD WAS LAST CHANGED      [ DBA_081 ]  |#|  VERIFY UNDO SEGMENTS                    [ DBA_082 ] 
-| VERIFY ALL SQL STATEMENTS                         [ DBA_083 ]  |#|  CLONE USER COMMANDS [ @ ]               [ DBA_084 ] 
-| VERIFY ALL INFOS ABOUT SYSAUX                     [ DBA_085 ]  |#|  VERIFY ALL INFOS ABOUT I/O + LATENCY    [ DBA_086 ] 
-| VERIFY MAIN TOP WAIT EVENTS PER WEEK              [ DBA_087 ]  |#|  VERIFY OBJECTS SIZE                     [ DBA_088 ] 
-| GENERAL DATABASE OVERVIEW                         [ DBA_089 ]  |#|  DATABASE DASHBOARD                      [ DBA_090 ] 
-| VERIFY ALL SQL IDS STATEMENTS                     [ DBA_091 ]  |#|  VERIFY NLS CONFIGURATION                [ DBA_092 ] 
-| VERIFY DATABASE ENCREASY PER DAY / WEEK / MONTH   [ DBA_093 ]  |#|  VERIFY ALL SQL IDS STATEMENTS           [ DBA_094 ]
-| VERIFY ALL PATCHES APPLIED                        [ DBA_095 ]  |#|  VERIFY CPU USAGE BY MINUTE              [ DBA_096 ]
-| VERIFY STANDBY CONFIGURATION                      [ DBA_097 ]  |#|  VERIFY GRANTS AND PERMISSIONS BY OWNER  [ DBA_098 ]
-| VERIFY GOLDENGATE REPLICATIONS                    [ DBA_099 ]  |#|  VERIFY BACKUP RUNNING ON REAL TIME      [ DBA_100 ]
-| VERIFY DATABASE COMPONENTS FROM REGISTRY          [ DBA_101 ]  |#|  Dataguard Health Check                  [ DBA_102 ]"
+|#[ DBA_001 ] DBA: VERIFY DATABASE VERSION                            |#|[ DBA_002 ] DBA: VERIFY INSTALLED PATCHES - DETAILS      |#|
+|#[ DBA_003 ] DBA: INSTANCE INFORMATION + PGA & SGA                   |#|[ DBA_004 ] DBA: GENERAL TUNING VIEW                     |#|
+|#[ DBA_005 ] DBA: DATABASE GROWN ON LASTS MONTHS                     |#|[ DBA_006 ] DBA: CONNECTIONS AVERAGE PER HOUR            |#|
+|#[ DBA_007 ] DBA: TOP 20 DB-CPU ACTIVITY                             |#|[ DBA_008 ] DBA: VERIFY SESSIONS PER MEMORY              |#|
+|#[ DBA_009 ] DBA: DATABASE SIZE                                      |#|[ DBA_010 ] DBA: VERIFY SESSIONS PER I/O                 |#|
+|#[ DBA_011 ] DBA: HIT RATIO THE LASTS 30 DAYS                        |#|[ DBA_012 ] DBA: VERIFY LONG OPERATIONS                  |#|
+|#[ DBA_013 ] DBA: INVALIDS OBJECTS [ @ ]                             |#|[ DBA_014 ] DBA: JOBS CONTROL OF THE CLIENT [ @ ]        |#|
+|#[ DBA_015 ] DBA: MATERIALIZEDS VIEWS DISABLED                       |#|[ DBA_016 ] DBA: VERIFY RUNNING JOBS                     |#| 
+|#[ DBA_017 ] DBA: KILL A RUNNING SESSION [ @ ]                       |#|[ DBA_018 ] DBA: VERIFY PROFILE INFORMATION              |#| 
+|#[ DBA_019 ] DBA: BACKUP STATISTICS                                  |#|[ DBA_020 ] DBA: QTD OF ARCHIVES PER HOUR                |#| 
+|#[ DBA_021 ] DBA: LAST FILE OF LAST BACKUP ARCH - RMAN               |#|[ DBA_022 ] DBA: LAST FILE OF LAST BACKUP FULL - RMAN    |#| 
+|#[ DBA_023 ] DBA: ARCHIVES GENERATED PER DAY                         |#|[ DBA_024 ] DBA: BACKUP LOG OF LAST BACKUP FULL - RMAN   |#| 
+|#[ DBA_025 ] DBA: BACKUP LOG OF LASTS ARCHIVES - RMAN                |#|[ DBA_026 ] DBA: ERRORS ON ALERT LOG FILE                |#| 
+|#[ DBA_027 ] DBA: ORACLE ENTERPRISE MANAGER ALERT                    |#|[ DBA_028 ] DBA: CAPTURE STATISTICS OF DATA DICTIONARY   |#| 
+|#[ DBA_029 ] DBA: CAPTURE STATISTICS OF ALL DATABASE                 |#|[ DBA_030 ] DBA: BLOCKING LOCKS                          |#| 
+|#[ DBA_031 ] DBA: LOCKED OBJECTS                                     |#|[ DBA_032 ] DBA: BLOCKING LOCKS [ SUMARY ]               |#| 
+|#[ DBA_033 ] DBA: BLOCKING LOCKS [ USER DETAILS ]                    |#|[ DBA_034 ] DBA: BLOCKING LOCKS [ WAITING SQL ]          |#| 
+|#[ DBA_035 ] DBA: LOCKED OBJECTS [ DETAILS ]                         |#|[ DBA_036 ] DBA: DML AND DDL LOCKS                       |#| 
+|#[ DBA_037 ] DBA: DML TABLE LOCKS TIME                               |#|[ DBA_038 ] DBA: VERIFY SESSIONS [ @ ]                   |#| 
+|#[ DBA_039 ] DBA: TOP 20 DATABASE SESSIONS                           |#|[ DBA_040 ] DBA: VERIFY TABLESPACES                      |#| 
+|#[ DBA_041 ] DBA: VERIFY STATISTICS - TABLES [ @ ]                   |#|[ DBA_042 ] DBA: VERIFY STATISTICS - INDEXES [ @ ]       |#| 
+|#[ DBA_043 ] DBA: CAPTURE STATISTICS - OWNER [ @ ]                   |#|[ DBA_044 ] DBA: VALIDATE OBJECTS FROM ONE OWNER [ @ ]   |#| 
+|#[ DBA_045 ] DBA: VERIFY TABLES SIZE, VALIDATE OBJ - OWNERS [ @ ]    |#|[ DBA_046 ] DBA: OWNER X OBJECTS X TYPE X QTD            |#| 
+|#[ DBA_047 ] DBA: VERIFY INSTANCE CHARACTERSET                       |#|[ DBA_048 ] DBA: CACHE HIT RATIO [ GOOD: > 90% ]         |#| 
+|#[ DBA_049 ] DBA: VERIFY INSTANCE INSTALLED PRODUCTS                 |#|[ DBA_050 ] DBA: INSTANCE PROPERTIES                     |#| 
+|#[ DBA_051 ] DBA: INSTANCE OPTIONS                                   |#|[ DBA_052 ] DBA: INSTANCE DIFFERENTS PARAMETERS          |#| 
+|#[ DBA_053 ] DBA: INSTANCE MODIFICABLES PARAMETERS                   |#|[ DBA_054 ] DBA: VERIFY DEAD LOCKS                       |#| 
+|#[ DBA_055 ] DBA: VERIFY SESSIONS PER I/O CONSUME                    |#|[ DBA_056 ] DBA: VERIFY FREE SEGMENTS ON DATAFILES       |#| 
+|#[ DBA_057 ] DBA: VERIFY WHICH DATAFILE CAN BE RESIZED [ @ ]         |#|[ DBA_058 ] DBA: VERIFY RECYCLEBIN                       |#| 
+|#[ DBA_059 ] DBA: CLEAR REYICLEBIN                                   |#|[ DBA_060 ] DBA: VERIFY DATABASE SESSIONS                |#| 
+|#[ DBA_061 ] DBA: VERIFY ACTIVES SESSIONS PER OWNER                  |#|[ DBA_062 ] DBA: UNLOCKING A USER [ @ ]                  |#| 
+|#[ DBA_063 ] DBA: LOCKING A USER [ @ ]                               |#|[ DBA_064 ] DBA: REDO GROUPS INFORMATIONS                |#| 
+|#[ DBA_065 ] DBA: SHOW ALL CORRUPTED OBJECTS                         |#|[ DBA_066 ] DBA: VERIFY SPACE OF FLASH RECOVERY AREA     |#| 
+|#[ DBA_067 ] DBA:                                                    |#|[ DBA_068 ] DBA: VERIFY CONTROLFILES                     |#| 
+|#[ DBA_069 ] DBA: VERIFY CONSUME PER CPU                             |#|[ DBA_070 ] DBA: QUICK TUNE                              |#| 
+|#[ DBA_071 ] DBA: VERIFY RECOMENDATIONS TUNING TOP 20 [ @ ]          |#|[ DBA_072 ] DBA: VERIFY TOP 20 TUNING HISTORY [ @ ]      |#| 
+|#[ DBA_073 ] DBA: VERIFY BACKGROUND PROCESSESS                       |#|[ DBA_074 ] DBA: TOP 100 QUERY RECOMMENDATIONS           |#| 
+|#[ DBA_075 ] DBA: VERIFY DYNAMICS PARAMETERS [ SPFILE ]              |#|[ DBA_076 ] DBA: VERIFY DBA FEATURES USAGE STATISTICS    |#| 
+|#[ DBA_077 ] DBA: VERIFY DBA HIGH WATER MARK STATISTICS              |#|[ DBA_078 ] DBA: GLOBAL INFORMATION ABOUT I/O            |#| 
+|#[ DBA_079 ] DBA: WHICH SEG. HAVE TOP LOGICAL I/O - PHYSICAL I/O     |#|[ DBA_080 ] DBA: VERIFY DBLINKS & FOLDERS INFO           |#| 
+|#[ DBA_081 ] DBA: IDENTIFYING WHEN A PASSWORD WAS LAST CHANGED       |#|[ DBA_082 ] DBA: VERIFY UNDO SEGMENTS                    |#| 
+|#[ DBA_083 ] DBA: VERIFY ALL SQL STATEMENTS                          |#|[ DBA_084 ] DBA: CLONE USER COMMANDS [ @ ]               |#| 
+|#[ DBA_085 ] DBA: VERIFY ALL INFOS ABOUT SYSAUX                      |#|[ DBA_086 ] DBA: VERIFY ALL INFOS ABOUT I/O + LATENCY    |#| 
+|#[ DBA_087 ] DBA: VERIFY MAIN TOP WAIT EVENTS PER WEEK               |#|[ DBA_088 ] DBA: VERIFY OBJECTS SIZE                     |#| 
+|#[ DBA_089 ] DBA: GENERAL DATABASE OVERVIEW                          |#|[ DBA_090 ] DBA: DATABASE DASHBOARD                      |#| 
+|#[ DBA_091 ] DBA: VERIFY ALL SQL IDS STATEMENTS                      |#|[ DBA_092 ] DBA: VERIFY NLS CONFIGURATION                |#| 
+|#[ DBA_093 ] DBA: VERIFY DATABASE ENCREASY PER DAY / WEEK / MONTH    |#|[ DBA_094 ] DBA: VERIFY ALL SQL IDS STATEMENTS           |#|
+|#[ DBA_095 ] DBA: VERIFY ALL PATCHES APPLIED                         |#|[ DBA_096 ] DBA: VERIFY CPU USAGE BY MINUTE              |#|
+|#[ DBA_097 ] DBA: VERIFY STANDBY CONFIGURATION                       |#|[ DBA_098 ] DBA: VERIFY GRANTS AND PERMISSIONS BY OWNER  |#|
+|#[ DBA_099 ] DBA:                                                    |#|[ DBA_100 ] DBA: VERIFY BACKUP RUNNING ON REAL TIME      |#|
+|#[ DBA_101 ] DBA: VERIFY DATABASE COMPONENTS FROM REGISTRY           |#|[ DBA_102 ] DBA: Dataguard Health Check                  |#|"
 SepLine
 }
 #
@@ -3089,7 +3089,7 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 col member FORMAT A90
 col group# format 999
 col status for a15
-col thread# for a10
+-- col thread# for a15
 col TOTAL_MB format 999,999,999,999
 col TOTAL_GB format 999,999,999,999
 col TOTAL_MB for a20
@@ -3251,156 +3251,15 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY PLUGGABLE DATABASES
+# 
 #########################################################################################################
 #
 function DBA_067() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-prompt ##############################################################
-prompt # PLUGGABLE DATABASES                                        #
-prompt ##############################################################
-col NAME for a30
-select CON_ID
-  , NAME
-  , OPEN_MODE
-  , DBID
-  , CON_UID
-  , GUID 
-FROM V\$CONTAINERS 
-ORDER BY CON_ID;
-Prompt
-prompt ##############################################################
-prompt # Verify Violations on PDBs Database                         #
-prompt ##############################################################
-col time for a20
-col message for a180
-select to_char(time, 'dd/mm/yyyy hh24:mi:ss') as time
-  , substr(message, 1,180) as message
-from pdb_plug_in_violations;
-Prompt
-prompt ##############################################################
-prompt # Verify Snapshots on PDBs Database                          #
-prompt ##############################################################
-col pdb_name for a10
-col snapshot_mode for a15
-select p.con_id
-  , p.pdb_name
-  , p.snapshot_mode
-  , p.snapshot_interval
-FROM cdb_pdbs p
-ORDER BY 1;
-Prompt
-prompt ##############################################################
-prompt # Verify Properties of Snapshots on PDBs Database            #
-prompt ##############################################################
-col property_name for a20
-col pdb_name for a10
-col property_value for a15
-col description for a50
-select pr.con_id
-  , p.pdb_name
-  , pr.property_name
-  , pr.property_value
-  , pr.description 
-FROM cdb_properties pr
-JOIN cdb_pdbs p ON pr.con_id = p.con_id 
-WHERE pr.property_name = 'MAX_PDBA_SNAPSHOTS' 
-ORDER BY pr.property_name;
-Prompt
-prompt ##############################################################
-prompt # Verify Availabilitt of Snapshots on PDBs Database          #
-prompt ##############################################################
-col con_name for a10
-col snapshot_name for a30
-col snapshot_scn for 9999999
-col full_snapshot_path for a50
-select con_id
-  , con_name
-  , snapshot_name
-  , snapshot_scn
-  , full_snapshot_path 
-FROM cdb_pdb_snapshots
-ORDER BY con_id, snapshot_scn;
-Prompt
-prompt ##############################################################
-prompt # Verify Snapshots JOBS on PDBs Database                     #
-prompt ##############################################################
-col owner for a10
-col job_name for a30
-col repeat_interval for a50
-select owner
-  , job_name
-  , repeat_interval
-FROM dba_scheduler_jobs
-WHERE job_name LIKE '%SNAPSHOT'
-ORDER BY owner, job_name;
-prompt
-prompt ##############################################################
-prompt # Verify Snapshots Refresh on PDBs Database                  #
-prompt ##############################################################
-select status
-  , refresh_mode
-from dba_pdbs;
-prompt
-prompt ##############################################################
-prompt # Verify The History of PDBs Database                        #
-prompt ##############################################################
-col db_name for a10 
-col CLONED_FROM_PDB_NAME for a25 
-col pdb_name for a18 
-select DB_NAME
-  , CON_ID
-  , PDB_NAME
-  , OPERATION
-  , to_char(OP_TIMESTAMP, 'dd/mm/yyyy hh24:mi:ss') as time
-  , CLONED_FROM_PDB_NAME
-FROM CDB_PDB_HISTORY;
-prompt
-prompt ##############################################################
-prompt # Check Undo Mode in Multitenant DB                          #
-prompt ##############################################################
-select * from database_properties where property_name = 'LOCAL_UNDO_ENABLED';
-prompt
-prompt ##############################################################
-prompt # Check Startup, uptime and creation time of PDB database
-prompt ##############################################################
-col name for a20
-col open_time for a33
-select con_id
-  , name
-  , dbid
-  , open_mode
-  , open_time 
-from v\$containers;
-prompt
-prompt ##############################################################
-prompt # Check uptime of PDB database
-prompt ##############################################################
-col name for a20
-col "database uptime" for a30
-select name
-  , floor(sysdate-cast(open_time as date)) || ' Days ' || floor(((sysdate-cast(open_time as date))-floor(sysdate-cast(open_time as date)))*24) || ' hours ' || round(((sysdate-cast(open_time as date)-floor(sysdate-cast(open_time as date))*24)-floor((sysdate-cast(open_time as date)-floor(sysdate-cast(open_time as date))*24)))*60) || ' minutes ' "Database Uptime" 
-from v\$containers;
-prompt
-prompt ##############################################################
-prompt # Check creation time and status of PDBS
-prompt ##############################################################
-col pdb_name for a30
-select pdb_name
-  , creation_time
-  , status 
-from dba_pdbs;
-prompt
-prompt ##############################################################
-prompt # Check size of PDBS
-prompt ##############################################################
-select name
-  , open_mode
-  , restricted
-  , creation_time
-  , total_size/1024/1024/1024 as GB
-from v\$PDBS;
+
+
+
 quit;
 EOF
 }
@@ -4047,13 +3906,15 @@ DECLARE
    v_output CLOB := NULL;
 BEGIN
    DBMS_OUTPUT.put_line ('DDL For Database Links');
-   FOR tt IN (select owner, DBA_link FROM dba_DBA_links)
+   FOR tt IN (select owner, DBA_link FROM dba_DB_links)
    LOOP
       select DBMS_METADATA.get_ddl ('DBA_LINK', tt.DBA_link, tt.owner) INTO v_output FROM DUAL;
       DBMS_OUTPUT.put_line (v_output);
    END LOOP;
 END;
 /
+prompt
+select * from dba_db_links order by 1,2,3;
 prompt
 prompt ##############################################################
 prompt # Verify Wich DB LINK are Opened                             #
@@ -6471,7 +6332,7 @@ EOF
 }
 #
 #########################################################################################################
-# VERIFY GOLDENGATE REPLICATIONS
+# 
 #########################################################################################################
 #
 function DBA_099() {
@@ -6479,135 +6340,7 @@ sqlplus -S / as sysdba <<EOF
 set feedback off timing off
 alter session set nls_date_format='dd/mm/yyyy';
 set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE PARAMETER
-prompt ##############################################################
-show parameter enable_goldengate_replication;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE CAPTURES, QUEUE AND STATUS
-prompt ##############################################################
-col CAPTURE_NAME for a20;
-col QUEUE_NAME for a15;
-col START_SCN for 9999999999;
-col STATUS for a10;
-col CAPTURED_SCN for 9999999999;
-col APPLIED_SCN for 9999999999;
-col SOURCE_DATABASE for a10;
-col LOGMINER_ID for 9999999;
-col REQUIRED_CHECKPOINTSCN for a30;
-col STATUS_CHANGE_TIME for a15;
-col ERROR_NUMBER for a15;
-col ERROR_MESSAGE for a10;
-col CAPTURE_TYPE for a10;
-col START_TIME for a30
-SELECT CAPTURE_NAME
-  , QUEUE_NAME
-  , START_SCN
-  , STATUS
-  , CAPTURED_SCN
-  , APPLIED_SCN
-  , SOURCE_DATABASE
-  , LOGMINER_ID
-  , REQUIRED_CHECKPOINT_SCN
-  , STATUS_CHANGE_TIME
-  , ERROR_NUMBER
-  , ERROR_MESSAGE
-  , CAPTURE_TYPE
-  , START_TIME
-FROM DBA_CAPTURE;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE STATE
-prompt ##############################################################
-col state for a30;
-col capture_name for a30;
-col bytes_of_redo_mined for a30;
-SELECT sid
-  , serial#
-  , capture#
-  , CAPTURE_NAME
-  , STARTUP_TIME
-  , CAPTURE_TIME
-  , state
-  , SGA_USED
-  , BYTES_OF_REDO_MINED
-  , to_char(STATE_CHANGED_TIME, 'mm/dd/yyyy hh24:mi') STATE_CHANGED_TIME
-FROM V\$GOLDENGATE_CAPTURE;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE CAPTURE
-prompt ##############################################################
-col capture_message_create_time for a30;
-col enqueue_message_create_time for a27;
-col available_message_create_time for a30;
-SELECT capture_name
-  , to_char(capture_time, 'mm/dd/yyyy hh24:mi') capture_time
-  , capture_message_number
-  , to_char(capture_message_create_time ,'mm/dd/yyyy hh24:mi') capture_message_create_time
-  , to_char(enqueue_time,'mm/dd/yyyy hh24:mi') enqueue_time
-  , enqueue_message_number
-  , to_char(enqueue_message_create_time, 'mm/dd/yyyy hh24:mi') enqueue_message_create_time
-  , available_message_number
-  , to_char(available_message_create_time,'mm/dd/yyyy hh24:mi') available_message_create_time
-FROM GV\$GOLDENGATE_CAPTURE;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE CAPTURE DETAILS
-prompt ##############################################################
-SELECT component_name capture_name
-  , count(*) open_transactions
-  , sum(cumulative_message_count) LCRs
-FROM GV\$GOLDENGATE_TRANSACTION
-WHERE component_type='CAPTURE'
-group by component_name;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE SCN
-prompt ##############################################################
-col db_name for a15;
-select INST_ID
-  , SESSION_ID
-  , SESSION_NAME
-  , SESSION_STATE
-  , DB_NAME
-  , NUM_PROCESS
-  , START_SCN
---  , END_SCN
-  , SPILL_SCN
-  , PROCESSED_SCN
-  , PREPARED_SCN
-  , READ_SCN MAX_MEMORY_SIZE
-  , USED_MEMORY_SIZE PINNED_TXN
-  , PINNED_COMMITTED_TXN
-from GV\$LOGMNR_SESSION;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE LOGMNR_STATS
-prompt ##############################################################
-col name for a60
-SELECT SESSION_ID
-  , NAME
-  , VALUE
-FROM V\$LOGMNR_STATS;
-prompt
-prompt ##############################################################
-prompt # VERIFY GOLDENGATE OWNER, LOG_GROUP, LOG_TYPE
-prompt ##############################################################
-col owner format a20
-col table_name for a20
-col log_group_name format a20
-col log_group_type format a20
-select owner
-  , log_group_name
-  , table_name
-  , log_group_type
-  , always
-  , generated
-from dba_log_groups
--- where owner = 'WLPAPP'
--- and log_group_name like 'OGGS%';
-;
+
 quit;
 EOF
 }
