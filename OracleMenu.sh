@@ -3,20 +3,20 @@ Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.51"
 DateCreation="07/01/2021"
 DateModification="25/07/2022"
-EMAIL_1=dba.ribas@gmail.com
-EMAIL_2=andre.ribas@icloud.com
-WEBSITE=http://dbnitro.net
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
 #
 # Separate Line Function
 #
 function SepLine() {
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
 }
 #
 # Clear Screen Function
 #
 function SetClear() {
-  printf "\033c"
+printf "\033c"
 }
 #
 # Verify ROOT User
@@ -55,7 +55,7 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|/usr/lib/oracle/sbin" # ---> Agent - Working on it.
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|/usr/lib/oracle/sbin"
 ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware"              | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
 ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|middleware" | egrep -i "agent" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
 ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE}|agent" | egrep -i "middleware" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
@@ -78,7 +78,6 @@ if [[ $(uname) == "SunOS" ]]; then
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
@@ -91,7 +90,6 @@ elif [[ $(uname) == "AIX" ]]; then
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
@@ -104,7 +102,6 @@ elif [[ $(uname) == "Linux" ]]; then
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   RED="\e[1;31;40m"
   RED="\e[1;31;40m"
   YEL="\e[1;33;40m"
@@ -152,9 +149,8 @@ fi
 #
 # Unsetting and Setting OS and ORATAB Variables
 #
-function unset_var()
-{
-  if [[ $(whoami) == "grid" ]]; then
+function unset_var() {
+if [[ $(whoami) == "grid" ]]; then
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
   for U_VAR in ${VARIABLES}; do
@@ -164,7 +160,7 @@ function unset_var()
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   #
-  elif [[ $(whoami) == "oracle" ]]; then
+elif [[ $(whoami) == "oracle" ]]; then
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
   for U_VAR in ${VARIABLES}; do
@@ -173,22 +169,20 @@ function unset_var()
   export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
-  fi
+fi
 }
 #
-function unalias_var()
-{
-  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
-  ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
-  for UN_ALIAS in ${ALIASES}; do
-    unalias ${UN_ALIAS} > /dev/null 2>&1
-  done
+function unalias_var() {
+ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
+ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
+for UN_ALIAS in ${ALIASES}; do
+  unalias ${UN_ALIAS} > /dev/null 2>&1
+done
 }
 #
 # Setting Functions
 #
-function set_GLOGIN()
-{
+function set_GLOGIN() {
 if [[ ! -f ${SCRIPTS}/.glogin.sql ]]; then
 cat > ${SCRIPTS}/.glogin.sql <<EOF
 set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
@@ -200,13 +194,10 @@ COLUMN FILE_NAME FORMAT A80
 SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
 EOF
-# chmod 777 /tmp/.glogin.sql
-# chown oracle.oinstall /tmp/.glogin.sql
 fi
 }
 #
-function set_GLOGIN_PDB()
-{
+function set_GLOGIN_PDB() {
 if [[ ! -f ${SCRIPTS}/.glogin_pdb.sql ]]; then
 cat > ${SCRIPTS}/.glogin_pdb.sql <<EOF
 COLUMN NAME FORMAT A20
@@ -225,15 +216,12 @@ col global_name noprint
 select upper(sys_context('userenv', 'session_user') || '@' || sys_context('userenv', 'con_name') || '@' || sys_context('userenv', 'cdb_name')) global_name from dual;
 SET SQLPROMPT '&gname> '
 EOF
-# chmod 777 /tmp/.glogin_pdb.sql
-# chown oracle.oinstall /tmp/.glogin_pdb.sql
 fi
 }
 #
 # Check and Set the GoldenGate Environment
 #
-function set_OGG()
-{
+function set_OGG() {
 if [[ ${ORACLE_SID} == "" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
   return 0
@@ -278,8 +266,7 @@ fi
 #
 # Check and Set the Database Version, Container and Pluggable Databases
 #
-function set_PDB()
-{
+function set_PDB() {
 if [[ ${ORACLE_SID} == "" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
   return 0
@@ -346,188 +333,311 @@ fi
 done
 }
 #
-function set_HOME()
-{
-  # Unset and Unalias
-  unset_var
-  unalias_var
-  # Set GLOGIN
-  set_GLOGIN
-  # SET HOME
-  local OPT=$1
-  export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_HOME="${OPT}"
-  export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
-  export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
-  export BASE="${ORACLE_BASE}"
-  export OH="${ORACLE_HOME}"
-  export DBS="${ORACLE_HOME}/dbs"
-  export TNS="${ORACLE_HOME}/network/admin"
-  export TFA="${TFA_HOME}"
-  export OCK="${OCK_HOME}"
-  export OPATCH="${ORACLE_HOME}/OPatch"
-  export JAVA_HOME="${ORACLE_HOME}/jdk"
-  if [[ "${ASM_EXISTS}" == "YES" ]]; then
-    export GRID_HOME=${G_HOME}
-    export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-    export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-    export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "+ASM*")
-    export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "crs")
-    export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
-    export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
-    # Alias to go to TRACE Folder
-    alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
-    # Alias CRS Logs
-    alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
-    # Aliases to tail LOGS
-    alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
-    # Aliases to CRSCTL STATUS
-    alias res='crsctl stat res -t'
-    alias rest='crsctl stat res -t -init'
-    alias resp='crsctl stat res -p -init'
-    # Aliases to connect on ASMCMD
-    alias asmcmd='rlwrap asmcmd'
-    alias a='rlwrap asmcmd -p'
-    # Alias to Scripts
-    alias rac-status='${SCRIPTS}/rac-status.sh -a'
-    alias asmdu='${SCRIPTS}/asmdu.sh -g'
-  else
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-    export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-  fi
-  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-  export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
-  # Alias to tail Listener Log
-  alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
-  # Alias to list lahrt
-  alias lt='ls -lahrt'
-  # Aliases to go to folder
-  alias oh='cd ${ORACLE_HOME}'
-  alias dbs='cd ${ORACLE_HOME}/dbs'
-  alias tns='cd ${ORACLE_HOME}/network/admin'
-  alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
-  alias ock='${OCK_HOME}/orachk'
-  # Aliases to connect on SQLPLUS
-  alias sqlplus='rlwrap sqlplus'
-  alias s='rlwrap sqlplus / as sysdba @${SCRIPTS}/.glogin.sql'
-  # Aliases to connect on ADRCI
-  alias adrci='rlwrap adrci'
-  alias ad='rlwrap adrci'
-  # Aliases to check PROCESSES
-  alias p='ps -ef | grep pmon | grep -v grep'
-  # Aliases to check LSNRCTL
-  alias t='rlwrap lsnrctl'
-  alias l='rlwrap lsnrctl status'
-  # Aliases to grep,egrep,fgrep
-  alias grep='grep --color=auto'
-  alias egrep='egrep --color=auto'
-  alias fgrep='fgrep --color=auto'
-  # Aliases to check MEMINFO
-  alias meminfo='free -g -h -l -t'
-  # Aliases to check PSMEM
-  alias psmem='ps auxf | sort -nr -k 4'
-  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-  # Aliases to check PSCPU
-  alias pscpu='ps auxf | sort -nr -k 3'
-  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
-  # Aliases to check CPUINFO
-  alias cpuinfo='lscpu'
-  #
-  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-  #
-  OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
-  #
-  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} == "Y" ]]; then
-    HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} == "N" ]]; then
-    HOME_RW=$(echo "${RED} RW ${BLA}")
-  fi
-  #
-  LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
-  if [[ "${LSNRCTL}" != 0 ]]; then
-    DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
-  else
-    DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
-  fi
-  SetClear
-  SepLine
-  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | ONWER: [${RED} ${OWNER} ${BLA}]"
-  echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  SepLine
-  #
-  export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  umask 0022
-}
-#
-function set_ASM_USER()
-{
-  echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
-  echo " -- YOU MUST CONNECT AS OS USER: ${ASM_OWNER} --"
-}
-#
-function set_ASM()
-{
-  # Unset and Unalias
-  unset_var
-  unalias_var
-  # Source Functions
-  source ${SCRIPTS}/.Oracle_ASM_Functions
-  source ${SCRIPTS}/.Oracle_RAC_Functions
-  source ${SCRIPTS}/.Oracle_EXA_Functions
-  source ${SCRIPTS}/.Oracle_ASM_Functions
-  source ${SCRIPTS}/.Oracle_ODA_Functions
-  # Set GLOGIN
-  set_GLOGIN
-  # SET ASM/GRID
-  local OPT=$1
-  export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_TERM=xterm
-  export ORACLE_SID="${OPT}"
-  export ORACLE_HOME="${G_HOME}"
-  export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export GRID_HOME="${ORACLE_HOME}"
-  export GRID_SID="${OPT}"
-  export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
-  export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
-  export BASE="${ORACLE_BASE}"
-  export OH="${ORACLE_HOME}"
-  export DBS="${ORACLE_HOME}/dbs"
-  export TNS="${ORACLE_HOME}/network/admin"
-  export TFA="${TFA_HOME}"
-  export OCK="${OCK_HOME}"
-  export OPATCH="${ORACLE_HOME}/OPatch"
-  export JAVA_HOME="${ORACLE_HOME}/jdk"
+function set_HOME() {
+# Unset and Unalias
+unset_var
+unalias_var
+# Set GLOGIN
+set_GLOGIN
+# SET HOME
+local OPT=$1
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_HOME="${OPT}"
+export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
+export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
+export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
+export BASE="${ORACLE_BASE}"
+export OH="${ORACLE_HOME}"
+export DBS="${ORACLE_HOME}/dbs"
+export TNS="${ORACLE_HOME}/network/admin"
+export TFA="${TFA_HOME}"
+export OCK="${OCK_HOME}"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+if [[ "${ASM_EXISTS}" == "YES" ]]; then
+  export GRID_HOME=${G_HOME}
+  export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
   export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
-  export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "crs")
-  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-  export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
-  export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
-  export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
+  export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "+ASM*")
+  export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | grep -i "crs")
+  export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+  export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   # Alias to go to TRACE Folder
   alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
   # Alias CRS Logs
   alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
-  # Alias to tail LOGS
+  # Aliases to tail LOGS
   alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
-  # Alias to tail Listener Log
-  alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
-  # Alias to edit the Alert Log DB
-  alias vlog='vim ${ALERTASM}'
-  # Alias to list lahrt
-  alias lt='ls -lahrt'
+  # Aliases to CRSCTL STATUS
+  alias res='crsctl stat res -t'
+  alias rest='crsctl stat res -t -init'
+  alias resp='crsctl stat res -p -init'
+  # Aliases to connect on ASMCMD
+  alias asmcmd='rlwrap asmcmd'
+  alias a='rlwrap asmcmd -p'
+  # Alias to Scripts
+  alias rac-status='${SCRIPTS}/rac-status.sh -a'
+  alias asmdu='${SCRIPTS}/asmdu.sh -g'
+else
+  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
+  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
+  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
+fi
+export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+# Alias to tail Listener Log
+alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
+# Alias to list lahrt
+alias lt='ls -lahrt'
+# Aliases to go to folder
+alias oh='cd ${ORACLE_HOME}'
+alias dbs='cd ${ORACLE_HOME}/dbs'
+alias tns='cd ${ORACLE_HOME}/network/admin'
+alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
+alias ock='${OCK_HOME}/orachk'
+# Aliases to connect on SQLPLUS
+alias sqlplus='rlwrap sqlplus'
+alias s='rlwrap sqlplus / as sysdba @${SCRIPTS}/.glogin.sql'
+# Aliases to connect on ADRCI
+alias adrci='rlwrap adrci'
+alias ad='rlwrap adrci'
+# Aliases to check PROCESSES
+alias p='ps -ef | grep pmon | grep -v grep'
+# Aliases to check LSNRCTL
+alias t='rlwrap lsnrctl'
+alias l='rlwrap lsnrctl status'
+# Aliases to grep,egrep,fgrep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+# Aliases to check MEMINFO
+alias meminfo='free -g -h -l -t'
+# Aliases to check PSMEM
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+# Aliases to check PSCPU
+alias pscpu='ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+# Aliases to check CPUINFO
+alias cpuinfo='lscpu'
+#
+T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+#
+OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+#
+HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+if [[ ${HOME_STATUS} == "Y" ]]; then
+  HOME_RW=$(echo "${GRE} RO ${BLA}")
+elif [[ ${HOME_STATUS} == "N" ]]; then
+  HOME_RW=$(echo "${RED} RW ${BLA}")
+fi
+#
+LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+if [[ "${LSNRCTL}" != 0 ]]; then
+  DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
+else
+  DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
+fi
+SetClear
+SepLine
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+SepLine
+#
+export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
+}
+#
+function set_ASM_USER() {
+echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
+echo " -- YOU MUST CONNECT AS OS USER: ${ASM_OWNER} --"
+}
+#
+function set_ASM() {
+# Unset and Unalias
+unset_var
+unalias_var
+# Source Functions
+source ${SCRIPTS}/.Oracle_ASM_Functions
+source ${SCRIPTS}/.Oracle_RAC_Functions
+source ${SCRIPTS}/.Oracle_EXA_Functions
+source ${SCRIPTS}/.Oracle_ODG_Functions
+source ${SCRIPTS}/.Oracle_ASM_Functions
+source ${SCRIPTS}/.Oracle_ODA_Functions
+# Set GLOGIN
+set_GLOGIN
+# SET ASM/GRID
+local OPT=$1
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_TERM=xterm
+export ORACLE_SID="${OPT}"
+export ORACLE_HOME="${G_HOME}"
+export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
+export GRID_HOME="${ORACLE_HOME}"
+export GRID_SID="${OPT}"
+export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
+export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
+export BASE="${ORACLE_BASE}"
+export OH="${ORACLE_HOME}"
+export DBS="${ORACLE_HOME}/dbs"
+export TNS="${ORACLE_HOME}/network/admin"
+export TFA="${TFA_HOME}"
+export OCK="${OCK_HOME}"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
+export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
+export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
+export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "+ASM*")
+export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -i "crs")
+export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+# Alias to go to TRACE Folder
+alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
+# Alias CRS Logs
+alias asmlog='tail -f -n 100 ${ALERTASM} | grep -v -i ${IGNORE_ERRORS}'
+# Alias to tail LOGS
+alias crslog='tail -f -n 100 ${ALERTCRS} | grep -v -i ${IGNORE_ERRORS}'
+# Alias to tail Listener Log
+alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
+# Alias to edit the Alert Log DB
+alias vlog='vim ${ALERTASM}'
+# Alias to list lahrt
+alias lt='ls -lahrt'
+# Aliases to CRSCTL STATUS
+alias res='crsctl stat res -t'
+alias rest='crsctl stat res -t -init'
+alias resp='crsctl stat res -p -init'
+# Alias to Scripts
+alias rac-status='${SCRIPTS}/rac-status.sh -a'
+alias asmdu='${SCRIPTS}/asmdu.sh -g'
+# Aliases to connect on ASMCMD
+alias asmcmd='rlwrap asmcmd'
+alias a='rlwrap asmcmd -p'
+# Aliases to go to folder
+alias oh='cd ${ORACLE_HOME}'
+alias dbs='cd ${ORACLE_HOME}/dbs'
+alias tns='cd ${ORACLE_HOME}/network/admin'
+alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
+alias ock='${OCK_HOME}/orachk'
+# Aliases to connect on SQLPLUS
+alias sqlplus='rlwrap sqlplus'
+alias s='rlwrap sqlplus / as sysasm @${SCRIPTS}/.glogin.sql'
+# Aliases to connect on ADRCI
+alias adrci='rlwrap adrci'
+alias ad='rlwrap adrci'
+# Aliases to check PROCESSES
+alias p='ps -ef | grep pmon | grep -v grep'
+# Aliases to check LSNRCTL
+alias t='rlwrap lsnrctl'
+alias l='rlwrap lsnrctl status'
+# Aliases to grep,egrep,fgrep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+# Aliases to connect on ORATOP
+alias orat='${ORATOP}/oratop -f -i 10 / as sysasm'
+# Aliases to check MEMINFO
+alias meminfo='free -g -h -l -t'
+# Aliases to check PSMEM
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+# Aliases to check PSCPU
+alias pscpu='ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+# Aliases to check CPUINFO
+alias cpuinfo='lscpu'
+#
+T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+#
+HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+if [[ ${HOME_STATUS} == "Y" ]]; then
+  HOME_RW=$(echo "${GRE} RO ${BLA}")
+elif [[ ${HOME_STATUS} == "N" ]]; then
+  HOME_RW=$(echo "${RED} RW ${BLA}")
+fi
+#
+PROC=$(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)
+if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
+  DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
+else
+  DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
+fi
+#
+LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+if [[ "${LSNRCTL}" != 0 ]]; then
+  DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
+else
+  DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
+fi
+#
+SetClear
+SepLine
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
+echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+SepLine
+#
+export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
+}
+#
+function set_DB() {
+# Unset and Unalias
+unset_var
+unalias_var
+# Source Functions
+source ${SCRIPTS}/.Oracle_DBA_Functions
+source ${SCRIPTS}/.Oracle_RAC_Functions
+source ${SCRIPTS}/.Oracle_EXA_Functions
+source ${SCRIPTS}/.Oracle_ODG_Functions
+source ${SCRIPTS}/.Oracle_OGG_Functions
+source ${SCRIPTS}/.Oracle_STR_Functions
+source ${SCRIPTS}/.Oracle_WALL_Functions
+source ${SCRIPTS}/.Oracle_RMAN_Functions
+source ${SCRIPTS}/.Oracle_PDB_Functions
+source ${SCRIPTS}/.Oracle_ASM_Functions
+source ${SCRIPTS}/.Oracle_ODA_Functions
+# Set GLOGIN
+set_GLOGIN
+# SET DATABASE
+local OPT=$1
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_TERM=xterm
+export ORACLE_SID="${OPT}"
+export ORACLE_HOME=$(cat ${ORATAB} | grep "${ORACLE_SID}" | cut -f2 -d ':')
+export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
+export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
+export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
+export BASE="${ORACLE_BASE}"
+export OH="${ORACLE_HOME}"
+export DBS="${ORACLE_HOME}/dbs"
+export TNS="${ORACLE_HOME}/network/admin"
+export TFA="${TFA_HOME}"
+export OCK="${OCK_HOME}"
+export ORATOP="${ORACLE_HOME}/suptools/oratop"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+#
+if [[ "${ASM_EXISTS}" == "YES" ]]; then
+  export GRID_HOME=${G_HOME}
+  export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
+  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
+  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
+  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
   # Aliases to CRSCTL STATUS
   alias res='crsctl stat res -t'
   alias rest='crsctl stat res -t -init'
@@ -538,369 +648,240 @@ function set_ASM()
   # Aliases to connect on ASMCMD
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
-  # Aliases to go to folder
-  alias oh='cd ${ORACLE_HOME}'
-  alias dbs='cd ${ORACLE_HOME}/dbs'
-  alias tns='cd ${ORACLE_HOME}/network/admin'
-  alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
-  alias ock='${OCK_HOME}/orachk'
-  # Aliases to connect on SQLPLUS
-  alias sqlplus='rlwrap sqlplus'
-  alias s='rlwrap sqlplus / as sysasm @${SCRIPTS}/.glogin.sql'
-  # Aliases to connect on ADRCI
-  alias adrci='rlwrap adrci'
-  alias ad='rlwrap adrci'
-  # Aliases to check PROCESSES
-  alias p='ps -ef | grep pmon | grep -v grep'
-  # Aliases to check LSNRCTL
-  alias t='rlwrap lsnrctl'
-  alias l='rlwrap lsnrctl status'
-  # Aliases to grep,egrep,fgrep
-  alias grep='grep --color=auto'
-  alias egrep='egrep --color=auto'
-  alias fgrep='fgrep --color=auto'
-  # Aliases to connect on ORATOP
-  alias orat='${ORATOP}/oratop -f -i 10 / as sysasm'
-  # Aliases to check MEMINFO
-  alias meminfo='free -g -h -l -t'
-  # Aliases to check PSMEM
-  alias psmem='ps auxf | sort -nr -k 4'
-  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-  # Aliases to check PSCPU
-  alias pscpu='ps auxf | sort -nr -k 3'
-  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
-  # Aliases to check CPUINFO
-  alias cpuinfo='lscpu'
-  #
-  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-  #
-  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} == "Y" ]]; then
-    HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} == "N" ]]; then
-    HOME_RW=$(echo "${RED} RW ${BLA}")
-  fi
-  #
-  PROC=$(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)
-  if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
-    DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
-  else
-    DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
-  fi
-  #
-  LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
-  if [[ "${LSNRCTL}" != 0 ]]; then
-    DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
-  else
-    DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
-  fi
- #
-  SetClear
-  SepLine
-  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
-  echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  SepLine
-  #
-  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  umask 0022
+else
+  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
+  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
+  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
+fi
+#
+export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -w "${OPT}")
+export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
+export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
+export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
+export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
+# Alias to go to TRACE Folder
+alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
+# Alias to tail Listener Log
+alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
+# Alias to edit the Alert Log DB
+alias vlog='vim ${ALERTDB}'
+# Alias to list lahrt
+alias lt='ls -lahrt'
+# Aliases to go to folder
+alias base='cd ${ORACLE_BASE}'
+alias oh='cd ${ORACLE_HOME}'
+alias dbs='cd ${ORACLE_HOME}/dbs'
+alias tns='cd ${ORACLE_HOME}/network/admin'
+alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
+alias ock='${OCK_HOME}/orachk'
+# Aliases to tail LOGS
+alias dblog='tail -f -n 100 ${ALERTDB} | grep -v -i ${IGNORE_ERRORS}'
+alias dglog='tail -f -n 100 ${ALERTDG} | grep -v -i ${IGNORE_ERRORS}'
+# Aliases to connect on SQLPLUS
+alias sqlplus='rlwrap sqlplus'
+alias s='rlwrap sqlplus / as sysdba @${SCRIPTS}/.glogin.sql'
+# Aliases to connect on RMAN
+alias rman='rlwrap rman'
+alias r='rlwrap rman target /'
+# Aliases to connect on DGMGRL
+alias dgmgrl='rlwrap dgmgrl'
+alias d='rlwrap dgmgrl /'
+# Aliases to connect on ADRCI
+alias adrci='rlwrap adrci'
+alias ad='rlwrap adrci'
+# Aliases to check PROCESSES
+alias p='ps -ef | grep pmon | grep -v grep'
+# Aliases to check LSNRCTL
+alias t='rlwrap lsnrctl'
+alias l='rlwrap lsnrctl status'
+# Aliases to grep,egrep,fgrep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+# Aliases to connect on ORATOP
+alias orat='${ORATOP}/oratop -f -i 10 / as sysdba'
+# Aliases to check MEMINFO
+alias meminfo='free -g -h -l -t'
+# Aliases to check PSMEM
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+# Aliases to check PSCPU
+alias pscpu='ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+# Aliases to check CPUINFO
+alias cpuinfo='lscpu'
+# Alias to Set Pluggable Databases
+alias pdb='set_PDB'
+# Alias to Set GoldenGate
+alias gg='set_OGG'
+#
+T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+#
+HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+if [[ ${HOME_STATUS} == "Y" ]]; then
+  HOME_RW=$(echo "${GRE} RO ${BLA}")
+elif [[ ${HOME_STATUS} == "N" ]]; then
+  HOME_RW=$(echo "${RED} RW ${BLA}")
+fi
+#
+PROC=$(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)
+if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
+  DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
+else
+  DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
+fi
+#
+LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+if [[ "${LSNRCTL}" != 0 ]]; then
+  DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
+else
+  DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
+fi
+#
+SetClear
+SepLine
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
+echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+SepLine
+#
+export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
 }
 #
-function set_DB()
-{
-  # Unset and Unalias
-  unset_var
-  unalias_var
-  # Source Functions
-  source ${SCRIPTS}/.Oracle_DBA_Functions
-  source ${SCRIPTS}/.Oracle_RAC_Functions
-  source ${SCRIPTS}/.Oracle_EXA_Functions
-  source ${SCRIPTS}/.Oracle_ODG_Functions
-  source ${SCRIPTS}/.Oracle_OGG_Functions
-  source ${SCRIPTS}/.Oracle_STR_Functions
-  source ${SCRIPTS}/.Oracle_WALL_Functions
-  source ${SCRIPTS}/.Oracle_RMAN_Functions
-  source ${SCRIPTS}/.Oracle_PDB_Functions
-  source ${SCRIPTS}/.Oracle_ASM_Functions
-  source ${SCRIPTS}/.Oracle_ODA_Functions
-  # Set GLOGIN
-  set_GLOGIN
-  # SET DATABASE
-  local OPT=$1
-  export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_TERM=xterm
-  export ORACLE_SID="${OPT}"
-  export ORACLE_HOME=$(cat ${ORATAB} | grep "${ORACLE_SID}" | cut -f2 -d ':')
-  export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
-  export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
-  export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
-  export BASE="${ORACLE_BASE}"
-  export OH="${ORACLE_HOME}"
-  export DBS="${ORACLE_HOME}/dbs"
-  export TNS="${ORACLE_HOME}/network/admin"
-  export TFA="${TFA_HOME}"
-  export OCK="${OCK_HOME}"
-  export ORATOP="${ORACLE_HOME}/suptools/oratop"
-  export OPATCH="${ORACLE_HOME}/OPatch"
-  export JAVA_HOME="${ORACLE_HOME}/jdk"
-  #
-  if [[ "${ASM_EXISTS}" == "YES" ]]; then
-    export GRID_HOME=${G_HOME}
-    export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-    export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-    # Aliases to CRSCTL STATUS
-    alias res='crsctl stat res -t'
-    alias rest='crsctl stat res -t -init'
-    alias resp='crsctl stat res -p -init'
-    # Alias to Scripts
-    alias rac-status='${SCRIPTS}/rac-status.sh -a'
-    alias asmdu='${SCRIPTS}/asmdu.sh -g'
-    # Aliases to connect on ASMCMD
-    alias asmcmd='rlwrap asmcmd'
-    alias a='rlwrap asmcmd -p'
-  else
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-    export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-    export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/
-  fi
-  #
-  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-  export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | grep -w "${OPT}")
-  export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
-  export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
-  export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
-  export ALERTLST="$(lsnrctl status | grep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
-  # Alias to go to TRACE Folder
-  alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
-  # Alias to tail Listener Log
-  alias lsnlog='tail -f -n 100 ${ALERTLST} | grep -v -i ${IGNORE_ERRORS}'
-  # Alias to edit the Alert Log DB
-  alias vlog='vim ${ALERTDB}'
-  # Alias to list lahrt
-  alias lt='ls -lahrt'
-  # Aliases to go to folder
-  alias base='cd ${ORACLE_BASE}'
-  alias oh='cd ${ORACLE_HOME}'
-  alias dbs='cd ${ORACLE_HOME}/dbs'
-  alias tns='cd ${ORACLE_HOME}/network/admin'
-  alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
-  alias ock='${OCK_HOME}/orachk'
-  # Aliases to tail LOGS
-  alias dblog='tail -f -n 100 ${ALERTDB} | grep -v -i ${IGNORE_ERRORS}'
-  alias dglog='tail -f -n 100 ${ALERTDG} | grep -v -i ${IGNORE_ERRORS}'
-  # Aliases to connect on SQLPLUS
-  alias sqlplus='rlwrap sqlplus'
-  alias s='rlwrap sqlplus / as sysdba @${SCRIPTS}/.glogin.sql'
-  # Aliases to connect on RMAN
-  alias rman='rlwrap rman'
-  alias r='rlwrap rman target /'
-  # Aliases to connect on DGMGRL
-  alias dgmgrl='rlwrap dgmgrl'
-  alias d='rlwrap dgmgrl /'
-  # Aliases to connect on ADRCI
-  alias adrci='rlwrap adrci'
-  alias ad='rlwrap adrci'
-  # Aliases to check PROCESSES
-  alias p='ps -ef | grep pmon | grep -v grep'
-  # Aliases to check LSNRCTL
-  alias t='rlwrap lsnrctl'
-  alias l='rlwrap lsnrctl status'
-  # Aliases to grep,egrep,fgrep
-  alias grep='grep --color=auto'
-  alias egrep='egrep --color=auto'
-  alias fgrep='fgrep --color=auto'
-  # Aliases to connect on ORATOP
-  alias orat='${ORATOP}/oratop -f -i 10 / as sysdba'
-  # Aliases to check MEMINFO
-  alias meminfo='free -g -h -l -t'
-  # Aliases to check PSMEM
-  alias psmem='ps auxf | sort -nr -k 4'
-  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-  # Aliases to check PSCPU
-  alias pscpu='ps auxf | sort -nr -k 3'
-  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
-  # Aliases to check CPUINFO
-  alias cpuinfo='lscpu'
-  # Alias to Set Pluggable Databases
-  alias pdb='set_PDB'
-  # Alias to Set GoldenGate
-  alias gg='set_OGG'
-  #
-  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-  #
-  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} == "Y" ]]; then
-    HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} == "N" ]]; then
-    HOME_RW=$(echo "${RED} RW ${BLA}")
-  fi
-  #
-  PROC=$(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)
-  if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
-    DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
-  else
-    DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
-  fi
-  #
- LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
-  if [[ "${LSNRCTL}" != 0 ]]; then
-    DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
-  else
-    DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
-  fi
-  #
-  SetClear
-  SepLine
-  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | RW_RO: [${HOME_RW}] | SID: [${RED} ${ORACLE_SID} ${BLA}] | STATUS: [${DB_STATUS}]"
-  echo -e "# LISTENER: [${DB_LISTNER}] | MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  SepLine
-  #
-  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  umask 0022
+function set_OMS() {
+# Unset and Unalias
+unset_var
+unalias_var
+# Set GLOGIN
+set_GLOGIN
+# SET HOME
+local OPT=$1
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_HOME="${OPT}"
+export OH="${ORACLE_HOME}"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+export CLASSPATH=${ORACLE_HOME}/jlib
+export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
+export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
+# Alias to list lahrt
+alias lt='ls -lahrt'
+# Aliases to go to folder
+alias oh='cd ${ORACLE_HOME}'
+# Aliases to connect on ADRCI
+alias adrci='rlwrap adrci'
+alias ad='rlwrap adrci'
+# Aliases to check PROCESSES
+alias p='ps -ef | grep pmon | grep -v grep'
+# Aliases to check LSNRCTL
+alias t='rlwrap lsnrctl'
+alias l='rlwrap lsnrctl status'
+# Aliases to grep,egrep,fgrep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+# Aliases to check MEMINFO
+alias meminfo='free -g -h -l -t'
+# Aliases to check PSMEM
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+# Aliases to check PSCPU
+alias pscpu='ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+# Aliases to check CPUINFO
+alias cpuinfo='lscpu'
+#
+T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+#
+OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+#
+SetClear
+SepLine
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+SepLine
+#
+export PS1=$'[ OMS ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
 }
 #
-function set_OMS()
-{
-  # Unset and Unalias
-  unset_var
-  unalias_var
-  # Set GLOGIN
-  set_GLOGIN
-  # SET HOME
-  local OPT=$1
-  export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_HOME="${OPT}"
-  export OH="${ORACLE_HOME}"
-  export OPATCH="${ORACLE_HOME}/OPatch"
-  export JAVA_HOME="${ORACLE_HOME}/jdk"
-  export CLASSPATH=${ORACLE_HOME}/jlib
-  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
-  # Alias to list lahrt
-  alias lt='ls -lahrt'
-  # Aliases to go to folder
-  alias oh='cd ${ORACLE_HOME}'
-  # Aliases to connect on ADRCI
-  alias adrci='rlwrap adrci'
-  alias ad='rlwrap adrci'
-  # Aliases to check PROCESSES
-  alias p='ps -ef | grep pmon | grep -v grep'
-  # Aliases to check LSNRCTL
-  alias t='rlwrap lsnrctl'
-  alias l='rlwrap lsnrctl status'
-  # Aliases to grep,egrep,fgrep
-  alias grep='grep --color=auto'
-  alias egrep='egrep --color=auto'
-  alias fgrep='fgrep --color=auto'
-  # Aliases to check MEMINFO
-  alias meminfo='free -g -h -l -t'
-  # Aliases to check PSMEM
-  alias psmem='ps auxf | sort -nr -k 4'
-  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-  # Aliases to check PSCPU
-  alias pscpu='ps auxf | sort -nr -k 3'
-  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
-  # Aliases to check CPUINFO
-  alias cpuinfo='lscpu'
-  #
-  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-  #
-  OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
-  #
-  SetClear
-  SepLine
-  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
-  echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  SepLine
-  #
-  export PS1=$'[ OMS ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  umask 0022
-}
+function set_AGENT() {
+# Unset and Unalias
+unset_var
+unalias_var
+# Set GLOGIN
+set_GLOGIN
+# SET HOME
+local OPT=$1
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_HOME="${OPT}"
+export OH="${ORACLE_HOME}"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+export CLASSPATH=${ORACLE_HOME}/jlib
+export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
+export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
+# Alias to list lahrt
+alias lt='ls -lahrt'
+# Aliases to go to folder
+alias oh='cd ${ORACLE_HOME}'
+# Aliases to connect on ADRCI
+alias adrci='rlwrap adrci'
+alias ad='rlwrap adrci'
+# Aliases to check PROCESSES
+alias p='ps -ef | grep pmon | grep -v grep'
+# Aliases to check LSNRCTL
+alias t='rlwrap lsnrctl'
+alias l='rlwrap lsnrctl status'
+# Aliases to grep,egrep,fgrep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+# Aliases to check MEMINFO
+alias meminfo='free -g -h -l -t'
+# Aliases to check PSMEM
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+# Aliases to check PSCPU
+alias pscpu='ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+# Aliases to check CPUINFO
+alias cpuinfo='lscpu'
 #
-function set_AGENT()
-{
-  # Unset and Unalias
-  unset_var
-  unalias_var
-  # Set GLOGIN
-  set_GLOGIN
-  # SET HOME
-  local OPT=$1
-  export ORACLE_HOSTNAME="${HOST}"
-  export ORACLE_HOME="${OPT}"
-  export OH="${ORACLE_HOME}"
-  export OPATCH="${ORACLE_HOME}/OPatch"
-  export JAVA_HOME="${ORACLE_HOME}/jdk"
-  export CLASSPATH=${ORACLE_HOME}/jlib
-  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
-  # Alias to list lahrt
-  alias lt='ls -lahrt'
-  # Aliases to go to folder
-  alias oh='cd ${ORACLE_HOME}'
-  # Aliases to connect on ADRCI
-  alias adrci='rlwrap adrci'
-  alias ad='rlwrap adrci'
-  # Aliases to check PROCESSES
-  alias p='ps -ef | grep pmon | grep -v grep'
-  # Aliases to check LSNRCTL
-  alias t='rlwrap lsnrctl'
-  alias l='rlwrap lsnrctl status'
-  # Aliases to grep,egrep,fgrep
-  alias grep='grep --color=auto'
-  alias egrep='egrep --color=auto'
-  alias fgrep='fgrep --color=auto'
-  # Aliases to check MEMINFO
-  alias meminfo='free -g -h -l -t'
-  # Aliases to check PSMEM
-  alias psmem='ps auxf | sort -nr -k 4'
-  alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-  # Aliases to check PSCPU
-  alias pscpu='ps auxf | sort -nr -k 3'
-  alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
-  # Aliases to check CPUINFO
-  alias cpuinfo='lscpu'
-  #
-  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-  #
-  OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
-  #
-  SetClear
-  SepLine
-  echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
-  echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
-  SepLine
-  #
-  export PS1=$'[ AGENT ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  umask 0022
+T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+#
+OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+#
+SetClear
+SepLine
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
+SepLine
+#
+export PS1=$'[ AGENT ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
 }
 #
 #
 # Main Menu
 #
-function MainMenu()
-{
+function MainMenu() {
 PS3="Select the Option: "
 select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} QUIT; do
 if [[ "${OPT}" == "QUIT" ]]; then
