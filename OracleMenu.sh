@@ -1,24 +1,27 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.51"
+SoftwareVersion="1.0.53"
 DateCreation="07/01/2021"
-DateModification="25/07/2022"
+DateModification="28/07/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
 #
+# ------------------------------------------------------------------------
 # Separate Line Function
 #
 function SepLine() {
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
 }
 #
+# ------------------------------------------------------------------------
 # Clear Screen Function
 #
 function SetClear() {
 printf "\033c"
 }
 #
+# ------------------------------------------------------------------------
 # Verify ROOT User
 #
 if [[ $(whoami) == "root" ]]; then
@@ -29,6 +32,7 @@ if [[ $(whoami) == "root" ]]; then
   return 1
 fi
 #
+# ------------------------------------------------------------------------
 # Verify oraInst.loc file
 #
 ORA_INST="/etc/oraInst.loc"
@@ -39,27 +43,32 @@ if [[ ! -f ${ORA_INST} ]]; then
  return 1
 fi
 #
+# ------------------------------------------------------------------------
 # Verify if all pre-reqs Softwares are installed
 #
 if [[ $(which rlwrap | wc -l | awk '{ print $1 }') == 0 ]]; then
   echo " -- You need to install rlwrap app --"
 fi
 #
+# ------------------------------------------------------------------------
 # IGNORE ERRORS
 #
 IGNORE_ERRORS="OGG-00987"
 #
+# ------------------------------------------------------------------------
 # Set ORACLE Inventory
 #
 ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 #
+# ------------------------------------------------------------------------
 # Verify INVENTORY HOMEs
 #
 ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|/usr/lib/oracle/sbin"
-ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware"              | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
-ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|middleware" | egrep -i "agent" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
-ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE}|agent" | egrep -i "middleware" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq)
+ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware"              | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|middleware" | egrep -i "agent" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE}|agent" | egrep -i "middleware" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
 #
+# ------------------------------------------------------------------------
 # Scripts Folders
 #
 SCRIPTS="/opt/dbnitro"
@@ -69,6 +78,7 @@ if [[ ${SCRIPTS} == "" ]]; then
   return 1
 fi
 #
+# ------------------------------------------------------------------------
 # Verify OS Parameters
 #
 if [[ $(uname) == "SunOS" ]]; then
@@ -111,6 +121,7 @@ elif [[ $(uname) == "Linux" ]]; then
   BLA="\e[0m"
 fi
 #
+# ------------------------------------------------------------------------
 # Verify ORATAB
 #
 if [[ ! -f ${ORATAB} ]]; then
@@ -121,13 +132,15 @@ if [[ ! -f ${ORATAB} ]]; then
   return 1
 fi
 #
+# ------------------------------------------------------------------------
 # DBLIST
 #
-DBLIST=$(cat ${ORATAB} | egrep ":N|:Y" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq)
+DBLIST=$(cat ${ORATAB} | egrep ":N|:Y" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq | sort)
 #
+# ------------------------------------------------------------------------
 # Verify ASM
 #
-ASM=$(cat ${ORATAB} | egrep ":N|:Y" | grep -i "+ASM*" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq | wc -l)
+ASM=$(cat ${ORATAB} | egrep ":N|:Y" | grep -i "+ASM*" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq  | sort | wc -l)
 if [[ ${ASM} == 0 ]]; then
   # ASM DO NOT EXISTS
   ASM_EXISTS="NO"
@@ -147,6 +160,7 @@ else
   fi
 fi
 #
+# ------------------------------------------------------------------------
 # Unsetting and Setting OS and ORATAB Variables
 #
 function unset_var() {
@@ -172,6 +186,9 @@ elif [[ $(whoami) == "oracle" ]]; then
 fi
 }
 #
+# ------------------------------------------------------------------------
+# UnAlias and Setting OS
+#
 function unalias_var() {
 ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
 ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
@@ -180,7 +197,8 @@ for UN_ALIAS in ${ALIASES}; do
 done
 }
 #
-# Setting Functions
+# ------------------------------------------------------------------------
+# Setting GLOGIN Functions
 #
 function set_GLOGIN() {
 if [[ ! -f ${SCRIPTS}/.glogin.sql ]]; then
@@ -196,6 +214,9 @@ DEFINE _EDITOR=vi
 EOF
 fi
 }
+#
+# ------------------------------------------------------------------------
+# Setting PDB GLOGIN Functions
 #
 function set_GLOGIN_PDB() {
 if [[ ! -f ${SCRIPTS}/.glogin_pdb.sql ]]; then
@@ -219,6 +240,7 @@ EOF
 fi
 }
 #
+# ------------------------------------------------------------------------
 # Check and Set the GoldenGate Environment
 #
 function set_OGG() {
@@ -237,13 +259,14 @@ GOLDENGATE_ACTIVATION=$(
 )
 fi
 #
+# ------------------------------------------------------------------------
+#
 if [[ $(echo ${GOLDENGATE_ACTIVATION} | awk '{ print $3 }') == "FALSE" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE GOLDENGATE TECHNOLOGY --"
   return 0
 else
   GOLDENGATE_HOME=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | grep "OraHome" | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | sed s/LOC=//g | sed s/\"//g)
-#
-echo "Options: "
+  echo "Options: "
 select OGGHOME in ${GOLDENGATE_HOME} QUIT; do
 if [[ "${OGGHOME}" == "QUIT" ]]; then
   echo " -- Exit Menu --"
@@ -264,6 +287,7 @@ done
 fi
 }
 #
+# ------------------------------------------------------------------------
 # Check and Set the Database Version, Container and Pluggable Databases
 #
 function set_PDB() {
@@ -274,6 +298,7 @@ elif [[ $(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | s
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
+#
 VERSION=$(
 {
   echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
@@ -296,6 +321,9 @@ PLUGGABLES=$(
 )
 fi
 #
+# ------------------------------------------------------------------------
+# Verify the Version, CDB and PDB of the Database
+#
 if [[ ${VERSION} < 12 ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY --"
   return 0
@@ -312,6 +340,9 @@ select name from v\$containers where con_id not in (0,1,2) order by 1;
 quit;
 EOF
 fi
+#
+# ------------------------------------------------------------------------
+# Select the CDB and PDB
 #
 echo "Options: "
 select PDBS in $(cat ${SCRIPTS}/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
@@ -332,6 +363,9 @@ else
 fi
 done
 }
+#
+# ------------------------------------------------------------------------
+# Set Oracle Home
 #
 function set_HOME() {
 # Unset and Unalias
@@ -454,6 +488,9 @@ SepLine
 export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
+#
+# ------------------------------------------------------------------------
+# Set ASM Environment
 #
 function set_ASM_USER() {
 echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
@@ -594,6 +631,9 @@ SepLine
 export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
+#
+# ------------------------------------------------------------------------
+# Set the Database Environment
 #
 function set_DB() {
 # Unset and Unalias
@@ -754,6 +794,9 @@ export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
 #
+# ------------------------------------------------------------------------
+# Set the OMS Home
+#
 function set_OMS() {
 # Unset and Unalias
 unset_var
@@ -815,6 +858,9 @@ SepLine
 export PS1=$'[ OMS ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
+#
+# ------------------------------------------------------------------------
+# Set AGENT Home
 #
 function set_AGENT() {
 # Unset and Unalias
@@ -878,6 +924,7 @@ export PS1=$'[ AGENT ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
 #
+# ------------------------------------------------------------------------
 #
 # Main Menu
 #
