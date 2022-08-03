@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.53"
+SoftwareVersion="1.0.55"
 DateCreation="07/01/2021"
-DateModification="28/07/2022"
+DateModification="03/08/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -33,14 +33,73 @@ if [[ $(whoami) == "root" ]]; then
 fi
 #
 # ------------------------------------------------------------------------
+# Verify OS Parameters
+#
+if [[ $(uname) == "SunOS" ]]; then
+  OS="Solaris"
+  ORATAB="/var/opt/oracle/oratab"
+  ORA_INST="/var/opt/oracle/oraInst.loc"
+  TMP="/tmp"
+  TMPDIR="${TMP}"
+  HOST=$(hostname)
+  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+  PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  RED="\033[1;31m"
+  YEL="\033[1;33m"
+  BLU="\e[96m"
+  GRE="\033[1;32m"
+  BLA="\033[m"
+elif [[ $(uname) == "AIX" ]]; then
+  OS="AIX"
+  ORATAB="/etc/oratab"
+  ORA_INST="/opt/oracle/etc/oraInst.loc"
+  TMP="/tmp"
+  TMPDIR="${TMP}"
+  HOST=$(hostname)
+  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+  PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  RED="\033[1;31m"
+  YEL="\033[1;33m"
+  BLU="\e[96m"
+  GRE="\033[1;32m"
+  BLA="\033[m"
+elif [[ $(uname) == "Linux" ]]; then
+  OS="Linux"
+  ORATAB="/etc/oratab"
+  ORA_INST="/etc/oraInst.loc"
+  TMP="/tmp"
+  TMPDIR="${TMP}"
+  HOST=$(hostname)
+  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+  PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  RED="\e[1;31;40m"
+  RED="\e[1;31;40m"
+  YEL="\e[1;33;40m"
+  YEL="\e[1;33;40m"
+  BLU="\e[96m"
+  GRE="\e[1;32;40m"
+  BLA="\e[0m"
+fi
+#
+# ------------------------------------------------------------------------
 # Verify oraInst.loc file
 #
-ORA_INST="/etc/oraInst.loc"
 if [[ ! -f ${ORA_INST} ]]; then
   SetClear
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
  return 1
+fi
+#
+# ------------------------------------------------------------------------
+# Verify ORATAB
+#
+if [[ ! -f ${ORATAB} ]]; then
+  SetClear
+  SepLine
+  echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
+  echo " -- PLEASE CHECK YOUR CONFIGURATION --"
+  return 1
 fi
 #
 # ------------------------------------------------------------------------
@@ -75,60 +134,6 @@ SCRIPTS="/opt/dbnitro"
 #
 if [[ ${SCRIPTS} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
-  return 1
-fi
-#
-# ------------------------------------------------------------------------
-# Verify OS Parameters
-#
-if [[ $(uname) == "SunOS" ]]; then
-  OS="Solaris"
-  ORATAB="/var/opt/oracle/oratab"
-  TMP="/tmp"
-  TMPDIR="${TMP}"
-  HOST=$(hostname)
-  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  RED="\033[1;31m"
-  YEL="\033[1;33m"
-  BLU="\e[96m"
-  GRE="\033[1;32m"
-  BLA="\033[m"
-elif [[ $(uname) == "AIX" ]]; then
-  OS="AIX"
-  ORATAB="/etc/oratab"
-  TMP="/tmp"
-  TMPDIR="${TMP}"
-  HOST=$(hostname)
-  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  RED="\033[1;31m"
-  YEL="\033[1;33m"
-  BLU="\e[96m"
-  GRE="\033[1;32m"
-  BLA="\033[m"
-elif [[ $(uname) == "Linux" ]]; then
-  OS="Linux"
-  ORATAB="/etc/oratab"
-  TMP="/tmp"
-  TMPDIR="${TMP}"
-  HOST=$(hostname)
-  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  RED="\e[1;31;40m"
-  RED="\e[1;31;40m"
-  YEL="\e[1;33;40m"
-  YEL="\e[1;33;40m"
-  BLU="\e[96m"
-  GRE="\e[1;32;40m"
-  BLA="\e[0m"
-fi
-#
-# ------------------------------------------------------------------------
-# Verify ORATAB
-#
-if [[ ! -f ${ORATAB} ]]; then
-  SetClear
-  SepLine
-  echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
-  echo " -- PLEASE CHECK YOUR CONFIGURATION --"
   return 1
 fi
 #
@@ -181,7 +186,7 @@ elif [[ $(whoami) == "oracle" ]]; then
     unset ${U_VAR} > /dev/null 2>&1
   done
   export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
-  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
   umask 0022
 fi
 }
@@ -849,9 +854,16 @@ F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
 #
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
 #
+OMS_STATUS=$(ps -ef | grep wlserver | grep -v "grep" | wc -l)
+if [[ "${OMS_STATUS}" != 0 ]]; then
+  OMS=$(echo "${GRE} ONLINE ${BLA}")
+else
+  OMS=$(echo "${RED} OFFLINE ${BLA}")
+fi
+#
 SetClear
 SepLine
-echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}] | OMS STATUS: [${OMS}]"
 echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
 SepLine
 #
@@ -914,9 +926,16 @@ F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
 #
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
 #
+AGENT_STATUS=$(ps -ef | grep agent | grep -v "grep" | wc -l)
+if [[ "${AGENT_STATUS}" != 0 ]]; then
+  AGENT=$(echo "${GRE} ONLINE ${BLA}")
+else
+  AGENT=$(echo "${RED} OFFLINE ${BLA}")
+fi
+#
 SetClear
 SepLine
-echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | BASE: [${BLU} ${ORACLE_BASE} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}]"
+echo -e "# UPTIME: [${RED} ${UPTIME} ${BLA}] | HOME: [${BLU} ${ORACLE_HOME} ${BLA}] | ONWER: [${RED} ${OWNER} ${BLA}] | AGENT STATUS: [${AGENT}] "
 echo -e "# MEMORY: [${BLU} ${T_MEM} ${BLA}] | USED: [${RED} ${U_MEM} ${BLA}] | FREE: [${GRE} ${F_MEM} ${BLA}] | SWAP: [${BLU} ${T_SWAP} ${BLA}] | USED: [${RED} ${U_SWAP} ${BLA}] | FREE: [${GRE} ${F_SWAP} ${BLA}]"
 SepLine
 #
