@@ -1,30 +1,41 @@
 #!/bin/sh
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.3"
+SoftwareVersion="1.0.5"
 DateCreation="28/09/2021"
-DateModification="30/09/2021"
+DateModification="04/08/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
 #
+# ------------------------------------------------------------------------
+# Creating and Installing the DBNITRO Components
+#
+FOLDER="/opt"
+DBNITRO="${FOLDER}/dbnitro"
+#
+# ------------------------------------------------------------------------
 # Check the Log
 #
-LOG=/var/log/oracle_purge_logs.log
+LOG=/var/log/oracle_purgelogs.log
 if [[ ! -f ${LOG} ]]; then
   touch ${LOG}
 fi
-echo "" > ${LOG}
 #
-# Execution of purgeLogs
-#
-/u00/Scripts/purgeLogs -automigrate
-/u00/Scripts/purgeLogs -days 30
-/u00/Scripts/purgeLogs -orcl 30
-/u00/Scripts/purgeLogs -days 30 -aud -lsnr
-/u00/Scripts/purgeLogs -orcl 30 -aud -lsnr
-#
-# Right the Log
+# ------------------------------------------------------------------------
+# Starting Execution of purgeLogs
 #
 DATE=$(date +%Y\/%m\/%d_%H\:%M)
-echo "${DATE}: Successfully Done" > ${LOG}
+echo "${DATE}: Start Purging Logs"             > ${LOG}
+#
+${DBNITRO}/purgeLogs -automigrate             >> ${LOG}    
+${DBNITRO}/purgeLogs -days 30                 >> ${LOG}
+${DBNITRO}/purgeLogs -orcl 30                 >> ${LOG}
+${DBNITRO}/purgeLogs -days 30 -aud -lsnr      >> ${LOG}
+${DBNITRO}/purgeLogs -orcl 30 -aud -lsnr      >> ${LOG}
+#
+# ------------------------------------------------------------------------
+# Finishing Execution of purgeLogs
+#
+DATE=$(date +%Y\/%m\/%d_%H\:%M)
+echo "${DATE}: Stop Purging Logs"             >> ${LOG}
