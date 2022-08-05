@@ -44,6 +44,12 @@ if [[ $(uname) == "SunOS" ]]; then
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
@@ -58,6 +64,12 @@ elif [[ $(uname) == "AIX" ]]; then
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
@@ -72,6 +84,12 @@ elif [[ $(uname) == "Linux" ]]; then
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
+  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
+  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
+  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
+  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
+  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
   RED="\e[1;31;40m"
   RED="\e[1;31;40m"
   YEL="\e[1;33;40m"
@@ -122,10 +140,11 @@ ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
 # ------------------------------------------------------------------------
 # Verify INVENTORY HOMEs
 #
-ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|/usr/lib/oracle/sbin"
-ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware"              | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|middleware" | egrep -i "agent" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE}|agent" | egrep -i "middleware" | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_HOMES_IGNORE="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin"
+ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware" | egrep -i "LOC"               | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE}|middleware"       | egrep -i "agent"             | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+OGG_HOME=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml  | egrep -i -v "${ORA_HOMES_IGNORE}|agent|middleware" | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | sed s/LOC=//g | sed s/\"//g)
+ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE}|agent"            | egrep -i "middleware"        | egrep -i "LOC" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
 #
 # ------------------------------------------------------------------------
 # Scripts Folders
@@ -256,7 +275,7 @@ elif [[ $(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | s
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-GOLDENGATE_ACTIVATION=$(
+OGG_STATUS=$(
 {
   echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
   echo 'show parameter enable_goldengate_replication;'
@@ -266,13 +285,13 @@ fi
 #
 # ------------------------------------------------------------------------
 #
-if [[ $(echo ${GOLDENGATE_ACTIVATION} | awk '{ print $3 }') == "FALSE" ]]; then
+if [[ $(echo ${OGG_STATUS} | awk '{ print $3 }') == "FALSE" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE GOLDENGATE TECHNOLOGY --"
   return 0
 else
-  GOLDENGATE_HOME=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | grep "OraHome" | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | sed s/LOC=//g | sed s/\"//g)
+  # OGG_HOME=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | grep "OraHome" | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | sed s/LOC=//g | sed s/\"//g)
   echo "Options: "
-select OGGHOME in ${GOLDENGATE_HOME} QUIT; do
+select OGGHOME in ${OGG_HOME} QUIT; do
 if [[ "${OGGHOME}" == "QUIT" ]]; then
   echo " -- Exit Menu --"
   return 1
@@ -462,13 +481,6 @@ alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
 #
-T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-#
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
 #
 HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
@@ -598,13 +610,6 @@ alias pscpu='ps auxf | sort -nr -k 3'
 alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
-#
-T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
 #
 HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
 if [[ ${HOME_STATUS} == "Y" ]]; then
@@ -761,13 +766,6 @@ alias pdb='set_PDB'
 # Alias to Set GoldenGate
 alias gg='set_OGG'
 #
-T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-#
 HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
 if [[ ${HOME_STATUS} == "Y" ]]; then
   HOME_RW=$(echo "${GRE} RO ${BLA}")
@@ -845,13 +843,6 @@ alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
 #
-T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
-#
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
 #
 OMS_STATUS=$(ps -ef | grep wlserver | grep -v "grep" | wc -l)
@@ -916,13 +907,6 @@ alias pscpu='ps auxf | sort -nr -k 3'
 alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
-#
-T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
 #
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
 #
