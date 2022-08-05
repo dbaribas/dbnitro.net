@@ -15,21 +15,34 @@ if [[ "$(whoami)" != "root" ]]; then
   echo " -- YOU ARE NOT ROOT, YOU MUST BE ROOT TO EXECUTE THIS SCRIPT --"
   exit 1
 fi
+#
+# ------------------------------------------------------------------------
+# Verify if all pre-reqs Softwares are installed
+#
+if [[ $(which wget | wc -l | awk '{ print $1 }') == 0 ]]; then
+  echo " -- You need to install wget app --"
+  exit 1
+fi
+#
 # ------------------------------------------------------------------------
 # Creating and Installing the DBNITRO Components
 #
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
 #
+function RemoveFolder() {
 if [[ -d ${DBNITRO}/ ]]; then
   rm -rf ${DBNITRO}/
 fi
+}
 #
+function CreateFolder() {
 if [[ ! -d ${DBNITRO}/ ]]; then
   mkdir -p ${DBNITRO}/
-  chmod -R 775 ${DBNITRO}/
-  #chown -R oracle.oinstall ${DBNITRO}/
 fi
+}
+#
+function SetUpDBNITRO() {
 cd ${DBNITRO}/
 #
 wget -O ${DBNITRO}/.OracleMenu.sh        https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
@@ -44,9 +57,6 @@ wget -O ${DBNITRO}/.Oracle_PDB_Functions https://raw.githubusercontent.com/dbari
 wget -O ${DBNITRO}/.Oracle_ODA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
 wget -O ${DBNITRO}/.Oracle_WALL_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
 wget -O ${DBNITRO}/.Oracle_RMAN_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
-#
-chown oracle.oinstall -R ${DBNITRO}
-chown oracle.oinstall -R ${DBNITRO}/
 #
 chmod a+x ${DBNITRO}/.OracleMenu.sh
 chmod g+w ${DBNITRO}/.OracleMenu.sh
@@ -85,12 +95,36 @@ wget https://raw.githubusercontent.com/freddenis/oracle-scripts/master/yal.sh
 chmod a+x ${DBNITRO}/*.sh
 chmod a+x ${DBNITRO}/oraenv++
 #
+chmod -R 775 ${DBNITRO}/
 chown -R oracle.oinstall ${DBNITRO}/
+#
+}
+#
+# ------------------------------------------------------------------------
+# Setup PurgLogs from Oracle Products (ONLY WITH GRID INFRASTRUCTURE)
+#
+function SetUpPURGELOGS() {
+cd ${DBNITRO}/
+wget -O ${DBNITRO}/purgeLogs         https://raw.githubusercontent.com/dbaribas/dbnitro/main/purgeLogs
+wget -O /etc/cron.daily/purgeLogs.sh https://raw.githubusercontent.com/dbaribas/dbnitro/main/purgeLogs.sh
+#
+chmod a+x ${DBNITRO}/purgeLogs
+chmod a+x /etc/cron.daily/purgeLogs.sh
+#
+chmod -R 775 ${DBNITRO}/purgeLogs
+chmod -R 775 /etc/cron.daily/purgeLogs.sh
+#
+chown -R oracle.oinstall ${DBNITRO}/purgeLogs
+chown -R oracle.oinstall /etc/cron.daily/purgeLogs.sh
+#
+}
 #
 # ------------------------------------------------------------------------
 # Add the Content on Grid Profile
 #
-cat > /home/grid/.bash_profile <<EOF
+function SetUpGrid() {
+if [[ $(cat /etc/passwd | grep grid | wc -l) != 0 ]]; then
+  cat > /home/grid/.bash_profile <<EOF
 # .bash_profile
 
 # Get the aliases and functions
@@ -109,11 +143,18 @@ alias db='. ${DBNITRO}/.OracleMenu.sh'
 #
 umask 0022
 EOF
+else
+  echo " -- Your Environment does not have Grid User --"
+  break
+fi
+}
 #
 # ------------------------------------------------------------------------
 # Add the Content on Oracle Profile
 #
-cat > /home/oracle/.bash_profile <<EOF
+function SetUpOracle() {
+if [[ $(cat /etc/passwd | grep oracle | wc -l) != 0 ]]; then
+  cat > /home/oracle/.bash_profile <<EOF
 # .bash_profile
 
 # Get the aliases and functions
@@ -132,6 +173,50 @@ alias db='. ${DBNITRO}/.OracleMenu.sh'
 #
 umask 0022
 EOF
+else
+  echo " -- Your Environment does not have Grid User --"
+  break
+fi
+}
+#
+function MainMenu() {
+PS3="Select the Option: "
+select OPT in INSTALL UPDATE OLD_ENV REMOVE QUIT; do
+if [[ "${OPT}" == "QUIT" ]]; then
+  echo " -- Exit Menu --"
+elif [[ "${OPT}" == "INSTALL" ]]; then
+  echo " -- Install DBNITRO Environment --"
+  CreateFolder
+  SetUpGrid
+  SetUpOracle
+  SetUpDBNITRO
+  SetUpPURGELOGS
+elif [[ "${OPT}" == "UPDATE" ]]; then
+  echo " -- Update DBNITRO Environment --"
+  RemoveFolder
+  CreateFolder
+  SetUpGrid
+  SetUpOracle
+  SetUpDBNITRO
+  SetUpPURGELOGS
+elif [[ "${OPT}" == "OLD_ENV" ]]; then
+  echo " -- Install DBNITRO Environment for OLD Servers --"
+  CreateFolder
+  SetUpDBNITRO
+  SetUpPURGELOGS
+  echo "alias db='. ${DBNITRO}/.OracleMenu.sh'" >> /home/oracle/.bash_profile
+elif [[ "${OPT}" == "REMOVE" ]]; then
+  echo " -- Remove DBNITRO Environment --"
+  RemoveFolder
+else
+  echo " -- Invalid Option --"
+  continue
+fi
+break
+done
+}
+#
+MainMenu
 #
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 # THE SCRIPT FINISHES HERE
