@@ -21,8 +21,14 @@ function PDB_HELP() {
 SetClear
 SepLine
 echo -e "\
-|#[ PDB_001 ] PDB: VERIFY DATABASE VERSION                            |#|[ PDB_002 ] PDB: VERIFY INSTALLED PATCHES - DETAILS      |#|
-"
+|#[ PDB_001 ] PDB: VERIFY PLUGGABLE DATABASES                         |#|[ PDB_002 ] PDB: VERIFY VIOLATIONS ON PDBS               |#|
+|#[ PDB_003 ] PDB: VERIFY SNAPSHOTS ON PDBS                           |#|[ PDB_004 ] PDB: VERIFY PROPERTIES OF SNAPSHOTS ON PDBS  |#|
+|#[ PDB_005 ] PDB: VERIFY AVAILABILITY OF SNAPSHOTS ON PDBS           |#|[ PDB_006 ] PDB: VERIFY SNAPSHOT JOBS ON PDB             |#|
+|#[ PDB_007 ] PDB: VERIFY SNAPSHOT REFRESH ON PDBS                    |#|[ PDB_008 ] PDB: VERIFY THE HISTORY OF PDBS              |#|
+|#[ PDB_009 ] PDB: CHECK UNDO MODE                                    |#|[ PDB_010 ] PDB: CHECK STARTUP AND UPTIME OF ALL PDBS    |#|
+|#[ PDB_011 ] PDB: CHECK UPTIME OF ALL PDBS                           |#|[ PDB_012 ] PDB: CHECK CREATION TIME AND STATUS          |#|
+|#[ PDB_013 ] PDB: VERIFY SIZE AND STATUS OF DATABASES                |#|[ PDB_014 ] PDB: VERIFY SIZE BY DATABASES                |#|
+|#[ PDB_013 ] PDB: CHECK PRORPERTIES AND VALUES                       "
 SepLine
 }
 #
@@ -31,15 +37,14 @@ SepLine
 # CDB PDB Funtions
 #
 #########################################################################################################
-# 
+# PDB: VERIFY PLUGGABLE DATABASES
 #########################################################################################################
 #
-
 function PDB_001() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # PDB: VERIFY PLUGGABLE DATABASES                            #
+prompt # PDB: VERIFY PLUGGABLE DATABASES
 prompt ##############################################################
 col NAME for a30
 select CON_ID
@@ -53,18 +58,16 @@ ORDER BY CON_ID;
 quit;
 EOF
 }
-
-
-
-
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY VIOLATIONS ON PDBS
+#########################################################################################################
+#
+function PDB_002() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # PDB: Verify Violations on PDBs Database                    #
+prompt # PDB: VERIFY VIOLATIONS ON PDBS
 prompt ##############################################################
 col time for a20
 col message for a180
@@ -74,17 +77,16 @@ from pdb_plug_in_violations;
 quit;
 EOF
 }
-
-
-
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY SNAPSHOTS ON PDBS
+#########################################################################################################
+#
+function PDB_003() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Verify Snapshots on PDBs Database                          #
+prompt # PDB: VERIFY SNAPSHOTS ON PDBS
 prompt ##############################################################
 col pdb_name for a10
 col snapshot_mode for a15
@@ -97,13 +99,16 @@ ORDER BY 1;
 quit;
 EOF
 }
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY PROPERTIES OF SNAPSHOTS ON PDBS
+#########################################################################################################
+#
+function PDB_004() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Verify Properties of Snapshots on PDBs Database            #
+prompt # PDB: VERIFY PROPERTIES OF SNAPSHOTS ON PDBS
 prompt ##############################################################
 col property_name for a20
 col pdb_name for a10
@@ -121,16 +126,16 @@ ORDER BY pr.property_name;
 quit;
 EOF
 }
-
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY AVAILABILITY OF SNAPSHOTS ON PDBS
+#########################################################################################################
+#
+function PDB_005() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-Prompt
 prompt ##############################################################
-prompt # Verify Availabilitt of Snapshots on PDBs Database          #
+prompt # PDB: VERIFY AVAILABILITY OF SNAPSHOTS ON PDBS
 prompt ##############################################################
 col con_name for a10
 col snapshot_name for a30
@@ -146,14 +151,16 @@ ORDER BY con_id, snapshot_scn;
 quit;
 EOF
 }
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY SNAPSHOT JOBS ON PDB
+#########################################################################################################
+#
+function PDB_006() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Verify Snapshots JOBS on PDBs Database                     #
+prompt # PDB: VERIFY SNAPSHOT JOBS ON PDB
 prompt ##############################################################
 col owner for a10
 col job_name for a30
@@ -167,29 +174,39 @@ ORDER BY owner, job_name;
 quit;
 EOF
 }
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY SNAPSHOT REFRESH ON PDBS
+#########################################################################################################
+#
+function PDB_007() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt
 prompt ##############################################################
-prompt # Verify Snapshots Refresh on PDBs Database                  #
+prompt # PDB: VERIFY SNAPSHOT REFRESH ON PDBS
 prompt ##############################################################
-select status
+col pdb_name for a15
+select pdb_id
+  , pdb_name
+  , status
   , refresh_mode
-from dba_pdbs;
+  , logging
+from dba_pdbs
+order by 1,2,3;
 quit;
 EOF
 }
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY THE HISTORY OF PDBS
+#########################################################################################################
+#
+function PDB_008() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Verify The History of PDBs Database                        #
+prompt # PDB: VERIFY THE HISTORY OF PDBS
 prompt ##############################################################
 col db_name for a10 
 col CLONED_FROM_PDB_NAME for a25 
@@ -200,31 +217,39 @@ select DB_NAME
   , OPERATION
   , to_char(OP_TIMESTAMP, 'dd/mm/yyyy hh24:mi:ss') as time
   , CLONED_FROM_PDB_NAME
-FROM CDB_PDB_HISTORY;
+FROM CDB_PDB_HISTORY
+order by con_id;
 quit;
 EOF
 }
-
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: CHECK UNDO MODE
+#########################################################################################################
+#
+function PDB_009() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Check Undo Mode in Multitenant DB                          #
+prompt # PDB: CHECK UNDO MODE
 prompt ##############################################################
+col property_name for a30
+col property_value for a15
+col description for a40
 select * from database_properties where property_name = 'LOCAL_UNDO_ENABLED';
 quit;
 EOF
 }
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: CHECK STARTUP AND UPTIME OF ALL PDBS
+#########################################################################################################
+#
+function PDB_010() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Check Startup, uptime and creation time of PDB database
+prompt # PDB: CHECK STARTUP AND UPTIME OF ALL PDBS
 prompt ##############################################################
 col name for a20
 col open_time for a33
@@ -232,19 +257,22 @@ select con_id
   , name
   , dbid
   , open_mode
-  , open_time 
-from v\$containers;
+  , to_char(open_time, 'dd/mm/yyyy hh24:mi:ss') as open_time
+from v\$containers
+order by 1,2,3;
 quit;
 EOF
 }
-
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: CHECK UPTIME OF ALL PDBS
+#########################################################################################################
+#
+function PDB_011() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Check uptime of PDB database
+prompt # PDB: CHECK UPTIME OF ALL PDBS
 prompt ##############################################################
 col name for a20
 col "database uptime" for a30
@@ -254,39 +282,112 @@ from v\$containers;
 quit;
 EOF
 }
-
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: CHECK CREATION TIME AND STATUS
+#########################################################################################################
+#
+function PDB_012() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Check creation time and status of PDBS
+prompt # PDB: CHECK CREATION TIME AND STATUS
 prompt ##############################################################
 col pdb_name for a30
 select pdb_name
-  , creation_time
+  , to_char(creation_time, 'dd/mm/yyyy hh24:mi:ss') as creation_time
   , status 
-from dba_pdbs;
+from dba_pdbs
+order by 1,2,3;
 quit;
 EOF
 }
 
-
-function PDB_001() {
+#
+#########################################################################################################
+# PDB: VERIFY SIZE AND STATUS OF DATABASES
+#########################################################################################################
+#
+function PDB_013() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # Check size of PDBS
+prompt # PDB: VERIFY SIZE AND STATUS OF DATABASES
 prompt ##############################################################
+COL NAME FOR A30
 select name
   , open_mode
   , restricted
-  , creation_time
+  , to_char(creation_time, 'DD/MM/YYYY HH24:MI:SS') as created
   , total_size/1024/1024/1024 as GB
-from v\$PDBS;
+from v\$PDBS
+order by 1,2,3;
 quit;
 EOF
 }
+#
+#########################################################################################################
+# PDB: VERIFY SIZE BY DATABASES
+#########################################################################################################
+#
+function PDB_014() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # PDB: VERIFY SIZE BY DATABASES
+prompt ##############################################################
+col name for a20
+select con_id
+  , name
+  , SUM(SIZE_MB) 
+from (select c.con_id
+        , nvl(p.name, 'CDB') name
+        , sum(bytes)/1024/1024 SIZE_MB 
+      from cdb_data_files c, v\$pdbs p 
+      where c.con_id = p.con_id(+) 
+      GROUP BY c.con_id,name
+UNION
+select c.con_id
+  , nvl(p.name, 'CDB') name
+  , sum(bytes)/1024/1024 SIZE_MB 
+from cdb_temp_files c, v\$pdbs p 
+where c.con_id = p.con_id(+) 
+GROUP BY c.con_id,name)
+group by con_id,name
+order by con_id;
+quit;
+EOF
+}
+#
+#########################################################################################################
+# PDB: CHECK PRORPERTIES AND VALUES
+#########################################################################################################
+#
+function PDB_015() {
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # PDB: CHECK PRORPERTIES AND VALUES
+prompt ##############################################################
+col property_name for a35
+col pdb_name for a50
+col property_value for a35
+col description for a100
+select CON_ID 
+  , PROPERTY_NAME
+  , PROPERTY_VALUE
+  , DESCRIPTION
+FROM cdb_properties 
+order by 1,2,3;
+quit;
+EOF
+}
+
+
+
+
+
+
 
 
 #

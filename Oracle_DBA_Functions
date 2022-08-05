@@ -54,7 +54,7 @@ echo -e "\
 |#[ DBA_061 ] DBA: VERIFY ACTIVES SESSIONS PER OWNER                  |#|[ DBA_062 ] DBA: UNLOCKING A USER [ @ ]                  |#| 
 |#[ DBA_063 ] DBA: LOCKING A USER [ @ ]                               |#|[ DBA_064 ] DBA: REDO GROUPS INFORMATIONS                |#| 
 |#[ DBA_065 ] DBA: SHOW ALL CORRUPTED OBJECTS                         |#|[ DBA_066 ] DBA: VERIFY SPACE OF FLASH RECOVERY AREA     |#| 
-|#[ DBA_067 ] DBA:                                                    |#|[ DBA_068 ] DBA: VERIFY CONTROLFILES                     |#| 
+|#[ DBA_067 ] DBA: TOTAL USERS COUNT ON DATABASE                      |#|[ DBA_068 ] DBA: VERIFY CONTROLFILES                     |#| 
 |#[ DBA_069 ] DBA: VERIFY CONSUME PER CPU                             |#|[ DBA_070 ] DBA: QUICK TUNE                              |#| 
 |#[ DBA_071 ] DBA: VERIFY RECOMENDATIONS TUNING TOP 20 [ @ ]          |#|[ DBA_072 ] DBA: VERIFY TOP 20 TUNING HISTORY [ @ ]      |#| 
 |#[ DBA_073 ] DBA: VERIFY BACKGROUND PROCESSESS                       |#|[ DBA_074 ] DBA: TOP 100 QUERY RECOMMENDATIONS           |#| 
@@ -67,11 +67,11 @@ echo -e "\
 |#[ DBA_087 ] DBA: VERIFY MAIN TOP WAIT EVENTS PER WEEK               |#|[ DBA_088 ] DBA: VERIFY OBJECTS SIZE                     |#| 
 |#[ DBA_089 ] DBA: GENERAL DATABASE OVERVIEW                          |#|[ DBA_090 ] DBA: DATABASE DASHBOARD                      |#| 
 |#[ DBA_091 ] DBA: VERIFY ALL SQL IDS STATEMENTS                      |#|[ DBA_092 ] DBA: VERIFY NLS CONFIGURATION                |#| 
-|#[ DBA_093 ] DBA: VERIFY DATABASE ENCREASY PER DAY / WEEK / MONTH    |#|[ DBA_094 ] DBA: VERIFY ALL SQL IDS STATEMENTS           |#|
+|#[ DBA_093 ] DBA:                                                    |#|[ DBA_094 ] DBA: VERIFY ALL SQL IDS STATEMENTS           |#|
 |#[ DBA_095 ] DBA: VERIFY ALL PATCHES APPLIED                         |#|[ DBA_096 ] DBA: VERIFY CPU USAGE BY MINUTE              |#|
 |#[ DBA_097 ] DBA: VERIFY STANDBY CONFIGURATION                       |#|[ DBA_098 ] DBA: VERIFY GRANTS AND PERMISSIONS BY OWNER  |#|
-|#[ DBA_099 ] DBA:                                                    |#|[ DBA_100 ] DBA: VERIFY BACKUP RUNNING ON REAL TIME      |#|
-|#[ DBA_101 ] DBA: VERIFY DATABASE COMPONENTS FROM REGISTRY           |#|[ DBA_102 ] DBA: Dataguard Health Check                  |#|"
+|#[ DBA_099 ] DBA: USER DETAILS SESSIONS                              |#|[ DBA_100 ] DBA: VERIFY BACKUP RUNNING ON REAL TIME      |#|
+|#[ DBA_101 ] DBA: VERIFY DATABASE COMPONENTS FROM REGISTRY           |#|[ DBA_102 ] DBA:                                         |#|"
 SepLine
 }
 #
@@ -186,21 +186,24 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 Prompt # INSTANCE INFORMATION + PGA + SGA                           #
 prompt ##############################################################
-col name for a60
-col host_name for a30
-col SERVER for a40
-col "INSTANCE NAME" for a15
-col version for a20
-col "STARTUP TIME" for a20
-col status for a15
-select inst_id AS "INSTANCE ID"
-   , a.instance_name AS "INSTANCE NAME"
-   , a.host_name AS "SERVER"
+column "name"           format a60  heading "Name"
+column "HOST NAME"      format a40  heading "Host|Name"
+column "INSTANCE ID"    format a10  heading "Instance|Id"
+column "INSTANCE NAME"  format a15  heading "Instance|Name"
+column "INSTANCE ROLE"  format a20  heading "Instance|Role"
+column "DATABASE ROLE"  format a20  heading "Database|Role"
+column "STARTUP TIME"   format a20  heading "Startup|Time"
+column "ACTIVE STATE"   format a10  heading "Active|State"
+column "status"         format a15  heading "Status"
+column "version"        format a15  heading "Version"
+select to_char(inst_id)                           as "INSTANCE ID"
+   , a.instance_name                              as "INSTANCE NAME"
+   , a.host_name                                  as "HOST NAME"
    , a.version
    , a.status
-   , a.instance_role as INST_ROLE
-   , b.DATABASE_ROLE as DBA_ROLE
-   , a.active_state
+   , a.instance_role                              as "INSTANCE ROLE"
+   , b.DATABASE_ROLE                              as "DATABASE ROLE"
+   , a.ACTIVE_STATE                               as "ACTIVE STATE"
    , to_char(a.startup_time,'dd/mm/yyyy hh24:mi') as "STARTUP TIME"
    , case when a.startup_time < sysdate then 'Status OK' when a.startup_time < sysdate - 7 then 'DB Restarted' else 'Verify Restarted DB' end as "Status DB"
 from gv\$instance a, v\$database b
@@ -396,7 +399,8 @@ prompt ##############################################################
 prompt # Waits by Class                                             #
 prompt ##############################################################
 col waits for a50
-select 'Waits by Class | ' || wait_class as Waits, time_waited
+select 'Waits by Class | ' || wait_class as Waits
+  , time_waited
 FROM v\$system_wait_class
 WHERE wait_class != 'Idle'
 ORDER BY time_waited DESC;
@@ -404,7 +408,8 @@ prompt ##############################################################
 Prompt # Wait Class Breakdown                                       #
 prompt ##############################################################
 col waits for a50
-select 'Wait Class Breakdown | ' || wait_class as Waits, ROUND(aas, 2)
+select 'Wait Class Breakdown | ' || wait_class as Waits
+  , ROUND(aas, 2)
 FROM (select n.wait_class, m.time_waited/m.INTSIZE_CSEC AAS
 FROM v\$waitclassmetric m, v\$system_wait_class n
 WHERE m.wait_class_id = n.wait_class_id
@@ -739,16 +744,17 @@ set pages 2000 lines 2000 timing on long 9999999 numwidth 20 heading on echo on 
 prompt ##############################################################
 prompt # ACTIVE SESSIONS AND SQL STATEMENTS                         #
 prompt ##############################################################
-col USERNAME for a15
-col "SID/SERIAL" for a15
-col SQL_TEXT for a90
-col machine for a35
-col osuser for a15
+column USERNAME for a15
+column "SID/SERIAL" for a15
+column "WAITING SEG" format a12 heading "WAITING|SEG"
+column SQL_TEXT for a90
+column machine for a35
+column osuser for a15
 select S.USERNAME
   , '( ' || s.sid || ',' || s.serial# || ' )' as "SID/SERIAL"
   , s.machine
   , s.osuser
-  , s.seconds_in_wait as "waiting seg"
+  , to_char(s.seconds_in_wait) as "WAITING SEG"
   , t.sql_id
   , sql_text
 from v\$sqltext_with_newlines t, V\$SESSION s
@@ -777,18 +783,21 @@ prompt ##############################################################
 prompt # OPERATION NAME, HOW LONG ARE RUNNING, MESSAGE              #
 prompt ##############################################################
 col OPNAME for a35
-col TARGET for a20
+col TARGET for a15
 col UNITS for a10
-col MESSAGE for a100
-col sql_id for a15
+col sofar for a10
+column "TOTAL WORK" for a10 heading "TOTAL|WORK"
+column "ELAPSED SECONDS" for a10 heading "ELAPSED|SECONDS"
+column MESSAGE for a90
+column sql_id for a15
 select distinct * from (select opname
               , target
-						  , sofar
+						  , to_char(sofar) as sofar
 						  , sql_id
-						  , totalwork
+						  , to_char(totalwork) as "TOTAL WORK"
 						  , units
-						  , elapsed_seconds
-						  , message 
+						  , to_char(elapsed_seconds) as "ELAPSED SECONDS"
+						  , substr(message,1,90) as message
 						from v\$session_longops 
 						order by start_time desc) 
 where rownum <= 10;
@@ -797,7 +806,7 @@ prompt ##############################################################
 prompt # ??? #
 prompt ##############################################################
 col OPNAME for a35
-col TARGET for a30
+col TARGET for a15
 select opname
   , target
   , osuser
@@ -894,9 +903,9 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 prompt # JOBS CONTROL OF THE CLIENT [ @ ]
 prompt ##############################################################
-col COMMENTS for a100
+col COMMENTS for a90
 col JOB_NAME for a40
--- col RUN_COUNT for a20
+col RUN_COUNT for a10
 col owner for a10
 col state for a12
 col SCHEDULE_TYPE for a16
@@ -907,9 +916,9 @@ select JOB_NAME
  , ENABLED
  , PROGRAM_OWNER as OWNER
  , SCHEDULE_TYPE
- , RUN_COUNT
+ , to_char(RUN_COUNT) as RUN_COUNT
  , to_char(LAST_START_DATE, 'dd/mm/yyyy HH:MM:SS') as LAST_EXEC
- , substr(COMMENTS,1,100) as COMMENTS
+ , substr(COMMENTS,1,90) as COMMENTS
 FROM DBA_SCHEDULER_JOBS
 ORDER BY 1,2,3,4,5,6,7;
 prompt
@@ -2580,7 +2589,7 @@ col schema for a12
 col comp_name for a40
 select comp_name
   , version_full
-  , status
+--  , status
   , modified
 --  , to_char(modified, 'DD/MM/YYYY HH24:MM:SS') as modified
   , schema
@@ -2764,6 +2773,7 @@ undefine topN topStat topUser
 define topN=3
 define topStat=%
 define pctMinimo=1
+column pct for 999.9 heading "PCT"
 column sid for a15
 column top_stat_name format a35 heading 'STATISTIC_NAME' trunc
 column sess_status format a10 heading 'STATUS' truncate
@@ -2771,13 +2781,13 @@ column username_osuser format a30 heading 'USERNAME/OSUSER'
 column minutos format 9999 heading 'MIN'
 column statistic_value format 9g999g999g999g990 heading 'STATISTIC_VAL'
 column conn_time format a20 heading 'CONNECTED ON'
-col "CONNECTED ON" for a20
+column "CONNECTED ON" for a20
 column rank format 99
 break on top_stat_name skip 1
 compute sum of pct on statistic_name
 select statistic_name as top_stat_name
    , rank
-   , pct
+   , pct as "PCT"
    , sid || '/' || serial# as sid
    , decode( username, null, '(' || bg_name || ')', username) || decode(osuser, null, null, '/') || substr(osuser, 1+instr(osuser, '\')) as username_osuser
    , lpad(decode(trunc(sysdate - logon_time), 0, null, trunc(sysdate - logon_time) || 'd, ') || to_char(to_date(trunc(86400 * ((sysdate-logon_time) - trunc(sysdate - logon_time))), 'SSSSS'), 'hh24"h "mi"m"'), 10) as conn_time
@@ -2893,19 +2903,19 @@ prompt # INFORMATIONS ABOUT DATAFILES                               #
 prompt ##############################################################
 select 'DATAFILE ' as DATAFILE
   , file_name
-  , ceil((nvl(hwm,1)*&&blksize)/1024/1024 ) smallest
-  , ceil(blocks*&&blksize/1024/1024) currsize
-  , ceil(blocks*&&blksize/1024/1024) - ceil((nvl(hwm,1)*&&blksize)/1024/1024) savings
-  , case when ceil(blocks*&&blksize/1024/1024) - ceil((nvl(hwm,1)*&&blksize)/1024/1024) > 100 then 'Recomended' else 'Not Recomended' end as "Recomendation"
-from dba_data_files a, (select file_id, max(block_id+blocks-1) hwm from dba_extents group by file_id) b
+  , ceil((nvl(hwm,1) * &&blksize)/1024/1024) smallest
+  , ceil(blocks * &&blksize/1024/1024) currsize
+  , ceil(blocks * &&blksize/1024/1024) - ceil((nvl(hwm,1) * &&blksize)/1024/1024) savings
+  , case when ceil(blocks * &&blksize/1024/1024) - ceil((nvl(hwm,1) * &&blksize)/1024/1024) > 100 then 'Recomended' else 'Not Recomended' end as "Recomendation"
+from dba_data_files a, (select file_id, max(block_id + blocks - 1) hwm from dba_extents group by file_id) b
 where a.file_id = b.file_id(+);
 prompt
 prompt ##############################################################
 prompt # COMMANDS TO RESIZE THE DATAFILES                           #
 prompt ##############################################################
 column "SQL Command" for a175 word_wrapped
-select 'alter database datafile ''' || file_name || ''' resize ' || ceil((nvl(hwm,1)*&&blksize)/1024/1024) || 'M;' as "SQL Command"
-from dba_data_files a, (select file_id, max(block_id+blocks-1) hwm from dba_extents group by file_id) b
+select 'alter database datafile ''' || file_name || ''' resize ' || ceil((nvl(hwm,1) * &&blksize)/1024/1024) || 'M;' as "SQL Command"
+from dba_data_files a, (select file_id, max(block_id + blocks - 1) hwm from dba_extents group by file_id) b
 where a.file_id = b.file_id(+)
 and ceil(blocks*&&blksize/1024/1024) - ceil((nvl(hwm,1)*&&blksize)/1024/1024) > 0;
 quit;
@@ -3089,7 +3099,7 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 col member FORMAT A90
 col group# format 999
 col status for a15
--- col thread# for a15
+col "Thread#" for a10
 col TOTAL_MB format 999,999,999,999
 col TOTAL_GB format 999,999,999,999
 col TOTAL_MB for a20
@@ -3103,7 +3113,7 @@ prompt ##############################################################
 prompt # OnLine RedoLogs                                            #
 prompt ##############################################################
 select t1.GROUP#
-   , t2.thread#
+   , to_char(t2.thread#) as "Thread#"
    , t1.TYPE
    , t2.status
    , t1.MEMBER
@@ -3118,7 +3128,7 @@ prompt ##############################################################
 prompt # Standby RedoLogs                                           #
 prompt ##############################################################
 select s1.group#
-  , s2.THREAD#
+  , to_char(s2.THREAD#) as "Thread#"
   , s1.type
   , s2.status
   , s1.member
@@ -3135,7 +3145,7 @@ prompt # Archiving Details                                          #
 prompt ##############################################################
 select PROCESS
   , STATUS
-  , THREAD#
+  , to_char(THREAD#) as "THREAD#"
   , SEQUENCE#
   , BLOCK#
   , BLOCKS
@@ -3144,14 +3154,14 @@ prompt
 prompt ##############################################################
 prompt # Utilization of Current Redo Log ( in % )                   #
 prompt ##############################################################
+column "Percent Full" for 999.99 heading "Percent Full"
 select le.leseq "Current log sequence No"
-  , 100*cp.cpodr_bno/le.lesiz "Percent Full"
+  , 100 * cp.cpodr_bno/le.lesiz "Percent Full"
   , cp.cpodr_bno "Current Block No"
   , le.lesiz "Size of Log in Blocks" 
 from x\$kcccp cp, x\$kccle le 
 where le.leseq =CP.cpodr_seq 
-and bitand(le.leflg,24) = 8 
-/
+and bitand(le.leflg,24) = 8;
 quit;
 EOF
 }
@@ -3251,15 +3261,28 @@ EOF
 }
 #
 #########################################################################################################
-# 
+# DBA: TOTAL USERS COUNT ON DATABASE
 #########################################################################################################
 #
 function DBA_067() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-
-
-
+prompt ##############################################################
+prompt # DBA: TOTAL USERS COUNT ON DATABASE
+prompt ##############################################################
+prompt
+break on report
+compute SUM of tot on report
+compute SUM of active on report
+compute SUM of inactive on report
+col username for a50
+select DECODE(username,NULL,'INTERNAL',USERNAME) Username
+  , count(*) TOT
+  , COUNT(DECODE(status,'ACTIVE',STATUS)) ACTIVE
+  , COUNT(DECODE(status,'INACTIVE',STATUS)) INACTIVE
+from gv\$session
+where status in ('ACTIVE','INACTIVE')
+group by username;
 quit;
 EOF
 }
@@ -3901,19 +3924,23 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 prompt # DATABASE LINKS                                             #
 prompt ##############################################################
-set long 1000 serveroutput on verify off lines 132
+set long 1000 serveroutput on verify off lines 700
 DECLARE
    v_output CLOB := NULL;
 BEGIN
    DBMS_OUTPUT.put_line ('DDL For Database Links');
-   FOR tt IN (select owner, DBA_link FROM dba_DB_links)
+   FOR tt IN (select owner, db_link FROM dba_DB_links)
    LOOP
-      select DBMS_METADATA.get_ddl ('DBA_LINK', tt.DBA_link, tt.owner) INTO v_output FROM DUAL;
+      select DBMS_METADATA.get_ddl ('DB_LINK', tt.db_link, tt.owner) INTO v_output FROM DUAL;
       DBMS_OUTPUT.put_line (v_output);
    END LOOP;
 END;
 /
 prompt
+col owner for a15
+col db_link for a30
+col username for a15
+col host for a40
 select * from dba_db_links order by 1,2,3;
 prompt
 prompt ##############################################################
@@ -3944,7 +3971,6 @@ EOF
 #########################################################################################################
 #
 function DBA_081() {
-
 sqlplus -S / as sysdba <<EOF
 set feedback off timing off
 alter session set nls_date_format='dd/mm/yyyy';
@@ -4006,6 +4032,7 @@ prompt
 prompt ##############################################################
 prompt # VERIFY UNDO SEGMENTS - ROLLBACK
 prompt ##############################################################
+column "% Waits" format 999.99 heading "% Waits"
 select rn.Name "Rollback Segment"
   , rs.RSSize/1024 "Size (KB)"
   , rs.Gets "Gets"
@@ -4160,20 +4187,20 @@ prompt ##############################################################
 prompt # VERIFY ALL INFOS ABOUT I/O & LATENCY
 prompt ##############################################################
 col name for a70
-select to_char(sn.END_INTERVAL_TIME,'dd/mm/YYYY HH24:MI:SS') "End snapshot time"
-  , sum(after.PHYRDS+after.PHYWRTS-before.PHYWRTS-before.PHYRDS) "number of IOs"
-  , trunc(10*sum(after.READTIM+after.WRITETIM-before.WRITETIM-before.READTIM)/sum(1+after.PHYRDS+after.PHYWRTS-before.PHYWRTS-before.PHYRDS)) "ave IO time (ms)"
-  , trunc((select value from v\$parameter where name='DBA_block_size')*sum(after.PHYBLKRD+after.PHYBLKWRT-before.PHYBLKRD-before.PHYBLKWRT)/sum(1+after.PHYRDS+after.PHYWRTS-before.PHYWRTS-before.PHYRDS)) "ave IO size (bytes)"
+select to_char(sn.END_INTERVAL_TIME, 'dd/mm/YYYY HH24:MI:SS') "End snapshot time"
+  , sum(after.PHYRDS + after.PHYWRTS - before.PHYWRTS - before.PHYRDS) "number of IOs"
+  , trunc(10 * sum(after.READTIM + after.WRITETIM - before.WRITETIM - before.READTIM) / sum(1 + after.PHYRDS + after.PHYWRTS - before.PHYWRTS - before.PHYRDS)) "ave IO time (ms)"
+  , trunc((select value from v\$parameter where name = 'DBA_block_size') * sum(after.PHYBLKRD + after.PHYBLKWRT - before.PHYBLKRD - before.PHYBLKWRT) / sum(1 + after.PHYRDS + after.PHYWRTS - before.PHYWRTS - before.PHYRDS)) "ave IO size (bytes)"
 from DBA_HIST_FILESTATXS before
   , DBA_HIST_FILESTATXS after
   , DBA_HIST_SNAPSHOT sn
 where after.file# = before.file#
-and after.snap_id = before.snap_id+1
+and after.snap_id = before.snap_id + 1
 and before.instance_number = after.instance_number
 and after.snap_id = sn.snap_id
 and after.instance_number = sn.instance_number
-group by to_char(sn.END_INTERVAL_TIME,'dd/mm/YYYY HH24:MI:SS')
-order by to_char(sn.END_INTERVAL_TIME,'dd/mm/YYYY HH24:MI:SS');
+group by to_char(sn.END_INTERVAL_TIME, 'dd/mm/YYYY HH24:MI:SS')
+order by to_char(sn.END_INTERVAL_TIME, 'dd/mm/YYYY HH24:MI:SS');
 prompt
 prompt ##############################################################
 prompt # Physical Reads and Writes                                  #
@@ -4186,7 +4213,6 @@ select NAME
   , round(PHYWRTS * 100 / PD.PHYS_WRTS,2) "Write %"
   , fs.PHYBLKRD+FS.PHYBLKWRT "Total Block I/O's"
 from (select sum(PHYRDS) PHYS_READS, sum(PHYWRTS) PHYS_WRTS from v\$filestat) pd
-  , v\$datafile df
   , v\$datafile df
   , v\$filestat fs
 where df.FILE# = fs.FILE#
@@ -4214,7 +4240,8 @@ col name format a100
 select distinct name
   , asynch_io
 from v\$datafile d
-inner join v\$iostat_file f on d.file# = f.file_no;
+inner join v\$iostat_file f on d.file# = f.file_no
+order by 1, 2;
 prompt
 -- SET SERVEROUTPUT ON
 -- DECLARE
@@ -4245,7 +4272,8 @@ select d.name
   , f.large_read_megabytes
 --  , f.large_read_reqs
 from v\$iostat_file f
-inner join v\$datafile d on f.file_no = d.file#;
+inner join v\$datafile d on f.file_no = d.file#
+order by 1, 2;
 quit;
 EOF
 }
@@ -4269,10 +4297,10 @@ col AVG_WAIT_TIME_MSEC for a30
 col EVENT_NAME for a40
 col total_waits for a15
 col total_waited_sec for a15
-col KW for a5
+col week for a5
 col AVG_WAIT_TIME_MSEC for 999999999,99
 select dhs.snap_id
-  , to_char(dhs.begin_interval_time,'iw') kw
+  , to_char(dhs.begin_interval_time,'iw') week
   , to_char(dhs.begin_interval_time,'dd/mm/yyyy hh24:mi:ss') begin_interval_time
   , to_char(dhs.end_interval_time,'dd/mm/yyyy hh24:mi:ss') end_interval_time
   , to_char(event_name) event_name
@@ -5723,10 +5751,9 @@ prompt # Last/Latest Running SQL                                    #
 prompt ##############################################################
 col username for a20
 col "Last SQL" for a130
-select t.inst_id
-  , s.username
-  , s.sid
-  , s.serial#
+col "SID" for a15
+select s.username
+  , s.sid || ',' || s.serial# || '@' || t.inst_id as "SID"
   , t.sql_id
   , t.sql_text "Last SQL"
 FROM gv\$session s, gv\$sqlarea t
@@ -5820,7 +5847,6 @@ col INVALIDATIONS format 99999 heading "INVL"
 col PARSE_CALLS format 99999999 heading "PARSE|CALLS"
 col PARSING_USER_ID format 999999 heading "PARSING|USER|ID"
 col PARSING_SCHEMA_ID format 999999 heading "PARSING|SCHEMA|ID"
-prompt
 prompt ##############################################################
 prompt # CHECK MODULE AND ACTION                                    #
 prompt ##############################################################
@@ -5891,9 +5917,8 @@ prompt ##############################################################
 prompt # CHECK SQL FULL TEXT OF STATEMENT                           #
 prompt ##############################################################
 select SQL_FULLTEXT
-from v\$sql
--- where sql_id='${OPT}'
-/
+from v\$sql;
+-- where sql_id='${OPT}';
 prompt
 prompt ##############################################################
 prompt # CHECK OBJECT LOB OF THE STATEMENT                          #
@@ -5901,9 +5926,8 @@ prompt ##############################################################
 select distinct object_name LOB_NAME
 from sys.x\$kglob, dba_objects
 where KGLNAOBJ like 'table%'
-and object_id = to_number(regexp_substr(KGLNAOBJ, '[^_]+', 1, 4),'xxxx')
--- and kglobt03 = '${OPT}'
-/
+and object_id = to_number(regexp_substr(KGLNAOBJ, '[^_]+', 1, 4),'xxxx');
+-- and kglobt03 = '${OPT}';
 prompt
 prompt ##############################################################
 prompt # CHECK CPU COSTS OF THE STATEMENT                           #
@@ -6016,7 +6040,7 @@ SELECT TO_CHAR(action_time, 'DD/MM/YYYY HH24:MI:SS') AS action_time
   , action
   , namespace
   , version
-  , id
+--  , id
   , comments
   , bundle_series
 FROM sys.registry\$history
@@ -6038,42 +6062,56 @@ col sample_time for a20
 col CONFIGURATION head "CONFIG" for 99.99
 col ADMINISTRATIVE head "ADMIN" for 99.99
 col OTHER for 99.99
+col OTHER for a10
+col CLUST for a10
+col QUEUEING for a10
+col NETWORK for a10
+col ADMINISTRATIVE for a10
+col CONFIGURATION for a10
+col COMMIT for a10
+col APPLICATION for a15
+col CONCURRENCY for a15
+col SYSTEM_IO for a10
+col USER_IO for a10
+col SCHEDULER for a10
+col CPU for a10
+col BACKGROUND_CPU for a15
 SELECT TO_CHAR(SAMPLE_TIME, 'DD/MM/YYYY HH24:MI:SS') AS SAMPLE_TIME
-  , ROUND(OTHER/60, 3) AS OTHER
-  , ROUND(CLUST/60, 3) AS CLUST
-  , ROUND(QUEUEING/60, 3) AS QUEUEING
-  , ROUND(NETWORK/60, 3) AS NETWORK
-  , ROUND(ADMINISTRATIVE/60, 3) AS ADMINISTRATIVE
-  , ROUND(CONFIGURATION/60, 3) AS CONFIGURATION
-  , ROUND(COMMIT/60, 3) AS COMMIT
-  , ROUND(APPLICATION/60, 3) AS APPLICATION
-  , ROUND(CONCURRENCY/60, 3) AS CONCURRENCY
-  , ROUND(SIO/60, 3) AS SYSTEM_IO
-  , ROUND(UIO/60, 3) AS USER_IO
-  , ROUND(SCHEDULER/60, 3) AS SCHEDULER
-  , ROUND(CPU/60, 3) AS CPU
-  , ROUND(BCPU/60, 3) AS BACKGROUND_CPU
-FROM (
-  SELECT TRUNC(SAMPLE_TIME, 'MI') AS SAMPLE_TIME
-    , DECODE(SESSION_STATE, 'ON CPU'
-	, DECODE(SESSION_TYPE, 'BACKGROUND', 'BCPU', 'ON CPU')
-	, WAIT_CLASS) AS WAIT_CLASS 
-  FROM V\$ACTIVE_SESSION_HISTORY 
-  WHERE SAMPLE_TIME > SYSDATE - INTERVAL '2' HOUR 
-  AND SAMPLE_TIME <= TRUNC(SYSDATE, 'MI')) ASH PIVOT(COUNT(*) FOR WAIT_CLASS IN ('ON CPU' AS CPU
-, 'BCPU' AS BCPU
-, 'Scheduler' AS SCHEDULER
-, 'User I/O' AS UIO
-, 'System I/O' AS SIO
-, 'Concurrency' AS CONCURRENCY
-, 'Application' AS APPLICATION
-, 'Commit' AS COMMIT
-, 'Configuration' AS CONFIGURATION
-, 'Administrative' AS ADMINISTRATIVE
-, 'Network' AS NETWORK
-, 'Queueing' AS QUEUEING
-, 'Cluster' AS CLUST
-, 'Other' AS OTHER))
+  , to_char(ROUND(OTHER/60, 3)) AS OTHER
+  , to_char(ROUND(CLUST/60, 3)) AS CLUST
+  , to_char(ROUND(QUEUEING/60, 3)) AS QUEUEING
+  , to_char(ROUND(NETWORK/60, 3)) AS NETWORK
+  , to_char(ROUND(ADMINISTRATIVE/60, 3)) AS ADMINISTRATIVE
+  , to_char(ROUND(CONFIGURATION/60, 3)) AS CONFIGURATION
+  , to_char(ROUND(COMMIT/60, 3)) AS COMMIT
+  , to_char(ROUND(APPLICATION/60, 3)) AS APPLICATION
+  , to_char(ROUND(CONCURRENCY/60, 3)) AS CONCURRENCY
+  , to_char(ROUND(SIO/60, 3)) AS SYSTEM_IO
+  , to_char(ROUND(UIO/60, 3)) AS USER_IO
+  , to_char(ROUND(SCHEDULER/60, 3)) AS SCHEDULER
+  , to_char(ROUND(CPU/60, 3)) AS CPU
+  , to_char(ROUND(BCPU/60, 3)) AS BACKGROUND_CPU
+FROM (SELECT TRUNC(SAMPLE_TIME, 'MI') AS SAMPLE_TIME
+        , DECODE(SESSION_STATE, 'ON CPU'
+	      , DECODE(SESSION_TYPE, 'BACKGROUND', 'BCPU', 'ON CPU')
+	      , WAIT_CLASS) AS WAIT_CLASS 
+      FROM V\$ACTIVE_SESSION_HISTORY 
+      WHERE SAMPLE_TIME > SYSDATE - INTERVAL '2' HOUR 
+      AND SAMPLE_TIME <= TRUNC(SYSDATE, 'MI')) ASH PIVOT(COUNT(*) FOR WAIT_CLASS IN 
+      ('ON CPU' AS CPU
+       , 'BCPU' AS BCPU
+       , 'Scheduler' AS SCHEDULER
+       , 'User I/O' AS UIO
+       , 'System I/O' AS SIO
+       , 'Concurrency' AS CONCURRENCY
+       , 'Application' AS APPLICATION
+       , 'Commit' AS COMMIT
+       , 'Configuration' AS CONFIGURATION
+       , 'Administrative' AS ADMINISTRATIVE
+       , 'Network' AS NETWORK
+       , 'Queueing' AS QUEUEING
+       , 'Cluster' AS CLUST
+       , 'Other' AS OTHER))
 order by 1;
 quit;
 EOF
@@ -6089,10 +6127,10 @@ set feedback off timing off
 alter session set nls_date_format='dd/mm/yyyy';
 set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt #
+prompt # DBA: Basic Configuration
 prompt ##############################################################
 column name for a30
-column display_value for a30
+column display_value for a100
 column ID format 99
 column "SRLs" format 99
 column active format 99
@@ -6107,39 +6145,44 @@ column db_mode for a15
 SELECT name, display_value 
 FROM v\$parameter 
 WHERE name IN ('db_name'
-,'db_unique_name'
-,'log_archive_config'
-,'log_archive_dest_2'
-,'log_archive_dest_state_2'
-,'fal_client'
-,'fal_server'
-,'standby_file_management'
-,'standby_archive_dest'
-,'db_file_name_convert'
-,'log_file_name_convert'
-,'remote_login_passwordfile'
-,'local_listener'
-,'dg_broker_start'
-,'dg_broker_config_file1'
-,'dg_broker_config_file2'
-,'log_archive_max_processes') 
+  , 'db_unique_name'
+  , 'log_archive_config'
+  , 'log_archive_dest_2'
+  , 'log_archive_dest_state_2'
+  , 'fal_client'
+  , 'fal_server'
+  , 'standby_file_management'
+  , 'standby_archive_dest'
+  , 'db_file_name_convert'
+  , 'log_file_name_convert'
+  , 'remote_login_passwordfile'
+  , 'local_listener'
+  , 'dg_broker_start'
+  , 'dg_broker_config_file1'
+  , 'dg_broker_config_file2'
+  , 'log_archive_max_processes') 
 order by name;
 prompt
 prompt ##############################################################
-prompt #
+prompt # DBA: Database Role, Archive, Flashback, Force Logging
 prompt ##############################################################
 column name for a10
 column DATABASE_ROLE for a10
+column force_logging for a13
 SELECT name
   , db_unique_name
-  , protection_mode
   , DATABASE_ROLE
+  , log_mode
+  , force_logging
+  , flashback_on
+  , protection_mode
+  , PROTECTION_LEVEL
   , OPEN_MODE
   , switchover_status 
 from v\$database;
 prompt
 prompt ##############################################################
-prompt #
+prompt # DBA: Database Threads
 prompt ##############################################################
 select thread#
   , max(sequence#) 
@@ -6155,12 +6198,12 @@ column timestamp for a20
 select severity
   , error_code
   , to_char(timestamp,'DD-MON-YYYY HH24:MI:SS') "timestamp"
-  , message from 
-v\$dataguard_status 
+  , message 
+from v\$dataguard_status 
 where dest_id=2;
 prompt
 prompt ##############################################################
-prompt #
+prompt # DBA: Database Configuration Standby Details
 prompt ##############################################################
 select ds.dest_id id
   , ad.status
@@ -6175,11 +6218,10 @@ from v\$archive_dest_status ds
   , v\$archive_dest ad
 where ds.dest_id = ad.dest_id
 and ad.status != 'INACTIVE'
-order by
-ds.dest_id;
+order by ds.dest_id;
 prompt
 prompt ##############################################################
-prompt #
+prompt # DBA: Recovery File Dest Usage
 prompt ##############################################################
 column FILE_TYPE format a20
 col name format a60
@@ -6193,7 +6235,7 @@ prompt ##############################################################
 prompt # ON STANDBY
 prompt ##############################################################
 column name for a30
-column display_value for a30
+column display_value for a100
 col value for a10
 col PROTECTION_MODE for a15
 col DATABASE_Role for a15
@@ -6201,22 +6243,22 @@ SELECT name
   , display_value 
 FROM v\$parameter 
 WHERE name IN ('db_name'
-,'db_unique_name'
-,'log_archive_config'
-,'log_archive_dest_2'
-,'log_archive_dest_state_2'
-,'fal_client'
-,'fal_server'
-,'standby_file_management'
-,'standby_archive_dest'
-,'db_file_name_convert'
-,'log_file_name_convert'
-,'remote_login_passwordfile'
-,'local_listener'
-,'dg_broker_start'
-,'dg_broker_config_file1'
-,'dg_broker_config_file2'
-,'log_archive_max_processes') 
+  , 'db_unique_name'
+  , 'log_archive_config'
+  , 'log_archive_dest_2'
+  , 'log_archive_dest_state_2'
+  , 'fal_client'
+  , 'fal_server'
+  , 'standby_file_management'
+  , 'standby_archive_dest'
+  , 'db_file_name_convert'
+  , 'log_file_name_convert'
+  , 'remote_login_passwordfile'
+  , 'local_listener'
+  , 'dg_broker_start'
+  , 'dg_broker_config_file1'
+  , 'dg_broker_config_file2'
+  , 'log_archive_max_processes') 
 order by name;
 prompt
 prompt ##############################################################
@@ -6257,14 +6299,16 @@ SELECT ARCH.THREAD# "Thread"
   , APPL.SEQUENCE# "Last Sequence Applied"
   , (ARCH.SEQUENCE# - APPL.SEQUENCE#) "Difference"
 FROM 
-(SELECT THREAD#, SEQUENCE# FROM V\$ARCHIVED_LOG WHERE (THREAD#, FIRST_TIME) IN (SELECT THREAD#, MAX(FIRST_TIME) FROM V\$ARCHIVED_LOG GROUP BY THREAD#)) ARCH,
-(SELECT THREAD#, SEQUENCE# FROM V\$LOG_HISTORY WHERE (THREAD#, FIRST_TIME) IN (SELECT THREAD#, MAX(FIRST_TIME) FROM V\$LOG_HISTORY GROUP BY THREAD#)) APPL
+(SELECT THREAD#, SEQUENCE# FROM V\$ARCHIVED_LOG WHERE (THREAD#, FIRST_TIME) IN 
+(SELECT THREAD#, MAX(FIRST_TIME) FROM V\$ARCHIVED_LOG GROUP BY THREAD#)) ARCH,
+(SELECT THREAD#, SEQUENCE# FROM V\$LOG_HISTORY WHERE (THREAD#, FIRST_TIME) IN 
+(SELECT THREAD#, MAX(FIRST_TIME) FROM V\$LOG_HISTORY GROUP BY THREAD#)) APPL
 WHERE ARCH.THREAD# = APPL.THREAD# ORDER BY 1;
-col name for a30 
 prompt
 prompt ##############################################################
 prompt #
 prompt ##############################################################
+col name for a30 
 select * from v\$dataguard_stats; 
 prompt
 prompt ##############################################################
@@ -6332,7 +6376,7 @@ EOF
 }
 #
 #########################################################################################################
-# 
+# DBA: USER DETAILS SESSIONS
 #########################################################################################################
 #
 function DBA_099() {
@@ -6340,7 +6384,32 @@ sqlplus -S / as sysdba <<EOF
 set feedback off timing off
 alter session set nls_date_format='dd/mm/yyyy';
 set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-
+prompt ##############################################################
+prompt # DBA: USER DETAILS SESSIONS
+prompt ##############################################################
+prompt
+column box format a25
+column session_id for a15
+column spid format a10
+column username format a20 
+column program format a30
+column os_user format a20
+col LOGON_TIME for a20  
+select b.sid || ',' || b.serial# || '@' || b.inst_id as session_id
+  , a.spid
+  , substr(b.machine,1,30) box
+  , to_char(b.logon_time, 'dd/mm/yyyy hh24:mi:ss') logon_time
+  , substr(b.username,1,30) username
+  , substr(b.osuser,1,20) os_user
+  , substr(b.program,1,30) program
+  , status
+  , b.last_call_et AS last_call_et_secs
+  , b.sql_id 
+ from gv\$session b,gv\$process a 
+ where b.paddr = a.addr 
+ and a.inst_id = b.inst_id  
+ and type = 'USER'  
+ order by b.inst_id,b.sid;
 quit;
 EOF
 }
@@ -6403,282 +6472,18 @@ col SCHEMA format a15
 col STATUS format a15
 col VERSION format a15
 col CON_ID format 99
-select CON_ID, COMP_ID, comp_name, schema, status, version from CDB_REGISTRY order by 1,2;
+select CON_ID
+  , COMP_ID
+  , comp_name
+  , schema
+  , status
+  , version 
+from CDB_REGISTRY 
+order by 1,2;
 quit;
 EOF
 }
-#
-#########################################################################################################
-# Dataguard Health Check
-#########################################################################################################
-#
-function DBA_102() {
-sqlplus -S / as sysdba <<EOF
-set feedback off timing off
-alter session set nls_date_format='dd/mm/yyyy';
-set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
--- 
--- Author    : Ludovico Caldara
--- Version   : 0.1
--- Purpose   : Checks the health of a Data Guard configuration on ONE database
--- Run as    : SYSDBA , to execute on each DB in the config it does not check ALL the DBs in the configuration but only the current one
---             You can use a wrapper to check all the DBs in the configuration or all the standby instances on a server
--- Limitations: Does not work on RAC environments yet
---              Does not work on 11g databases (tested on 19c)
 
-DECLARE
-	v_dgconfig BINARY_INTEGER;
-	v_num_errors BINARY_INTEGER;
-	v_num_warnings BINARY_INTEGER;
-	v_apply_lag INTERVAL DAY TO SECOND;
-	v_transport_lag INTERVAL DAY TO SECOND;
-	v_apply_th INTERVAL DAY TO SECOND;
-	v_transport_th INTERVAL DAY TO SECOND;
-	v_delay INTERVAL DAY TO SECOND;
-	v_delaymins BINARY_INTEGER;
-	v_flashback v$database.flashback_on%type;
-
-	CURSOR c_dgconfig IS SELECT piv.*, obj.status FROM (SELECT object_id, attribute, value FROM x$drc WHERE object_id IN ( SELECT object_id FROM x$drc WHERE attribute = 'DATABASE')
-	) drc PIVOT ( MAX ( value ) FOR attribute
-	IN ('DATABASE' DATABASE ,
-		'intended_state' intended_state ,
-		'connect_string' connect_string ,
-		'enabled' enabled ,
-		'role' role ,
-		'receive_from' receive_from ,
-		'ship_to' ship_to ,
-		'FSFOTargetValidity' FSFOTargetValidity)
-	) piv JOIN x$drc obj ON ( obj.object_id = piv.object_id AND obj.attribute = 'DATABASE' )
-	WHERE lower(piv.database)=lower(sys_context('USERENV','DB_UNIQUE_NAME'));
- 
-	CURSOR c_priconfig IS SELECT piv.*, obj.status FROM (SELECT object_id, attribute, value FROM x$drc WHERE object_id IN ( SELECT object_id FROM x$drc WHERE attribute = 'DATABASE')
-	) drc PIVOT ( MAX ( value ) FOR attribute
-	IN ('DATABASE' DATABASE ,
-		'intended_state' intended_state ,
-		'connect_string' connect_string ,
-		'enabled' enabled ,
-		'role' role ,
-		'receive_from' receive_from ,
-		'ship_to' ship_to ,
-		'FSFOTargetValidity' FSFOTargetValidity)
-	) piv JOIN x$drc obj ON ( obj.object_id = piv.object_id AND obj.attribute = 'DATABASE' )
-	WHERE piv.role='PRIMARY';
- 
-	r_dgconfig c_dgconfig%ROWTYPE;
-	r_priconfig c_priconfig%ROWTYPE;
- 
-	v_open_mode v$database.open_mode%TYPE;
- 
-	-- variables for the dbms_drs.do_control
-	v_indoc VARCHAR2 ( 4000 );
-	v_outdoc VARCHAR2 ( 4000 );
-	v_rid NUMBER;
-	v_context VARCHAR2(100);
-	v_pieceno NUMBER ;
-	/* xmltype does not work on mounted databases 
-	v_y CLOB;
-	v_z XMLTYPE;
-	v_xml XMLTYPE;
-	*/
-	v_status VARCHAR2(100);
-	v_error VARCHAR2(100);
-	v_p_connect BINARY_INTEGER;
-	v_s_connect BINARY_INTEGER;
-	v_offline_datafiles BINARY_INTEGER;
-BEGIN
-	v_num_errors := 0;
-	v_num_warnings := 0;
-	v_p_connect := 0;
-	v_s_connect := 0;
-	dbms_output.put_line('Checking Data Guard Configuration for '||sys_context('USERENV','DB_UNIQUE_NAME'));
-	dbms_output.put_line('--------------------------------------');
-	-- get open_mode
-	SELECT open_mode INTO v_open_mode FROM v$database;
-	-- check if the configuration exists
-	SELECT count(*) INTO v_dgconfig FROM x$drc;
-	IF v_dgconfig = 0 THEN
-		dbms_output.put_line('ERROR: Current database does not have a Data Guard config.');
-		v_num_errors := v_num_errors + 1;
-		GOTO stop_checks;
-	else
-		dbms_output.put_line('___OK: Current database has a Data Guard config.');
-	END IF;
-	-- fetch the current DB config in record
-	OPEN c_dgconfig;
-	BEGIN
-		FETCH c_dgconfig INTO r_dgconfig;
-	EXCEPTION
-		WHEN NO_DATA_FOUND THEN 
-			dbms_output.put_line('ERROR: Current database does not have a Data Guard config.');
-			v_num_errors := v_num_errors + 1;
-			GOTO stop_checks;
-	END;
-	-- fetch the primary DB config in record
-	OPEN c_priconfig;
-	BEGIN
-		FETCH c_priconfig INTO r_priconfig;
-	EXCEPTION
-		WHEN NO_DATA_FOUND THEN 
-			dbms_output.put_line('ERROR: There is no primary database in the config?');
-			v_num_errors := v_num_errors + 1;
-			GOTO stop_checks;
-	END;
-	-- enabled?
-	IF r_dgconfig.enabled = 'YES' THEN
-		dbms_output.put_line('___OK: Current database is enabled in Data Guard.');
-	ELSE
-		dbms_output.put_line('ERROR: Current database is not enabled in Data Guard.');
-		v_num_errors := v_num_errors + 1;
-	END IF;
-	-- status SUCCESS?
-	IF r_dgconfig.status = 'SUCCESS' THEN
-		dbms_output.put_line('___OK: Data Guard status for the database is: '||r_dgconfig.status);
-	ELSE
-		dbms_output.put_line('ERROR: Data Guard status for the database is: '||r_dgconfig.status);
-		v_num_errors := v_num_errors + 1;
-	END IF;
-	-- reachability of the primary
-	BEGIN
-		dbms_drs.CHECK_CONNECT (r_priconfig.database ,r_priconfig.database);
-		dbms_output.put_line('___OK: Primary ('||r_priconfig.database||') is reachable.');
-		v_p_connect := 1;
-	EXCEPTION
-		WHEN OTHERS THEN
-		dbms_output.put_line('ERROR: Primary ('||r_priconfig.database||') unreachable. Error code ' || SQLCODE || ': ' || SQLERRM);
-		v_num_errors := v_num_errors + 1;
-	END;
-	-- if we are not on the primary, check the current database connectivity as well through the broker
-	IF r_priconfig.object_id <> r_dgconfig.object_id THEN
-		BEGIN
-			dbms_drs.CHECK_CONNECT (r_dgconfig.database ,r_dgconfig.database);
-			dbms_output.put_line('___OK: current DB ('||r_dgconfig.database||') is reachable.');
-			v_s_connect := 1;
-		EXCEPTION
-			WHEN OTHERS THEN
-			dbms_output.put_line('ERROR: current DB ('||r_dgconfig.database||') unreachable. Error code ' || SQLCODE || ': ' || SQLERRM);
-			v_num_errors := v_num_errors + 1;
-		END;
-	END IF;
-	-- we check primary transport only if reachable
-	IF v_p_connect = 1 THEN
-		-- primary logxpt?
-		v_indoc := '<DO_MONITOR version="19.1"><PROPERTY name="LogXptStatus" object_id="'||r_priconfig.object_id||'"/></DO_MONITOR>';
-		v_pieceno  := 1;
-		dbms_drs.do_control(v_indoc, v_outdoc, v_rid, v_pieceno, v_context);
-	
-		select regexp_substr(v_outdoc, '(<TD >)([[:alnum:]].*?)(</TD>)',1,3,'i',2) into v_status from dual;
- 
-		/* does not work on MOUNTED databases 
-		v_y := TO_CLOB ( v_outdoc );
-		v_z := XMLType ( v_y );
-		select xt.status , xt.error into v_status, v_error from xmltable  ('/TABLE/TR' passing v_z columns status varchar2(100) PATH 'TD[3]', error varchar2(100) PATH 'TD[4]') xt ;
-		*/
- 
-		IF v_status = 'VALID' THEN
-			dbms_output.put_line('___OK: LogXptStatus of primary is VALID.');
-		ELSE
-			dbms_output.put_line('ERROR: LogXptStatus of primary is '||nvl(v_status,'NULL'));
-			v_num_errors := v_num_errors + 1;
-		END IF;
-	END IF;
-	-- flashback?
-	SELECT flashback_on into v_flashback
-	FROM v$database;
-	IF v_flashback = 'YES' THEN
-		dbms_output.put_line('___OK: Flashback Logging is enabled.');
-	ELSE
-		dbms_output.put_line('_WARN: Flashback Logging is disabled.');
-		v_num_warnings := v_num_warnings + 1;
-	END IF;
-	-- role?
-	IF r_dgconfig.ROLE = 'PRIMARY' THEN
-		dbms_output.put_line('___OK: The database is PRIMARY, skipping standby checks.');
-		GOTO stop_checks;
-	ELSE
-		dbms_output.put_line('___OK: The database is STANDBY, executing standby checks.');
-	END IF;
-	-- intended state?
-	IF r_dgconfig.intended_state = 'PHYSICAL-APPLY-ON' THEN
-		dbms_output.put_line('___OK: The database intended state is APPLY-ON.');
-	ELSIF r_dgconfig.intended_state = 'PHYSICAL-APPLY-READY' THEN
-		dbms_output.put_line('_WARN: The database intended state is APPLY-OFF.');
-		v_num_warnings := v_num_warnings + 1;
-	ELSE
-		dbms_output.put_line('ERROR: The database intended state is '||r_dgconfig.intended_state);
-		v_num_errors := v_num_errors + 1;
-	END IF;
-	-- real time apply?
-	IF v_open_mode = 'READ ONLY WITH APPLY' THEN
-		dbms_output.put_line('_WARN: Real Time Apply is used.');
-		v_num_warnings := v_num_warnings + 1;
-	ELSIF v_open_mode = 'MOUNTED' THEN
-		dbms_output.put_line('___OK: The standby database is mounted.');
-	ELSE
-		dbms_output.put_line('ERROR: The database open_mode is '||v_open_mode);
-		v_num_errors := v_num_errors + 1;
-	END IF;
-	-- offline datafiles?
-	BEGIN
-		select count(distinct con_id) into v_offline_datafiles from v$recover_file where online_status='OFFLINE' group by con_id;
-		dbms_output.put_line('ERROR: There are '||v_offline_datafiles||' OFFLINE datafiles');
-		v_num_errors := v_num_errors + 1;
-	EXCEPTION WHEN NO_DATA_FOUND THEN
-		dbms_output.put_line('___OK: There are no PDBs with OFFLINE datafiles');
-	END;
- 	-- we get the delay as well, so that we can compute the apply threshold in a more intelligent way than the broker...
-	v_delaymins := dbms_drs.get_property_obj(r_dgconfig.object_id,'DelayMins');
-	v_delay := numtodsinterval(v_delaymins,'minute');
- 
-	IF v_delaymins > 0 THEN
-		dbms_output.put_line('_WARN: Standby delayed by '||v_delaymins||' minutes.');
-		v_num_warnings := v_num_warnings + 1;
-	END IF;
- 
-	-- apply lag?
-	v_apply_th := numtodsinterval(dbms_drs.get_property_obj(r_dgconfig.object_id,'ApplyLagThreshold'),'second');
-	BEGIN
-		SELECT TO_DSINTERVAL(value) into v_apply_lag FROM v$dataguard_stats WHERE name='apply lag';
-		IF v_apply_lag > ( v_apply_th + v_delay ) THEN
-			dbms_output.put_line('ERROR: apply lag is '||v_apply_lag);
-			v_num_errors := v_num_errors + 1;
-		ELSE
-			dbms_output.put_line('___OK: apply lag is '||v_apply_lag);
-		END IF;
-	EXCEPTION WHEN OTHERS THEN
-		dbms_output.put_line('ERROR: cannot determine apply lag.');
-		v_num_errors := v_num_errors + 1;
-	END;
- 
-	-- transport lag?
-	v_transport_lag := numtodsinterval(dbms_drs.get_property_obj(r_dgconfig.object_id,'TransportLagThreshold'),'second');
-	BEGIN
-		SELECT TO_DSINTERVAL(value) into v_transport_lag FROM v$dataguard_stats WHERE name='transport lag';
-		IF v_transport_lag > v_transport_th THEN
-			dbms_output.put_line('ERROR: transport lag is '||v_transport_lag);
-			v_num_errors := v_num_errors + 1;
-		ELSE
-			dbms_output.put_line('___OK: transport lag is '||v_transport_lag);
-		END IF;
-	EXCEPTION WHEN OTHERS THEN
-		dbms_output.put_line('_WARN: cannot determine transport lag.');
-		v_num_warnings := v_num_warnings + 1;
-	END;
-	
-	<<stop_checks>>
-	
-	dbms_output.put_line('--------------------------------------');
-	IF v_num_errors > 0 THEN
-		dbms_output.put_line('RESULT: ERROR: '||to_char(v_num_errors)||' errors - '||to_char(v_num_warnings)||' warnings');
-	ELSIF v_num_warnings > 0 THEN
-		dbms_output.put_line('RESULT: _WARN: '||to_char(v_num_errors)||' errors - '||to_char(v_num_warnings)||' warnings');
-	ELSE
-		dbms_output.put_line('RESULT: ___OK: '||to_char(v_num_errors)||' errors - '||to_char(v_num_warnings)||' warnings');
-	END IF;
-END;
-/
-quit;
-EOF
-}
 #
 #########################################################################################################
 # Finish of the System
