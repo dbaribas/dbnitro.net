@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.55"
+SoftwareVersion="1.0.57"
 DateCreation="07/01/2021"
-DateModification="03/08/2022"
+DateModification="08/08/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -19,6 +19,33 @@ printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 #
 function SetClear() {
 printf "\033c"
+}
+#
+# ------------------------------------------------------------------------
+# DBNITRO Script Folder
+#
+FOLDER="/opt"
+DBNITRO="${FOLDER}/dbnitro"
+#
+if [[ ${DBNITRO} == "" ]]; then
+  echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
+# ------------------------------------------------------------------------
+# Help Function
+function HELP() {
+SetClear
+SepLine
+echo -e "\
+|#| GRID........: YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS
+|#| DATABASE....: YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS
+|#| HOMES.......: YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)
+|#| OMS.........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS
+|#| AGENT.......: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER AGENT HOME AND TOOLS
+|#| GOLDENGATE..: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
+|#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb
+"
 }
 #
 # ------------------------------------------------------------------------
@@ -135,7 +162,7 @@ IGNORE_ERRORS="OGG-00987"
 # ------------------------------------------------------------------------
 # Set ORACLE Inventory
 #
-ORA_INVENTORY=$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')
+ORA_INVENTORY="$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
 #
 # ------------------------------------------------------------------------ 
 # Verify INVENTORY HOMEs
@@ -144,31 +171,18 @@ ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|agent|/us
 ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|/usr/lib/oracle/sbin"
 ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
 ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
-ORA_HOMES=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-ORA_AGENT=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC" | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-OGG_HOME=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC" | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-ORA_OMS=$(cat ${ORA_INVENTORY}/ContentsXML/inventory.xml   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC" | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
 #
-# ------------------------------------------------------------------------
-# Scripts Folders
-#
-FOLDER="/opt"
-DBNITRO="${FOLDER}/dbnitro"
-#
-if [[ ${DBNITRO} == "" ]]; then
-  echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
-  return 1
-fi
-#
-# ------------------------------------------------------------------------
-# DBLIST
-#
-DBLIST=$(cat ${ORATAB} | egrep ":N|:Y" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq | sort)
+ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+DBLIST=$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
 #
 # ------------------------------------------------------------------------
 # Verify ASM
 #
-ASM=$(cat ${ORATAB} | egrep ":N|:Y" | grep -i "+ASM*" | egrep -v -i "+apx|-mgmtdb" | cut -f1 -d ':' | uniq  | sort | wc -l)
+ASM=$(cat ${ORATAB} | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
 if [[ ${ASM} == 0 ]]; then
   # ASM DO NOT EXISTS
   ASM_EXISTS="NO"
@@ -304,9 +318,9 @@ else
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${OGG_HOME}/lib
   export PATH=${PATH}:${OGG_HOME}
   export ALERTGG="${OGG_HOME}/ggserr.log"
-  alias oggsci='rlwrap ${OGG_HOME}/ggsci'
-  alias o='rlwrap ${OGG_HOME}/ggsci'
-  alias ogg='cd ${OGG_HOME}'
+  alias ggsci='rlwrap ${OGG_HOME}/ggsci'
+  alias g='rlwrap ${OGG_HOME}/ggsci'
+  alias ggh='cd ${OGG_HOME}'
   alias gglog='tail -f -n 100 ${ALERTGG} | grep -v -i ${IGNORE_ERRORS}'
   echo " -- Golden Gate Environment: ${OGGHOME}"
   return 1
@@ -660,11 +674,11 @@ source ${DBNITRO}/.Oracle_EXA_Functions
 source ${DBNITRO}/.Oracle_ODG_Functions
 source ${DBNITRO}/.Oracle_OGG_Functions
 source ${DBNITRO}/.Oracle_STR_Functions
-source ${DBNITRO}/.Oracle_WALL_Functions
-source ${DBNITRO}/.Oracle_RMAN_Functions
 source ${DBNITRO}/.Oracle_PDB_Functions
 source ${DBNITRO}/.Oracle_ASM_Functions
 source ${DBNITRO}/.Oracle_ODA_Functions
+source ${DBNITRO}/.Oracle_WALL_Functions
+source ${DBNITRO}/.Oracle_RMAN_Functions
 # Set GLOGIN
 set_GLOGIN
 # SET DATABASE
@@ -768,7 +782,7 @@ alias cpuinfo='lscpu'
 # Alias to Set Pluggable Databases
 alias pdb='set_PDB'
 # Alias to Set GoldenGate
-alias gg='set_OGG'
+alias ogg='set_OGG'
 #
 HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
 if [[ ${HOME_STATUS} == "Y" ]]; then
