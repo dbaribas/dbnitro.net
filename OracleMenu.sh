@@ -27,6 +27,11 @@ printf "\033c"
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
 #
+if [[ ! -d ${DBNITRO}/ ]]; then
+  echo " -- YOUR SCRIPT FOLDER DOES NOT EXISTS, YOU HAVE TO CREATE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
 if [[ ${DBNITRO} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
   return 1
@@ -44,8 +49,8 @@ echo -e "\
 |#| OMS.........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS
 |#| AGENT.......: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER AGENT HOME AND TOOLS
 |#| GOLDENGATE..: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
-|#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb
-"
+|#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
+SepLine
 }
 #
 # ------------------------------------------------------------------------
@@ -151,6 +156,8 @@ fi
 # Verify if all pre-reqs Softwares are installed
 #
 if [[ $(which rlwrap | wc -l | awk '{ print $1 }') == 0 ]]; then
+  SetClear
+  SepLine
   echo " -- You need to install rlwrap app --"
 fi
 #
@@ -163,6 +170,15 @@ IGNORE_ERRORS="OGG-00987"
 # Set ORACLE Inventory
 #
 ORA_INVENTORY="$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
+#
+if [[ ! -f ${ORA_INVENTORY} ]]; then
+  SetClear
+  SepLine
+  echo " -- YOU DO NOT HAVE THE ORACLE INVENTORY IN YOUR ENVIRONMENT --"
+  echo " -- PLEASE CHECK YOUR CONFIGURATION --"
+  return 1
+fi
+
 #
 # ------------------------------------------------------------------------ 
 # Verify INVENTORY HOMEs
