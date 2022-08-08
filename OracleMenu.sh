@@ -40,6 +40,26 @@ if [[ ${DBNITRO} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
   return 1
 fi
+# ------------------------------------------------------------------------
+# Verify ROOT User
+#
+if [[ $(whoami) == "root" ]]; then
+  SetClear
+  SepLine
+  echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
+  echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
+  return 1
+fi
+#
+# ------------------------------------------------------------------------
+# Verify if all pre-reqs Softwares are installed
+#
+if [[ $(which rlwrap | wc -l | awk '{ print $1 }') == 0 ]]; then
+  SetClear
+  SepLine
+  echo " -- You need to install rlwrap app --"
+  return 1
+fi
 #
 # ------------------------------------------------------------------------
 # Help Function
@@ -56,17 +76,6 @@ echo -e "\
 |#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
 SepLine
 }
-#
-# ------------------------------------------------------------------------
-# Verify ROOT User
-#
-if [[ $(whoami) == "root" ]]; then
-  SetClear
-  SepLine
-  echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
-  echo " -- PLEASE USE OTHER USER TO ACCESS THIS SCRIPTS --"
-  return 1
-fi
 #
 # ------------------------------------------------------------------------
 # Verify OS Parameters
@@ -189,15 +198,6 @@ if [[ ! -f ${ORATAB} ]]; then
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
   return 1
-fi
-#
-# ------------------------------------------------------------------------
-# Verify if all pre-reqs Softwares are installed
-#
-if [[ $(which rlwrap | wc -l | awk '{ print $1 }') == 0 ]]; then
-  SetClear
-  SepLine
-  echo " -- You need to install rlwrap app --"
 fi
 #
 # ------------------------------------------------------------------------
