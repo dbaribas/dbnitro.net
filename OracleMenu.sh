@@ -28,11 +28,15 @@ FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
 #
 if [[ ! -d ${DBNITRO}/ ]]; then
+  SetClear
+  SepLine
   echo " -- YOUR SCRIPT FOLDER DOES NOT EXISTS, YOU HAVE TO CREATE THAT BEFORE YOU CONTINUE --"
   return 1
 fi
 #
 if [[ ${DBNITRO} == "" ]]; then
+  SetClear
+  SepLine
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
   return 1
 fi
@@ -96,12 +100,12 @@ elif [[ $(uname) == "AIX" ]]; then
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
-  U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
-  F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
-  T_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $2 }')
-  U_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $3 }')
-  F_SWAP=$(free -g -h | grep -i "Swap" | awk '{ print $4 }')
+  T_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $2 }')
+  U_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $3 }')
+  F_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $4 }')
+  T_SWAP="NO"
+  U_SWAP="NO"
+  F_SWAP="NO"
   RED="\033[1;31m"
   YEL="\033[1;33m"
   BLU="\e[96m"
