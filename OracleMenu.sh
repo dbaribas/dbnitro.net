@@ -75,6 +75,7 @@ if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
   ORATAB="/var/opt/oracle/oratab"
   ORA_INST="/var/opt/oracle/oraInst.loc"
+  ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
@@ -85,12 +86,12 @@ if [[ $(uname) == "SunOS" ]]; then
   ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
   ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
   ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
+  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
   T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
   U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
   F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
@@ -106,6 +107,7 @@ elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
   ORATAB="/etc/oratab"
   ORA_INST="/opt/oracle/etc/oraInst.loc"
+  ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
@@ -115,13 +117,12 @@ elif [[ $(uname) == "AIX" ]]; then
   ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|/usr/lib/oracle/sbin"
   ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
   ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "\${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "\${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "\${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "\${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "\${ORA_HOMES_IGNORE_5}" | egrep -i -v "^#" | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "\${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
+  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
   T_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $2 }')
   U_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $3 }')
   F_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $4 }')
@@ -137,6 +138,7 @@ elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
   ORATAB="/etc/oratab"
   ORA_INST="/etc/oraInst.loc"
+  ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
@@ -147,12 +149,12 @@ elif [[ $(uname) == "Linux" ]]; then
   ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
   ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
   ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
+  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
   T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
   U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
   F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
@@ -205,8 +207,6 @@ IGNORE_ERRORS="OGG-00987"
 #
 # ------------------------------------------------------------------------
 # Set ORACLE Inventory
-#
-ORA_INVENTORY="$(cat ${ORA_INST} | grep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
 #
 if [[ ! -f ${ORA_INVENTORY} ]]; then
   SetClear
