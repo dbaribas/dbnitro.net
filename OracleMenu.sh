@@ -11,14 +11,14 @@ WEBSITE="http://dbnitro.net"
 # Separate Line Function
 #
 function SepLine() {
-printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - 
 }
 #
 # ------------------------------------------------------------------------
 # Clear Screen Function
 #
 function SetClear() {
-printf "\033c"
+  printf "\033c"
 }
 #
 # ------------------------------------------------------------------------
@@ -40,6 +40,7 @@ if [[ ${DBNITRO} == "" ]]; then
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
   return 1
 fi
+#
 # ------------------------------------------------------------------------
 # Verify ROOT User
 #
@@ -64,9 +65,9 @@ fi
 # ------------------------------------------------------------------------
 # Help Function
 function HELP() {
-SetClear
-SepLine
-echo -e "\
+  SetClear
+  SepLine
+  echo -e "\
 |#| GRID........: YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS
 |#| DATABASE....: YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS
 |#| HOMES.......: YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)
@@ -74,33 +75,43 @@ echo -e "\
 |#| AGENT.......: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER AGENT HOME AND TOOLS
 |#| GOLDENGATE..: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
 |#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
-SepLine
+  SepLine
 }
 #
 # ------------------------------------------------------------------------
-# Verify OS Parameters
+# Verify OS Parameters and Variables
+#
+ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|middleware|agent"
+ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|middleware"
+ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware|agent"
+ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|agent"
+ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
+#
+# ------------------------------------------------------------------------
+# IGNORE ERRORS
+#
+IGNORE_ERRORS="OGG-00987"
 #
 if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
   ORATAB="/var/opt/oracle/oratab"
   ORA_INST="/var/opt/oracle/oraInst.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
+  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
+  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
+  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
+  ALIASES=$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
   ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
   T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
   U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
   F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
@@ -117,21 +128,21 @@ elif [[ $(uname) == "AIX" ]]; then
   ORATAB="/etc/oratab"
   ORA_INST="/opt/oracle/etc/oraInst.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
+  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
+  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
+  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
+  ALIASES=$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
   ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
   T_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $2 }')
   U_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $3 }')
   F_MEM=$(svmon -G -O unit=GB | grep -i "memory" | awk '{ print $4 }')
@@ -148,22 +159,21 @@ elif [[ $(uname) == "Linux" ]]; then
   ORATAB="/etc/oratab"
   ORA_INST="/etc/oraInst.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
+  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
+  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
+  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
+  ALIASES=$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
   TMP="/tmp"
   TMPDIR="${TMP}"
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|middleware|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|middleware|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|OraHome|agent|/usr/lib/oracle/sbin"
-  ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
   ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':' | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':' | uniq | sort | wc -l)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq               | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq               | sort | wc -l)
   T_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $2 }')
   U_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $3 }')
   F_MEM=$(free -g -h | grep -i "Mem" | awk '{ print $4 }')
@@ -201,11 +211,6 @@ if [[ ! -f ${ORATAB} ]]; then
 fi
 #
 # ------------------------------------------------------------------------
-# IGNORE ERRORS
-#
-IGNORE_ERRORS="OGG-00987"
-#
-# ------------------------------------------------------------------------
 # Set ORACLE Inventory
 #
 if [[ ! -f ${ORA_INVENTORY} ]]; then
@@ -225,10 +230,10 @@ if [[ ${ASM} == 0 ]]; then
 else
   # ASM EXISTS
   ASM_EXISTS="YES"
-  G_SID=$(cat ${ORATAB} | grep -i "+ASM*" | cut -f1 -d ':')
-  G_HOME=$(cat ${ORATAB} | grep -i "+ASM*" | cut -f2 -d ':')
+  G_SID=$(cat ${ORATAB}  | egrep -i -v "^#" | egrep -i "+ASM*" | cut -f1 -d ':')
+  G_HOME=$(cat ${ORATAB} | egrep -i -v "^#" | egrep -i "+ASM*" | cut -f2 -d ':')
   #
-  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }' | egrep -i -v "root" | grep -Ev "^$" | uniq)
   if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then
     # ASM IS ON THE ORACLE USER
     ASM_USER="YES"
@@ -243,24 +248,20 @@ fi
 #
 function unset_var() {
 if [[ $(whoami) == "grid" ]]; then
-  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
-  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
-  for U_VAR in ${VARIABLES}; do
-    unset ${U_VAR} > /dev/null 2>&1
-  done
-  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
-  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
-  umask 0022
-  #
+for U_VAR in ${VARIABLES}; do
+  unset ${U_VAR} > /dev/null 2>&1
+done
+export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
+#
 elif [[ $(whoami) == "oracle" ]]; then
-  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
-  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
-  for U_VAR in ${VARIABLES}; do
-    unset ${U_VAR} > /dev/null 2>&1
-  done
-  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
-  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
-  umask 0022
+for U_VAR in ${VARIABLES}; do
+  unset ${U_VAR} > /dev/null 2>&1
+done
+export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
+umask 0022
 fi
 }
 #
@@ -268,11 +269,125 @@ fi
 # UnAlias and Setting OS
 #
 function unalias_var() {
-ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
-ALIASES=$(alias | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
 for UN_ALIAS in ${ALIASES}; do
   unalias ${UN_ALIAS} > /dev/null 2>&1
 done
+}
+#
+# ------------------------------------------------------------------------
+# Show Database Info
+#
+function INFO() {
+if [[ ${ORACLE_SID} == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  return 0
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
+else
+sqlplus -S '/ as sysdba' <<EOF
+set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
+alter session set nls_date_format='dd/mm/yyyy';
+select 'DB_MODE.........................: ' || status                                                          from v\$instance;
+select 'DB_VERSION......................: ' || version                                                         from v\$instance;
+select 'DB_RELEASE......................: ' || substr(version,1,2)                                             from v\$instance;
+select 'DB_EDITION......................: ' || substr(banner, 21, 18)                                          from v\$version where banner like 'Oracle%';
+select 'DB_ACTIVE_STATE.................: ' || active_state                                                    from v\$instance;
+select 'DB_ROLE.........................: ' || database_role                                                   from v\$database;
+select 'DB_UNIQ_NAME....................: ' || value                                                           from v\$parameter where name = 'db_unique_name';
+select 'DB_SRV_NAME.....................: ' || value                                                           from v\$parameter where name = 'service_names';
+select 'DB_BLOC_SIZE_K..................: ' || value                                                           from v\$parameter where name = 'db_block_size';
+select 'DB_BLOC_SIZE_M..................: ' || value/1024                                                      from v\$parameter where name = 'db_block_size';
+select 'DB_MEM_MAX_M....................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'memory_max_target';
+select 'DB_MEM_MAX_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'memory_max_target';
+select 'DB_MEM_MAX_T....................: ' || ltrim(to_char(value/1024/1024/1024/1024, '9G999G999D999'))      from v\$parameter where name = 'memory_max_target';
+select 'DB_MEM_TAR_M....................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'memory_target';
+select 'DB_MEM_TAR_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'memory_target';
+select 'DB_MEM_TAR_T....................: ' || ltrim(to_char(value/1024/1024/1024/1024, '9G999G999D999'))      from v\$parameter where name = 'memory_target';
+select 'DB_SGA_MAX_M....................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'sga_max_size';
+select 'DB_SGA_MAX_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'sga_max_size';
+select 'DB_SGA_MAX_T....................: ' || ltrim(to_char(value/1024/1024/1024/1024, '9G999G999D999'))      from v\$parameter where name = 'sga_max_size';
+select 'DB_SGA_TAR_M....................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'sga_target';
+select 'DB_SGA_TAR_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'sga_target';
+select 'DB_SGA_TAR_T....................: ' || ltrim(to_char(value/1024/1024/1024/1024, '9G999G999D999'))      from v\$parameter where name = 'sga_target';
+select 'DB_PGA_LIM_K....................: ' || ltrim(to_char(value/1024, '9G999G999D999'))                     from v\$parameter where name = 'pga_aggregate_limit';
+select 'DB_PGA_LIM_M....................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'pga_aggregate_limit';
+select 'DB_PGA_LIM_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'pga_aggregate_limit';
+select 'DB_PGA_TAR_K....................: ' || ltrim(to_char(value/1024, '9G999G999D999'))                     from v\$parameter where name = 'pga_aggregate_target';
+select 'DB_PGA_TAR_M....................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'pga_aggregate_target';
+select 'DB_PGA_TAR_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'pga_aggregate_target';
+select 'DB_UPTIME.......................: ' || to_date(startup_time, 'dd/mm/yyyy hh24:mi')                     from v\$instance;
+select 'DB_UPTIME_DAYS..................: ' || (select to_date(sysdate, 'dd/mm/yyyy hh24:mi') - to_date(startup_time, 'dd/mm/yyyy hh24:mi') from v\$instance) from dual;
+select 'DB_VER_TIME.....................: ' || to_char(max(action_time), 'dd/mm/yyyy')                         from DBA_REGISTRY_SQLPATCH where action in ('APPLY','UPGRADE','RU_APPLY');
+select 'DB_VER_TIME.....................: ' || to_char(max(action_time), 'dd/mm/yyyy')                         from registry\$history where action in ('APPLY','UPGRADE','RU_APPLY');
+select 'DB_VER_TIME_DAYS................: ' || ltrim(lpad(substr(substr(to_char((select sysdate from dual) - (select max(action_time) from DBA_REGISTRY_SQLPATCH where action in ('APPLY','UPGRADE','RU_APPLY'))),3),2), 16, '0'), '0') from dual;
+select 'DB_TOT_SIZE_M...................: ' || ltrim(to_char(sum(bytes)/1024/1024, '9G999G999D999'))           from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);
+select 'DB_TOT_SIZE_G...................: ' || ltrim(to_char(sum(bytes)/1024/1024/1024, '9G999G999D999'))      from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);
+select 'DB_TOT_SIZE_T...................: ' || ltrim(to_char(sum(bytes)/1024/1024/1024/1024, '9G999G999D999')) from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);
+select 'DB_CACHE_SIZE_K.................: ' || ltrim(to_char(value/1024, '9G999G999D999'))                     from v\$parameter where name = 'db_cache_size';
+select 'DB_CACHE_SIZE_M.................: ' || ltrim(to_char(value/1024/1024, '9G999G999D999'))                from v\$parameter where name = 'db_cache_size';
+select 'DB_CACHE_SIZE_G.................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))           from v\$parameter where name = 'db_cache_size';
+select 'DB_SHARED_POOL_K................: ' || ltrim(to_char(value/1024, '9G999G999D999'))                     from v\$parameter where name = 'shared_pool_size';
+select 'DB_SHARED_POOL_M................: ' || ltrim(to_char(value/1024, '9G999G999D999'))                     from v\$parameter where name = 'shared_pool_size';
+select 'DB_SHARED_POOL_G................: ' || ltrim(to_char(value/1024, '9G999G999D999'))                     from v\$parameter where name = 'shared_pool_size';
+select 'DB_SCN..........................: ' || current_scn                                                     from v\$DATABASE;
+select 'DB_ARCH_LAG_TARGET..............: ' || ltrim(value)                                                    from v\$parameter where name = 'archive_lag_target';
+select 'DB_ARCH_LAG_TARGET_MINUTES......: ' || to_char(value/60)                                               from v\$parameter where name = 'archive_lag_target';
+select 'DB_ARCH_LAG_TARGET_HOURS........: ' || ltrim(to_char(round(value/60/60, 2)))                           from v\$parameter where name = 'archive_lag_target';
+select 'DB_ARCH_LAG_TARGET_DAYS.........: ' || ltrim(to_char(round(value/60/60/24, 2)))                        from v\$parameter where name = 'archive_lag_target';
+select 'DB_ARCH_LOG_FORMAT..............: ' || ltrim(value)                                                    from v\$parameter where name = 'log_archive_format';
+select case when log_mode = 'ARCHIVELOG' then 'DB_ARCHIVE_MODE.................: YES' else 'DB_ARCHIVE_MODE.................: NO' end from v\$DATABASE;
+select 'DB_GOLDENGATE...................: ' || case when value = 'TRUE' then 'YES' when value = 'FALSE' then 'NO' end                 from v\$parameter where name = 'enable_goldengate_replication';
+select decode(count(*), 0, 'DB_PARTITION....................: NO', 'DB_PARTITION....................: YES') Partitioning from dba_part_tables where owner not in ('SYSMAN', 'SH', 'SYS', 'SYSTEM');
+select distinct case when a.DETECTED_USAGES = 0 then 'DB_SQL_TUNING...................: NO' else 'DB_SQL_TUNING...................: YES' end from dba_feature_usage_statistics a, v\$instance b where a.name = 'SQL Tuning Advisor' and a.version = b.version;
+select case when value = 'TRUE' then 'DB_SPATIAL......................: YES' else 'DB_SPATIAL......................: NO' end from v\$option where parameter = 'Spatial';
+select distinct case when DETECTED_USAGES = 0 then 'DB_MULTIMEDIA...................: NO' else 'DB_MULTIMEDIA...................: YES' end from dba_feature_usage_statistics a, v\$instance b where name  = 'Oracle Multimedia' and a.version = b.version;
+select distinct case when DETECTED_USAGES = 0 then 'DB_TEXT.........................: NO' else 'DB_TEXT.........................: YES' end from dba_feature_usage_statistics a, v\$instance b where name  = 'Oracle Text' and a.version = b.version;
+select 'DB_DATAGUARD....................: ' || case when value = 'TRUE' then 'YES' when value = 'FALSE' then 'NO' end               from v\$parameter where name = 'dg_broker_start';
+select 'DB_STBY_FILE_MANAGEMENT.........: ' || value                                                                                from v\$parameter where name = 'standby_file_management';
+select case when FORCE_LOGGING = 'YES' then 'DB_FORCE_LOGGING................: YES' else 'DB_FORCE_LOGGING................: NO' end from v\$DATABASE;
+select case when FLASHBACK_ON = 'YES' then 'DB_FLASBBACK_ON.................: YES' else 'DB_FLASBBACK_ON.................: NO' end from v\$DATABASE;
+select 'DB_FLASH_SIZE_M.................: ' || ltrim(to_char(space_limit/1024/1024, '9G999G999D999'))           from v\$recovery_file_dest;
+select 'DB_FLASH_SIZE_G.................: ' || ltrim(to_char(space_limit/1024/1024/1024, '9G999G999D999'))      from v\$recovery_file_dest;
+select 'DB_FLASH_SIZE_T.................: ' || ltrim(to_char(space_limit/1024/1024/1024/1024, '9G999G999D999')) from v\$recovery_file_dest;
+select 'DB_FLASH_RETENTION_MINUTES......: ' || ltrim(value)                                                     from v\$parameter where name = 'db_flashback_retention_target';
+select 'DB_FLASH_RETENTION_HOURS........: ' || ltrim(value/60)                                                  from v\$parameter where name = 'db_flashback_retention_target';
+select 'DB_FLASH_RETENTION_DAYS.........: ' || ltrim(value/60/24)                                               from v\$parameter where name = 'db_flashback_retention_target';
+select 'DB_PROTECTION_MODE..............: ' || ltrim(protection_mode)                                           from v\$database;
+select 'DB_RECOVERY_FILE_DEST_G.........: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))            from v\$parameter where name = 'db_recovery_file_dest_size';
+select 'DB_RECOVERY_FILE_DEST_T.........: ' || ltrim(to_char(value/1024/1024/1024/1024, '9G999G999D999'))       from v\$parameter where name = 'db_recovery_file_dest_size';
+select 'DB_RECOVERY_FILE_DEST_PERC......: ' || ltrim(to_char(decode(nvl(space_used, 0), 0, 0, ceil((space_used/space_limit) * 100)))) || '%"' from v\$recovery_file_dest;
+select 'DB_UNDO_RETENTION_SECONDS.......: ' || ltrim(value)                                                     from v\$parameter where name = 'undo_retention';
+select 'DB_UNDO_RETENTION_MINUTES.......: ' || ltrim(value/60)                                                  from v\$parameter where name = 'undo_retention';
+select 'DB_UNDO_RETENTION_HOURS.........: ' || ltrim(value/60/60)                                               from v\$parameter where name = 'undo_retention';
+select 'DB_OPEN_CURSORS.................: ' || ltrim(value)                                                     from v\$parameter where name = 'open_cursors';
+select 'DB_PROCESSES....................: ' || ltrim(value)                                                     from v\$parameter where name = 'processes';
+select 'DB_RECYCLEBIN...................: ' || upper(value)                                                     from v\$parameter where name = 'recyclebin';
+select 'DB_ORA-0600.....................: ' || count(*)                                                         from sys.X\$DBGALERTEXT where MESSAGE_TEXT like '%ORA-00600%' and ORIGINATING_TIMESTAMP > sysdate-30 and rownum = 1;
+select 'DB_ORA_ERRORS...................: ' || count(*)                                                         from sys.X\$DBGALERTEXT where (lower(MESSAGE_TEXT) like '%ora-%' or lower(MESSAGE_TEXT) like '%error%' or lower(MESSAGE_TEXT) like '%checkpoint not complete%' or lower(MESSAGE_TEXT) like '%fail%') and ORIGINATING_TIMESTAMP > sysdate-30 and rownum = 1;
+select case when used_percent >= 80 then 'DB_TBS_SPACE.................: WARNING' when used_percent >= 90 then 'DB_TBS_SPACE.................: CRITICAL' else 'DB_TBS_SPACE....................: SIZE OK' end from dba_tablespace_usage_metrics where rownum = 1;
+SELECT 'DB_COMPONEN.....................: ' || comp_name || ' ---> ' || case when status = 'VALID' then 'YES' when status = 'OPTION OFF' then 'NO' else status end FROM dba_registry;
+quit;
+EOF
+fi
+}
+#
+# ------------------------------------------------------------------------
+# Create Database Report
+#
+function REPORT() {
+if [[ ${ORACLE_SID} == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  return 0
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
+else
+sqlplus -S '/ as sysdba' <<EOF
+@${DBNITRO}/dbareport_v.3.0.1.sql
+quit;
+EOF
+fi
 }
 #
 # ------------------------------------------------------------------------
@@ -325,7 +440,7 @@ function set_OGG() {
 if [[ ${ORACLE_SID} == "" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
   return 0
-elif [[ $(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g | wc -l) == 0 ]]; then
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
@@ -357,7 +472,7 @@ else
   alias ggsci='rlwrap ${OGG_HOME}/ggsci'
   alias g='rlwrap ${OGG_HOME}/ggsci'
   alias ggh='cd ${OGG_HOME}'
-  alias gglog='tail -f -n 100 ${ALERTGG} | grep -v -i ${IGNORE_ERRORS}'
+  alias gglog='tail -f -n 100 ${ALERTGG} | egrep -i -v ${IGNORE_ERRORS}'
   echo " -- Golden Gate Environment: ${OGGHOME}"
   return 1
 fi
@@ -372,7 +487,7 @@ function set_PDB() {
 if [[ ${ORACLE_SID} == "" ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
   return 0
-elif [[ $(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g | wc -l) == 0 ]]; then
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
@@ -544,7 +659,7 @@ elif [[ ${HOME_STATUS} == "N" ]]; then
   HOME_RW=$(echo "${RED} RW ${BLA}")
 fi
 #
-LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+LSNRCTL=$(ps -ef | egrep -i "tnslsnr" | egrep -v "grep" | wc -l)
 if [[ "${LSNRCTL}" != 0 ]]; then
   DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
 else
@@ -564,8 +679,8 @@ umask 0022
 # Set ASM Environment
 #
 function set_ASM_USER() {
-echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
-echo " -- YOU MUST CONNECT AS OS USER: ${ASM_OWNER} --"
+  echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
+  echo " -- YOU MUST CONNECT AS OS USER: ${ASM_OWNER} --"
 }
 #
 function set_ASM() {
@@ -665,21 +780,21 @@ alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
 #
-HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)
 if [[ ${HOME_STATUS} == "Y" ]]; then
   HOME_RW=$(echo "${GRE} RO ${BLA}")
 elif [[ ${HOME_STATUS} == "N" ]]; then
   HOME_RW=$(echo "${RED} RW ${BLA}")
 fi
 #
-PROC=$(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)
+PROC=$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)
 if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
   DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
 else
   DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
 fi
 #
-LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+LSNRCTL=$(ps -ef | egrep -i "tnslsnr" | egrep -v "grep" | wc -l)
 if [[ "${LSNRCTL}" != 0 ]]; then
   DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
 else
@@ -820,21 +935,21 @@ alias pdb='set_PDB'
 # Alias to Set GoldenGate
 alias ogg='set_OGG'
 #
-HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep ":N|:Y" | cut -f4 -d ':' | uniq)
+HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)
 if [[ ${HOME_STATUS} == "Y" ]]; then
   HOME_RW=$(echo "${GRE} RO ${BLA}")
 elif [[ ${HOME_STATUS} == "N" ]]; then
   HOME_RW=$(echo "${RED} RW ${BLA}")
 fi
 #
-PROC=$(ps -ef | grep pmon | grep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)
+PROC=$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)
 if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
   DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
 else
   DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
 fi
 #
-LSNRCTL=$(ps -ef | grep tnslsnr | grep -v "grep" | wc -l)
+LSNRCTL=$(ps -ef | egrep -i "tnslsnr" | egrep -v "grep" | wc -l)
 if [[ "${LSNRCTL}" != 0 ]]; then
   DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
 else
@@ -897,9 +1012,9 @@ alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
 #
-OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | grep -Ev "^$" | uniq)
 #
-OMS_STATUS=$(ps -ef | grep wlserver | grep -v "grep" | wc -l)
+OMS_STATUS=$(ps -ef | egrep -i "wlserver" | egrep -v "grep" | wc -l)
 if [[ "${OMS_STATUS}" != 0 ]]; then
   OMS=$(echo "${GRE} ONLINE ${BLA}")
 else
@@ -962,9 +1077,9 @@ alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
 #
-OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | grep -v -i "root" | grep -Ev "^$" | uniq)
+OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | grep -Ev "^$" | uniq)
 #
-AGENT_STATUS=$(ps -ef | grep agent | grep -v "grep" | wc -l)
+AGENT_STATUS=$(ps -ef | egrep -i "agent" | egrep -v "grep" | wc -l)
 if [[ "${AGENT_STATUS}" != 0 ]]; then
   AGENT=$(echo "${GRE} ONLINE ${BLA}")
 else
