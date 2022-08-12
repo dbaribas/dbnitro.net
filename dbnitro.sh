@@ -39,24 +39,26 @@ fi
 function CreateFolder() {
 if [[ ! -d ${DBNITRO}/ ]]; then
   mkdir -p ${DBNITRO}/
+  mkdir -p ${DBNITRO}/reports/
 fi
 }
 #
 function SetUpDBNITRO() {
 cd ${DBNITRO}/
 #
-wget -O ${DBNITRO}/.OracleMenu.sh        https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
-wget -O ${DBNITRO}/.Oracle_ASM_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
-wget -O ${DBNITRO}/.Oracle_DBA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
-wget -O ${DBNITRO}/.Oracle_RAC_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RAC_Functions
-wget -O ${DBNITRO}/.Oracle_EXA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_EXA_Functions
-wget -O ${DBNITRO}/.Oracle_ODG_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODG_Functions
-wget -O ${DBNITRO}/.Oracle_OGG_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_OGG_Functions
-wget -O ${DBNITRO}/.Oracle_STR_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_STR_Functions
-wget -O ${DBNITRO}/.Oracle_PDB_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_PDB_Functions
-wget -O ${DBNITRO}/.Oracle_ODA_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
-wget -O ${DBNITRO}/.Oracle_WALL_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
-wget -O ${DBNITRO}/.Oracle_RMAN_Functions https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
+wget -O ${DBNITRO}/.OracleMenu.sh                https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
+wget -O ${DBNITRO}/.Oracle_ASM_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
+wget -O ${DBNITRO}/.Oracle_DBA_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
+wget -O ${DBNITRO}/.Oracle_RAC_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RAC_Functions
+wget -O ${DBNITRO}/.Oracle_EXA_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_EXA_Functions
+wget -O ${DBNITRO}/.Oracle_ODG_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODG_Functions
+wget -O ${DBNITRO}/.Oracle_OGG_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_OGG_Functions
+wget -O ${DBNITRO}/.Oracle_STR_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_STR_Functions
+wget -O ${DBNITRO}/.Oracle_PDB_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_PDB_Functions
+wget -O ${DBNITRO}/.Oracle_ODA_Functions         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
+wget -O ${DBNITRO}/.Oracle_WALL_Functions        https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
+wget -O ${DBNITRO}/.Oracle_RMAN_Functions        https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
+wget -O ${DBNITRO}/reports/dbareport_v.3.0.1.sql https://raw.githubusercontent.com/dbaribas/dbnitro/main/dbareport_v.3.0.1.sql 
 #
 chmod a+x ${DBNITRO}/.OracleMenu.sh
 chmod g+w ${DBNITRO}/.OracleMenu.sh
@@ -124,7 +126,7 @@ chown -R oracle.oinstall /etc/cron.daily/purgeLogs.sh
 #
 function SetUpGrid() {
 if [[ $(cat /etc/passwd | grep grid | wc -l) != 0 ]]; then
-  cat > /home/grid/.bash_profile <<EOF
+cat > /home/grid/.bash_profile <<EOF
 # .bash_profile
 
 # Get the aliases and functions
@@ -138,7 +140,7 @@ export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/g
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 #
 echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
-echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
+echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE OR TYPE: HELP --"
 alias db='. ${DBNITRO}/.OracleMenu.sh'
 #
 umask 0022
@@ -154,7 +156,7 @@ fi
 #
 function SetUpOracle() {
 if [[ $(cat /etc/passwd | grep oracle | wc -l) != 0 ]]; then
-  cat > /home/oracle/.bash_profile <<EOF
+cat > /home/oracle/.bash_profile <<EOF
 # .bash_profile
 
 # Get the aliases and functions
@@ -168,7 +170,7 @@ export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/o
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 #
 echo " -- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --"
-echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE --"
+echo " -- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE OR TYPE: HELP --"
 alias db='. ${DBNITRO}/.OracleMenu.sh'
 #
 umask 0022
