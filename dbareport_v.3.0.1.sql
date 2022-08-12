@@ -74,7 +74,7 @@ set define on
 col spoolname new_value spoolname_var
 select to_char(sysdate, 'YYYYMMDD_HHSS') || '_dbinfo_' || instance_name || '_' || host_name || '.html' spoolname from v$instance;
 DEFINE LOGFILE=&&spoolname_var
-spool ${DBNITRO}/reports/&LOGFILE
+spool /opt/dbnitro/reports/&LOGFILE
 set define off
 ---------------HTML-Head-----------------------------------------------------------------------------------------
 prompt <HTML>
