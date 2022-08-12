@@ -930,6 +930,10 @@ alias pscpu='ps auxf | sort -nr -k 3'
 alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
 # Aliases to check CPUINFO
 alias cpuinfo='lscpu'
+# Alias to Show Database Info
+alias INFO='INFO'
+# Alias to Create Database Report
+alias REPORT='REPORT'
 # Alias to Set Pluggable Databases
 alias pdb='set_PDB'
 # Alias to Set GoldenGate
