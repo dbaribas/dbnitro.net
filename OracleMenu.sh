@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.59"
+SoftwareVersion="1.0.61"
 DateCreation="07/01/2021"
-DateModification="15/08/2022"
+DateModification="25/08/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -64,6 +64,7 @@ fi
 #
 # ------------------------------------------------------------------------
 # Help Function
+#
 function HELP() {
 SetClear
 SepLine
@@ -79,6 +80,11 @@ SepLine
 }
 #
 # ------------------------------------------------------------------------
+# IGNORE ERRORS
+#
+IGNORE_ERRORS="OGG-00987"
+#
+# ------------------------------------------------------------------------
 # Verify OS Parameters and Variables
 #
 ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|middleware|agent"
@@ -86,11 +92,6 @@ ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome
 ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware|agent"
 ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|agent"
 ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
-#
-# ------------------------------------------------------------------------
-# IGNORE ERRORS
-#
-IGNORE_ERRORS="OGG-00987"
 #
 if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
@@ -110,8 +111,8 @@ if [[ $(uname) == "SunOS" ]]; then
   ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
   T_MEM=$(free -g -h  | egrep -i "Mem"  | awk '{ print $2 }')
   U_MEM=$(free -g -h  | egrep -i "Mem"  | awk '{ print $3 }')
   F_MEM=$(free -g -h  | egrep -i "Mem"  | awk '{ print $4 }')
@@ -128,21 +129,21 @@ elif [[ $(uname) == "AIX" ]]; then
   ORATAB="/etc/oratab"
   ORA_INST="/opt/oracle/etc/oraInst.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
-  VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
-  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
-  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
-  ALIASES=$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
+  VARIABLES_IGNORE="AUTHSTATE|DSM_LOG|EDITOR/ENV/EXTENDED_HISTORY|FCEDIT|HISTDATEFMT|HISTFILE|HISTSIZE|HOME|HOST|LANG|LC__FASTMSG|LOCPATH|LOGIN|LOGONNAME|MAIL|MAILMSG|MANPATH|MISSINGPV_VARYON|NLSPATH|NMON|ODMDIR|RES_RETRY|RES_TIMEOUT|SHELL|SSH_CLIENT|SSH_CONNECTION|SSH_TTY|TERM|TZ|USER|XAUTHORITY"
+  ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which|autoload|command|functions|history|integer|local"
+  VARIABLES=$(export | awk '{ print $1 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
+  ALIASES=$(alias    | awk '{ print $1 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
   TMP="/tmp"
   TMPDIR="${TMP}"
-  HOST=$(hostname)
+  HOST=$(hostname -s)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
+  PS=$(PS1=$'[ ${USER}@{HOST}:${PED}: ]$ ')
   ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
   T_MEM=$(svmon -G -O unit=GB | egrep -i "memory" | awk '{ print $2 }')
   U_MEM=$(svmon -G -O unit=GB | egrep -i "memory" | awk '{ print $3 }')
   F_MEM=$(svmon -G -O unit=GB | egrep -i "memory" | awk '{ print $4 }')
@@ -172,8 +173,8 @@ elif [[ $(uname) == "Linux" ]]; then
   ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"   | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"   | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
   ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"   | egrep -i "middleware"        | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#"                       | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#"                       | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq               | sort | wc -l)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y" | cut -f1 -d ':'               | uniq | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*" | cut -f1 -d ':'               | uniq | sort | wc -l)
   T_MEM=$(free -g -h  | egrep -i "Mem"  | awk '{ print $2 }')
   U_MEM=$(free -g -h  | egrep -i "Mem"  | awk '{ print $3 }')
   F_MEM=$(free -g -h  | egrep -i "Mem"  | awk '{ print $4 }')
@@ -242,21 +243,57 @@ fi
 # Unsetting and Setting OS and ORATAB Variables
 #
 function unset_var() {
-if [[ $(whoami) == "grid" ]]; then
-for U_VAR in ${VARIABLES}; do
-  unset ${U_VAR} > /dev/null 2>&1
-done
-export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
-export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
-umask 0022
-#
-elif [[ $(whoami) == "oracle" ]]; then
-for U_VAR in ${VARIABLES}; do
-  unset ${U_VAR} > /dev/null 2>&1
-done
-export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
-export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
-umask 0022
+if [[ $(uname) == "SunOS" ]]; then
+  if [[ $(whoami) == "grid" ]]; then
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
+  #
+  elif [[ $(whoami) == "oracle" ]]; then
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
+  umask 0022
+  fi
+elif [[ $(uname) == "AIX" ]]; then
+  if [[ $(whoami) == "grid" ]]; then
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/bin:/usr/sbin:/bin:/sbin:/etc:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:/home/grid/.local/bin:/home/grid/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
+  #
+  elif [[ $(whoami) == "oracle" ]]; then
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/bin:/usr/sbin:/bin:/sbin:/etc:/usr/bin/X11:/usr/local/bin:/usr/local/sbin:/home/oracle/.local/bin:/home/oracle/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
+  umask 0022
+  fi
+elif [[ $(uname) == "Linux" ]]; then
+  if [[ $(whoami) == "grid" ]]; then
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+  umask 0022
+  #
+  elif [[ $(whoami) == "oracle" ]]; then
+  for U_VAR in ${VARIABLES}; do
+    unset ${U_VAR} > /dev/null 2>&1
+  done
+  export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+  export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
+  umask 0022
+  fi
 fi
 }
 #
@@ -330,9 +367,8 @@ select 'DB_PGA_TAR_M....................: ' || ltrim(to_char(value/1024/1024, '9
 select 'DB_PGA_TAR_G....................: ' || ltrim(to_char(value/1024/1024/1024, '9G999G999D999'))                                                                                                          from v\$parameter where name = 'pga_aggregate_target';
 select 'DB_UPTIME.......................: ' || to_date(startup_time, 'dd/mm/yyyy hh24:mi')                                                                                                                    from v\$instance;
 select 'DB_UPTIME_DAYS..................: ' || (select to_date(sysdate, 'dd/mm/yyyy hh24:mi') - to_date(startup_time, 'dd/mm/yyyy hh24:mi')                                                                   from v\$instance) from dual;
-select 'DB_VER_TIME.....................: ' || to_char(max(action_time), 'dd/mm/yyyy')                                                                                                                        from DBA_REGISTRY_SQLPATCH where action in ('APPLY','UPGRADE','RU_APPLY');
-select 'DB_VER_TIME.....................: ' || to_char(max(action_time), 'dd/mm/yyyy')                                                                                                                        from registry\$history where action in ('APPLY','UPGRADE','RU_APPLY');
-select 'DB_VER_TIME_DAYS................: ' || ltrim(lpad(substr(substr(to_char((select sysdate from dual) - (select max(action_time)                                                                         from DBA_REGISTRY_SQLPATCH where action in ('APPLY','UPGRADE','RU_APPLY'))),3),2), 16, '0'), '0') from dual;
+select 'DB_VER_TIME_PATCHED.............: ' || to_char(max(action_time), 'dd/mm/yyyy')                                                                                                                        from registry\$history where action in ('APPLY','UPGRADE','RU_APPLY');
+select 'DB_VER_TIME_DAYS_AGO............: ' || ltrim(lpad(substr(substr(to_char((select sysdate from dual) - (select max(action_time)                                                                         from DBA_REGISTRY_SQLPATCH where action in ('APPLY','UPGRADE','RU_APPLY'))),3),2), 16, '0'), '0') from dual;
 select 'DB_TOT_SIZE_M...................: ' || ltrim(to_char(sum(bytes)/1024/1024, '9G999G999D999'))                                                                                                          from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);
 select 'DB_TOT_SIZE_G...................: ' || ltrim(to_char(sum(bytes)/1024/1024/1024, '9G999G999D999'))                                                                                                     from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);
 select 'DB_TOT_SIZE_T...................: ' || ltrim(to_char(sum(bytes)/1024/1024/1024/1024, '9G999G999D999'))                                                                                                from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);
@@ -378,7 +414,7 @@ select 'DB_RECYCLEBIN...................: ' || upper(value)                     
 select 'DB_ORA-0600.....................: ' || count(*)                                                                                                                                                       from sys.X\$DBGALERTEXT where MESSAGE_TEXT like '%ORA-00600%' and ORIGINATING_TIMESTAMP > sysdate-30 and rownum = 1;
 select 'DB_ORA_ERRORS...................: ' || count(*)                                                                                                                                                       from sys.X\$DBGALERTEXT where (lower(MESSAGE_TEXT) like '%ora-%' or lower(MESSAGE_TEXT) like '%error%' or lower(MESSAGE_TEXT) like '%checkpoint not complete%' or lower(MESSAGE_TEXT) like '%fail%') and ORIGINATING_TIMESTAMP > sysdate-30 and rownum = 1;
 select case when used_percent >= 80 then 'DB_TBS_SPACE.................: WARNING' when used_percent >= 90 then 'DB_TBS_SPACE.................: CRITICAL' else 'DB_TBS_SPACE....................: SIZE OK' end from dba_tablespace_usage_metrics where rownum = 1;
-SELECT 'DB_COMPONEN.....................: ' || comp_name || ' ---> ' || case when status = 'VALID' then 'YES' when status = 'OPTION OFF' then 'NO' else status end                                            from dba_registry;
+SELECT 'DB_COMPONENTS...................: ' || comp_name || ' ---> ' || case when status = 'VALID' then 'YES' when status = 'OPTION OFF' then 'NO' else status end                                            from dba_registry order by comp_name;
 quit;
 EOF
 fi
@@ -684,7 +720,6 @@ export DBS="${ORACLE_HOME}/dbs"
 export TNS="${ORACLE_HOME}/network/admin"
 export TFA="${TFA_HOME}"
 export OCK="${OCK_HOME}"
-export ORATOP="${ORACLE_HOME}/suptools/oratop"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
 export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
@@ -720,7 +755,6 @@ alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep'
 alias t='rlwrap lsnrctl'
 alias l='rlwrap lsnrctl status'
-alias orat='${ORATOP}/oratop -f -i 10 / as sysasm'
 #
 HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)
 if [[ ${HOME_STATUS} == "Y" ]]; then
