@@ -45,6 +45,10 @@ echo -e "\
 function ASM_001() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY INSTANCE PARAMETERS
+prompt ##############################################################
+prompt
 col name for a40
 col value for a60
 col description for a75
@@ -60,6 +64,10 @@ EOF
 function ASM_002() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY OPERATION
+prompt ##############################################################
+prompt
 select * from v\$asm_operation;
 quit;
 EOF
@@ -72,6 +80,10 @@ EOF
 function ASM_003() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISKS AND GROUPS
+prompt ##############################################################
+prompt
 col path for a50;
 SELECT GROUP_NUMBER
   , DISK_NUMBER
@@ -96,6 +108,10 @@ EOF
 function ASM_004() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK STATE AND COMPATIBILITY
+prompt ##############################################################
+prompt
 col compatibility for a13
 col database_compatibility for a22
 select GROUP_NUMBER
@@ -117,6 +133,10 @@ EOF
 function ASM_005() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY GENERAL INFO
+prompt ##############################################################
+prompt
 col instance_name for a30
 col cluster_name for a30
 col db_name for a20
@@ -135,6 +155,10 @@ EOF
 function ASM_006() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY LIBRARY
+prompt ##############################################################
+prompt
 col path for a40
 select name
   , path
@@ -152,6 +176,10 @@ EOF
 function ASM_007() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK GROUP SUMMARY
+prompt ##############################################################
+prompt
 col path for a35
 col Diskgroup for a15
 col DiskName for a20
@@ -183,6 +211,10 @@ EOF
 function ASM_008() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK GROUP USAGE
+prompt ##############################################################
+prompt
 col diskgroup for a15
 col diskname for a15
 col path for a35
@@ -211,7 +243,8 @@ prompt ##############################################################
 prompt # ASM: REMOVING ALL ARCHIVELOGS FROM ASM
 prompt ##############################################################
 prompt
-SELECT 'alter diskgroup '||dg.name||' drop file ''+'||dg.name||''||SYS_CONNECT_BY_PATH(al.name,'/')||''';'
+col command for a180
+SELECT 'alter diskgroup '||dg.name||' drop file ''+'||dg.name||''||SYS_CONNECT_BY_PATH(al.name,'/')||''';' as command
 FROM v\$asm_alias al, v\$asm_file fi, v\$asm_diskgroup dg
 WHERE al.file_number = fi.file_number(+)
 AND al.group_number = dg.group_number
@@ -229,6 +262,10 @@ EOF
 function ASM_010() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK GROUP SIZE AND USAGE
+prompt ##############################################################
+prompt
 SELECT name
   , type
   , total_mb
@@ -247,6 +284,10 @@ EOF
 function ASM_011() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK GROUP SIZE AND USAGE DETAILS
+prompt ##############################################################
+prompt
 col name for a15
 col lable for a15
 col path for a70
@@ -271,6 +312,10 @@ EOF
 function ASM_012() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY ALL DISKGROUPS CONTENTS
+prompt ##############################################################
+prompt
 col full_path format a150
 col full_alias_path format a150
 SELECT concat('+' || gname, sys_connect_by_path(aname, '/')) full_alias_path
@@ -290,6 +335,10 @@ EOF
 function ASM_013() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY OPERATION DETAIL
+prompt ##############################################################
+prompt
 select GROUP_NUMBER
   , OPERATION
   , STATE
@@ -308,6 +357,10 @@ EOF
 function ASM_014() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISKS SIZE AND STATUS
+prompt ##############################################################
+prompt
 col NAME for a15
 select GROUP_NUMBER DG#
   , name
@@ -403,7 +456,11 @@ EOF
 function ASM_016() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-col PATH for a15
+prompt ##############################################################
+prompt # ASM: VERIFY DISKS TYPE AND STATUS
+prompt ##############################################################
+prompt
+col PATH for a60
 col DG_NAME for a15
 col DG_STATE for a10
 col FAILGROUP for a10
@@ -429,6 +486,10 @@ EOF
 function ASM_017() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISKS READ AND WRITE VALUES
+prompt ##############################################################
+prompt
 SELECT SUBSTR(dgs.name,1,10) AS diskgroup
   , SUBSTR(ds.name,1,10) AS asmdisk
   , ds.mount_status
@@ -456,6 +517,8 @@ prompt ##############################################################
 prompt # ASM: VERIFY FILES IN ASM NOT KNOWN TO DATABASE
 prompt ##############################################################
 prompt
+col full_alias_path for a120
+col file_type for a30
 select concat('+'||gname, sys_connect_by_path(aname, '/')) full_alias_path
   , system_created
   , alias_directory
@@ -474,7 +537,7 @@ from (select b.name gname
       and a.file_incarnation = c.incarnation(+))
 where alias_directory = 'N'
 start with (mod(pindex, power(2, 24))) = 0
-and rindex in (select a.reference_index from v\$asm_alias a, v\$asm_diskgroup b where a.group_number = b.group_number and (mod(a.parent_index, power(2, 24))) = 0 and a.name = '&DATABASENAME')
+and rindex in (select a.reference_index from v\$asm_alias a, v\$asm_diskgroup b where a.group_number = b.group_number and (mod(a.parent_index, power(2, 24))) = 0)
 connect by prior rindex = pindex;
 quit;
 EOF
@@ -487,6 +550,10 @@ EOF
 function ASM_019() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK GROUP % USAGE
+prompt ##############################################################
+prompt
 column "Diskgroup" format A30
 column "Imbalance" format 99.9 Heading "Percent|Imbalance"
 column "Variance" format 99.9 Heading "Percent|Disk Size|Variance"
@@ -516,6 +583,10 @@ EOF
 function ASM_020() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY DISK GROUPS FREE SPACE
+prompt ##############################################################
+prompt
 col name for a30
 select NAME
   , ALLOCATION_UNIT_SIZE
@@ -537,6 +608,10 @@ EOF
 function ASM_021() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # 
+prompt ##############################################################
+prompt
 
 quit;
 EOF
@@ -549,6 +624,10 @@ EOF
 function ASM_022() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY CANDIDATE DISKS
+prompt ##############################################################
+prompt
 BREAK ON report ON disk_group_name SKIP 1
 col DISK_GROUP_NAME for a20
 col DISK_FILE_PATH for a50
@@ -572,6 +651,10 @@ EOF
 function ASM_023() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # ASM: VERIFY PATH AND ALOCATED SIZE
+prompt ##############################################################
+prompt
 col GROUP_NUMBER format 9999 heading "GRP_NO"
 col "GRP_NAME" format a24
 col "DSK_NAME" format a24
@@ -587,7 +670,8 @@ select d.GROUP_NUMBER
   , d.free_MB "FREE_MB"
   , d.free_MB*100/d.OS_MB "PCT_FREE" 
 from V\$asm_disk d, v\$asm_diskgroup g 
-where d.GROUP_NUMBER = g.GROUP_NUMBER;
+where d.GROUP_NUMBER = g.GROUP_NUMBER
+order by 1,2,3;
 quit;
 EOF
 }
@@ -603,7 +687,7 @@ prompt ##############################################################
 prompt # ASM: EACH FOLDER UTILIZATION IN MB BY DISKGROUP
 prompt ##############################################################
 prompt
-column inst format a10 heading 'Inst'
+column inst format a20 heading 'Inst'
 column file_type format a20 heading 'File type'
 column mg format 99,999,999
 break on inst skip 1
@@ -652,6 +736,11 @@ EOF
 function ASM_025() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+select to_char(sysdate, 'DD-MON-YYYY HH24:MI:SS') current_time from dual;
+prompt ##############################################################
+prompt # ASM: BLOCKER IN ASM
+prompt ##############################################################
+prompt
 column username format a10
 column module format a50
 column blocker format a7
@@ -667,11 +756,6 @@ col s# format 99999
 col server format a10
 col client format a10
 col pname format a10
-select to_char(sysdate, 'DD-MON-YYYY HH24:MI:SS' ) current_time from dual;
-prompt ##############################################################
-prompt # ASM: Blocker in ASM
-prompt ##############################################################
-prompt
 select b.inst_id||'/'||b.sid blocker
 -- , s.module
   , w.inst_id||'/'||w.sid waiter
@@ -700,13 +784,16 @@ EOF
 }
 #
 #########################################################################################################
-# ASM VERIFY DATABASE VERSION
+# ASM: 
 #########################################################################################################
 #
 function ASM_026() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-
+prompt ##############################################################
+prompt # 
+prompt ##############################################################
+prompt
 
 
 quit;
@@ -714,13 +801,16 @@ EOF
 }
 #
 #########################################################################################################
-# ASM VERIFY DATABASE VERSION
+# ASM:
 #########################################################################################################
 #
 function ASM_027() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-
+prompt ##############################################################
+prompt # 
+prompt ##############################################################
+prompt
 
 
 quit;
@@ -728,13 +818,16 @@ EOF
 }
 #
 #########################################################################################################
-# ASM VERIFY DATABASE VERSION
+# ASM:
 #########################################################################################################
 #
 function ASM_028() {
 sqlplus -S / as sysdba <<EOF
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-
+prompt ##############################################################
+prompt # 
+prompt ##############################################################
+prompt
 
 
 quit;
