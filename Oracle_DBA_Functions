@@ -21,57 +21,57 @@ function DBA_HELP() {
 SetClear
 SepLine
 echo -e "\
-|#[ DBA_001 ] DBA: VERIFY DATABASE VERSION                            |#|[ DBA_002 ] DBA: VERIFY INSTALLED PATCHES - DETAILS      |#|
-|#[ DBA_003 ] DBA: INSTANCE INFORMATION + PGA & SGA                   |#|[ DBA_004 ] DBA: GENERAL TUNING VIEW                     |#|
-|#[ DBA_005 ] DBA: DATABASE GROWN ON LASTS MONTHS                     |#|[ DBA_006 ] DBA: CONNECTIONS AVERAGE PER HOUR            |#|
-|#[ DBA_007 ] DBA: TOP 20 DB-CPU ACTIVITY                             |#|[ DBA_008 ] DBA: VERIFY SESSIONS PER MEMORY              |#|
-|#[ DBA_009 ] DBA: DATABASE SIZE                                      |#|[ DBA_010 ] DBA: VERIFY SESSIONS PER I/O                 |#|
-|#[ DBA_011 ] DBA: HIT RATIO THE LASTS 30 DAYS                        |#|[ DBA_012 ] DBA: VERIFY LONG OPERATIONS                  |#|
-|#[ DBA_013 ] DBA: INVALIDS OBJECTS [ @ ]                             |#|[ DBA_014 ] DBA: JOBS CONTROL OF THE CLIENT [ @ ]        |#|
-|#[ DBA_015 ] DBA: MATERIALIZEDS VIEWS DISABLED                       |#|[ DBA_016 ] DBA: VERIFY RUNNING JOBS                     |#| 
-|#[ DBA_017 ] DBA: KILL A RUNNING SESSION [ @ ]                       |#|[ DBA_018 ] DBA: VERIFY PROFILE INFORMATION              |#| 
-|#[ DBA_019 ] DBA: BACKUP STATISTICS                                  |#|[ DBA_020 ] DBA: QTD OF ARCHIVES PER HOUR                |#| 
-|#[ DBA_021 ] DBA: LAST FILE OF LAST BACKUP ARCH - RMAN               |#|[ DBA_022 ] DBA: LAST FILE OF LAST BACKUP FULL - RMAN    |#| 
-|#[ DBA_023 ] DBA: ARCHIVES GENERATED PER DAY                         |#|[ DBA_024 ] DBA: BACKUP LOG OF LAST BACKUP FULL - RMAN   |#| 
-|#[ DBA_025 ] DBA: BACKUP LOG OF LASTS ARCHIVES - RMAN                |#|[ DBA_026 ] DBA: ERRORS ON ALERT LOG FILE                |#| 
-|#[ DBA_027 ] DBA: ORACLE ENTERPRISE MANAGER ALERT                    |#|[ DBA_028 ] DBA: CAPTURE STATISTICS OF DATA DICTIONARY   |#| 
-|#[ DBA_029 ] DBA: CAPTURE STATISTICS OF ALL DATABASE                 |#|[ DBA_030 ] DBA: BLOCKING LOCKS                          |#| 
-|#[ DBA_031 ] DBA: LOCKED OBJECTS                                     |#|[ DBA_032 ] DBA: BLOCKING LOCKS [ SUMARY ]               |#| 
-|#[ DBA_033 ] DBA: BLOCKING LOCKS [ USER DETAILS ]                    |#|[ DBA_034 ] DBA: BLOCKING LOCKS [ WAITING SQL ]          |#| 
-|#[ DBA_035 ] DBA: LOCKED OBJECTS [ DETAILS ]                         |#|[ DBA_036 ] DBA: DML AND DDL LOCKS                       |#| 
-|#[ DBA_037 ] DBA: DML TABLE LOCKS TIME                               |#|[ DBA_038 ] DBA: VERIFY SESSIONS [ @ ]                   |#| 
-|#[ DBA_039 ] DBA: TOP 20 DATABASE SESSIONS                           |#|[ DBA_040 ] DBA: VERIFY TABLESPACES                      |#| 
-|#[ DBA_041 ] DBA: VERIFY STATISTICS - TABLES [ @ ]                   |#|[ DBA_042 ] DBA: VERIFY STATISTICS - INDEXES [ @ ]       |#| 
-|#[ DBA_043 ] DBA: CAPTURE STATISTICS - OWNER [ @ ]                   |#|[ DBA_044 ] DBA: VALIDATE OBJECTS FROM ONE OWNER [ @ ]   |#| 
-|#[ DBA_045 ] DBA: VERIFY TABLES SIZE, VALIDATE OBJ - OWNERS [ @ ]    |#|[ DBA_046 ] DBA: OWNER X OBJECTS X TYPE X QTD            |#| 
-|#[ DBA_047 ] DBA: VERIFY INSTANCE CHARACTERSET                       |#|[ DBA_048 ] DBA: CACHE HIT RATIO [ GOOD: > 90% ]         |#| 
-|#[ DBA_049 ] DBA: VERIFY INSTANCE INSTALLED PRODUCTS                 |#|[ DBA_050 ] DBA: INSTANCE PROPERTIES                     |#| 
-|#[ DBA_051 ] DBA: INSTANCE OPTIONS                                   |#|[ DBA_052 ] DBA: INSTANCE DIFFERENTS PARAMETERS          |#| 
-|#[ DBA_053 ] DBA: INSTANCE MODIFICABLES PARAMETERS                   |#|[ DBA_054 ] DBA: VERIFY DEAD LOCKS                       |#| 
-|#[ DBA_055 ] DBA: VERIFY SESSIONS PER I/O CONSUME                    |#|[ DBA_056 ] DBA: VERIFY FREE SEGMENTS ON DATAFILES       |#| 
-|#[ DBA_057 ] DBA: VERIFY WHICH DATAFILE CAN BE RESIZED [ @ ]         |#|[ DBA_058 ] DBA: VERIFY RECYCLEBIN                       |#| 
-|#[ DBA_059 ] DBA: CLEAR REYICLEBIN                                   |#|[ DBA_060 ] DBA: VERIFY DATABASE SESSIONS                |#| 
-|#[ DBA_061 ] DBA: VERIFY ACTIVES SESSIONS PER OWNER                  |#|[ DBA_062 ] DBA: UNLOCKING A USER [ @ ]                  |#| 
-|#[ DBA_063 ] DBA: LOCKING A USER [ @ ]                               |#|[ DBA_064 ] DBA: REDO GROUPS INFORMATIONS                |#| 
-|#[ DBA_065 ] DBA: SHOW ALL CORRUPTED OBJECTS                         |#|[ DBA_066 ] DBA: VERIFY SPACE OF FLASH RECOVERY AREA     |#| 
-|#[ DBA_067 ] DBA: TOTAL USERS COUNT ON DATABASE                      |#|[ DBA_068 ] DBA: VERIFY CONTROLFILES                     |#| 
-|#[ DBA_069 ] DBA: VERIFY CONSUME PER CPU                             |#|[ DBA_070 ] DBA: QUICK TUNE                              |#| 
-|#[ DBA_071 ] DBA: VERIFY RECOMENDATIONS TUNING TOP 20 [ @ ]          |#|[ DBA_072 ] DBA: VERIFY TOP 20 TUNING HISTORY [ @ ]      |#| 
-|#[ DBA_073 ] DBA: VERIFY BACKGROUND PROCESSESS                       |#|[ DBA_074 ] DBA: TOP 100 QUERY RECOMMENDATIONS           |#| 
-|#[ DBA_075 ] DBA: VERIFY DYNAMICS PARAMETERS [ SPFILE ]              |#|[ DBA_076 ] DBA: VERIFY DBA FEATURES USAGE STATISTICS    |#| 
-|#[ DBA_077 ] DBA: VERIFY DBA HIGH WATER MARK STATISTICS              |#|[ DBA_078 ] DBA: GLOBAL INFORMATION ABOUT I/O            |#| 
-|#[ DBA_079 ] DBA: WHICH SEG. HAVE TOP LOGICAL I/O - PHYSICAL I/O     |#|[ DBA_080 ] DBA: VERIFY DBLINKS & FOLDERS INFO           |#| 
-|#[ DBA_081 ] DBA: IDENTIFYING WHEN A PASSWORD WAS LAST CHANGED       |#|[ DBA_082 ] DBA: VERIFY UNDO SEGMENTS                    |#| 
-|#[ DBA_083 ] DBA: VERIFY ALL SQL STATEMENTS                          |#|[ DBA_084 ] DBA: CLONE USER COMMANDS [ @ ]               |#| 
-|#[ DBA_085 ] DBA: VERIFY ALL INFOS ABOUT SYSAUX                      |#|[ DBA_086 ] DBA: VERIFY ALL INFOS ABOUT I/O + LATENCY    |#| 
-|#[ DBA_087 ] DBA: VERIFY MAIN TOP WAIT EVENTS PER WEEK               |#|[ DBA_088 ] DBA: VERIFY OBJECTS SIZE                     |#| 
-|#[ DBA_089 ] DBA: GENERAL DATABASE OVERVIEW                          |#|[ DBA_090 ] DBA: DATABASE DASHBOARD                      |#| 
-|#[ DBA_091 ] DBA: VERIFY ALL SQL IDS STATEMENTS                      |#|[ DBA_092 ] DBA: VERIFY NLS CONFIGURATION                |#| 
-|#[ DBA_093 ] DBA: VERIFY FAILED LOGIN                                |#|[ DBA_094 ] DBA: VERIFY ALL SQL IDS STATEMENTS           |#|
-|#[ DBA_095 ] DBA: VERIFY ALL PATCHES APPLIED                         |#|[ DBA_096 ] DBA: VERIFY CPU USAGE BY MINUTE              |#|
-|#[ DBA_097 ] DBA: VERIFY STANDBY CONFIGURATION                       |#|[ DBA_098 ] DBA: VERIFY GRANTS AND PERMISSIONS BY OWNER  |#|
-|#[ DBA_099 ] DBA: USER DETAILS SESSIONS                              |#|[ DBA_100 ] DBA: VERIFY BACKUP RUNNING ON REAL TIME      |#|
-|#[ DBA_101 ] DBA: VERIFY DATABASE COMPONENTS FROM REGISTRY           |#|[ DBA_102 ] DBA:                                         |#|"
+|#[ DBA_001 ] DBA: VERIFY DATABASE VERSION                            |#|[ DBA_002 ] DBA: VERIFY INSTALLED PATCHES - DETAILS             |#|
+|#[ DBA_003 ] DBA: INSTANCE INFORMATION + PGA & SGA                   |#|[ DBA_004 ] DBA: GENERAL TUNING VIEW                            |#|
+|#[ DBA_005 ] DBA: DATABASE GROWN ON LASTS MONTHS                     |#|[ DBA_006 ] DBA: CONNECTIONS AVERAGE PER HOUR                   |#|
+|#[ DBA_007 ] DBA: TOP 20 DB-CPU ACTIVITY                             |#|[ DBA_008 ] DBA: VERIFY SESSIONS PER MEMORY                     |#|
+|#[ DBA_009 ] DBA: DATABASE SIZE                                      |#|[ DBA_010 ] DBA: VERIFY SESSIONS PER I/O                        |#|
+|#[ DBA_011 ] DBA: HIT RATIO THE LASTS 30 DAYS                        |#|[ DBA_012 ] DBA: VERIFY LONG OPERATIONS                         |#|
+|#[ DBA_013 ] DBA: INVALIDS OBJECTS [ @ ]                             |#|[ DBA_014 ] DBA: JOBS CONTROL OF THE CLIENT [ @ ]               |#|
+|#[ DBA_015 ] DBA: MATERIALIZEDS VIEWS DISABLED                       |#|[ DBA_016 ] DBA: VERIFY RUNNING JOBS                            |#| 
+|#[ DBA_017 ] DBA: KILL A RUNNING SESSION [ @ ]                       |#|[ DBA_018 ] DBA: VERIFY PROFILE INFORMATION                     |#| 
+|#[ DBA_019 ] DBA: BACKUP STATISTICS                                  |#|[ DBA_020 ] DBA: QTD OF ARCHIVES PER HOUR                       |#| 
+|#[ DBA_021 ] DBA: LAST FILE OF LAST BACKUP ARCH - RMAN               |#|[ DBA_022 ] DBA: LAST FILE OF LAST BACKUP FULL - RMAN           |#| 
+|#[ DBA_023 ] DBA: ARCHIVES GENERATED PER DAY                         |#|[ DBA_024 ] DBA: BACKUP LOG OF LAST BACKUP FULL - RMAN          |#| 
+|#[ DBA_025 ] DBA: BACKUP LOG OF LASTS ARCHIVES - RMAN                |#|[ DBA_026 ] DBA: ERRORS ON ALERT LOG FILE                       |#| 
+|#[ DBA_027 ] DBA: ORACLE ENTERPRISE MANAGER ALERT                    |#|[ DBA_028 ] DBA: CAPTURE STATISTICS OF DATA DICTIONARY          |#| 
+|#[ DBA_029 ] DBA: CAPTURE STATISTICS OF ALL DATABASE                 |#|[ DBA_030 ] DBA: BLOCKING LOCKS                                 |#| 
+|#[ DBA_031 ] DBA: LOCKED OBJECTS                                     |#|[ DBA_032 ] DBA: BLOCKING LOCKS [ SUMARY ]                      |#| 
+|#[ DBA_033 ] DBA: BLOCKING LOCKS [ USER DETAILS ]                    |#|[ DBA_034 ] DBA: BLOCKING LOCKS [ WAITING SQL ]                 |#| 
+|#[ DBA_035 ] DBA: LOCKED OBJECTS [ DETAILS ]                         |#|[ DBA_036 ] DBA: DML AND DDL LOCKS                              |#| 
+|#[ DBA_037 ] DBA: DML TABLE LOCKS TIME                               |#|[ DBA_038 ] DBA: VERIFY SESSIONS [ @ ]                          |#| 
+|#[ DBA_039 ] DBA: TOP 20 DATABASE SESSIONS                           |#|[ DBA_040 ] DBA: VERIFY TABLESPACES                             |#| 
+|#[ DBA_041 ] DBA: VERIFY STATISTICS - TABLES [ @ ]                   |#|[ DBA_042 ] DBA: VERIFY STATISTICS - INDEXES [ @ ]              |#| 
+|#[ DBA_043 ] DBA: CAPTURE STATISTICS - OWNER [ @ ]                   |#|[ DBA_044 ] DBA: VALIDATE OBJECTS FROM ONE OWNER [ @ ]          |#| 
+|#[ DBA_045 ] DBA: VERIFY TABLES SIZE, VALIDATE OBJ - OWNERS [ @ ]    |#|[ DBA_046 ] DBA: OWNER X OBJECTS X TYPE X QTD                   |#| 
+|#[ DBA_047 ] DBA: VERIFY INSTANCE CHARACTERSET                       |#|[ DBA_048 ] DBA: CACHE HIT RATIO [ GOOD: > 90% ]                |#| 
+|#[ DBA_049 ] DBA: VERIFY INSTANCE INSTALLED PRODUCTS                 |#|[ DBA_050 ] DBA: INSTANCE PROPERTIES                            |#| 
+|#[ DBA_051 ] DBA: INSTANCE OPTIONS                                   |#|[ DBA_052 ] DBA: INSTANCE DIFFERENTS PARAMETERS                 |#| 
+|#[ DBA_053 ] DBA: INSTANCE MODIFICABLES PARAMETERS                   |#|[ DBA_054 ] DBA: VERIFY DEAD LOCKS                              |#| 
+|#[ DBA_055 ] DBA: VERIFY SESSIONS PER I/O CONSUME                    |#|[ DBA_056 ] DBA: VERIFY FREE SEGMENTS ON DATAFILES              |#| 
+|#[ DBA_057 ] DBA: VERIFY WHICH DATAFILE CAN BE RESIZED [ @ ]         |#|[ DBA_058 ] DBA: VERIFY RECYCLEBIN                              |#| 
+|#[ DBA_059 ] DBA: CLEAR REYICLEBIN                                   |#|[ DBA_060 ] DBA: VERIFY DATABASE SESSIONS                       |#| 
+|#[ DBA_061 ] DBA: VERIFY ACTIVES SESSIONS PER OWNER                  |#|[ DBA_062 ] DBA: UNLOCKING A USER [ @ ]                         |#| 
+|#[ DBA_063 ] DBA: LOCKING A USER [ @ ]                               |#|[ DBA_064 ] DBA: REDO GROUPS INFORMATIONS                       |#| 
+|#[ DBA_065 ] DBA: SHOW ALL CORRUPTED OBJECTS                         |#|[ DBA_066 ] DBA: VERIFY SPACE OF FLASH RECOVERY AREA            |#| 
+|#[ DBA_067 ] DBA: TOTAL USERS COUNT ON DATABASE                      |#|[ DBA_068 ] DBA: VERIFY CONTROLFILES                            |#| 
+|#[ DBA_069 ] DBA: VERIFY CONSUME PER CPU                             |#|[ DBA_070 ] DBA: QUICK TUNE                                     |#| 
+|#[ DBA_071 ] DBA: VERIFY RECOMENDATIONS TUNING TOP 20 [ @ ]          |#|[ DBA_072 ] DBA: VERIFY TOP 20 TUNING HISTORY [ @ ]             |#| 
+|#[ DBA_073 ] DBA: VERIFY BACKGROUND PROCESSESS                       |#|[ DBA_074 ] DBA: TOP 100 QUERY RECOMMENDATIONS                  |#| 
+|#[ DBA_075 ] DBA: VERIFY DYNAMICS PARAMETERS [ SPFILE ]              |#|[ DBA_076 ] DBA: VERIFY DBA FEATURES USAGE STATISTICS           |#| 
+|#[ DBA_077 ] DBA: VERIFY DBA HIGH WATER MARK STATISTICS              |#|[ DBA_078 ] DBA: GLOBAL INFORMATION ABOUT I/O                   |#| 
+|#[ DBA_079 ] DBA: WHICH SEG. HAVE TOP LOGICAL I/O - PHYSICAL I/O     |#|[ DBA_080 ] DBA: VERIFY DBLINKS & FOLDERS INFO                  |#| 
+|#[ DBA_081 ] DBA: IDENTIFYING WHEN A PASSWORD WAS LAST CHANGED       |#|[ DBA_082 ] DBA: VERIFY UNDO SEGMENTS                           |#| 
+|#[ DBA_083 ] DBA: VERIFY ALL SQL STATEMENTS                          |#|[ DBA_084 ] DBA: CLONE USER COMMANDS [ @ ]                      |#| 
+|#[ DBA_085 ] DBA: VERIFY ALL INFOS ABOUT SYSAUX                      |#|[ DBA_086 ] DBA: VERIFY ALL INFOS ABOUT I/O + LATENCY           |#| 
+|#[ DBA_087 ] DBA: VERIFY MAIN TOP WAIT EVENTS PER WEEK               |#|[ DBA_088 ] DBA: VERIFY OBJECTS SIZE                            |#| 
+|#[ DBA_089 ] DBA: GENERAL DATABASE OVERVIEW                          |#|[ DBA_090 ] DBA: DATABASE DASHBOARD                             |#| 
+|#[ DBA_091 ] DBA: VERIFY ALL SQL IDS STATEMENTS                      |#|[ DBA_092 ] DBA: VERIFY NLS CONFIGURATION                       |#| 
+|#[ DBA_093 ] DBA: VERIFY FAILED LOGIN                                |#|[ DBA_094 ] DBA: VERIFY ALL SQL IDS STATEMENTS                  |#|
+|#[ DBA_095 ] DBA: VERIFY ALL PATCHES APPLIED                         |#|[ DBA_096 ] DBA: VERIFY CPU USAGE BY MINUTE                     |#|
+|#[ DBA_097 ] DBA: VERIFY STANDBY CONFIGURATION                       |#|[ DBA_098 ] DBA: VERIFY GRANTS AND PERMISSIONS BY OWNER         |#|
+|#[ DBA_099 ] DBA: USER DETAILS SESSIONS                              |#|[ DBA_100 ] DBA: VERIFY BACKUP RUNNING ON REAL TIME             |#|
+|#[ DBA_101 ] DBA: VERIFY DATABASE COMPONENTS FROM REGISTRY           |#|[ DBA_102 ] DBA: VERIFY ORACLE NET SEND AND RECEIVE SIZE VOLUME |#|"
 SepLine
 }
 #
@@ -650,14 +650,14 @@ EOF
 }
 #
 #########################################################################################################
-# DATABASE SIZE
+# DBA: DATABASE SIZE
 #########################################################################################################
 #
 function DBA_009() {
 sqlplus -S / as sysdba <<EOF
 set pages 1000 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # DATABASE SIZE                                              #
+prompt # DBA: DATABASE SIZE                                              #
 prompt ##############################################################
 col "SIZE MB" for a20
 col "SIZE GB" for a20
@@ -672,6 +672,15 @@ union all
 select sum(bytes * members) from v\$log
 union all
 select sum(block_size * file_size_blks) from v\$controlfile);
+prompt
+prompt ##############################################################
+prompt # DBA: DATAFILES AND DATABASE SIZE
+prompt ##############################################################
+col files for a30
+col db_size for a30
+select 'Number of Files: ' || dbms_xplan.FORMAT_NUMBER(count(*)) as FILES
+  , 'Database Size: ' || dbms_xplan.FORMAT_SIZE(sum(bytes)) as DB_SIZE
+from dba_data_files;
 quit;
 EOF
 }
@@ -6554,7 +6563,45 @@ order by 1,2;
 quit;
 EOF
 }
-
+#
+#########################################################################################################
+# DBA: VERIFY ORACLE NET SEND AND RECEIVE SIZE VOLUME
+#########################################################################################################
+#
+function DBA_102() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 1000 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+col name for a50
+col event for a50
+col format_size for a20
+col format_size2 for a20
+col FORMAT_NUMBER for a20
+col FORMAT_NUMBER2 for a20
+prompt ##############################################################
+prompt # DBA: VERIFY ORACLE NET SEND AND RECEIVE SIZE VOLUME
+prompt ##############################################################
+select name
+  , dbms_xplan.FORMAT_SIZE(value) as FORMAT_SIZE
+  , dbms_xplan.FORMAT_SIZE2(value) FORMAT_SIZE2 
+from v\$sysstat 
+where name like 'bytes%SQL*Net%' 
+and value > 0 
+order by value desc;
+prompt
+prompt ##############################################################
+prompt # DBA: VERIFY ORACLE NET SEND AND RECEIVE SIZE VOLUME
+prompt ##############################################################
+select event
+  , dbms_xplan.FORMAT_NUMBER(total_waits) as FORMAT_NUMBER
+  , dbms_xplan.FORMAT_NUMBER2(total_waits) as FORMAT_NUMBER2 
+from v\$system_event 
+where event like '%SQL*Net%' 
+order by total_waits desc;
+quit;
+EOF
+}
 #
 #########################################################################################################
 # Finish of the System

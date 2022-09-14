@@ -50,6 +50,7 @@
 -------                http://www.oracle.com/us/corporate/license-management-services/index.html
 -------
 ------- Mon-YYYY
+------- Oct-2021 - Updated to handle version 21c and reflect versions 19c and higher accepting up to 3 user-created PDBs without Multitenant licensing
 ------- Apr-2018 - Updated to handle version 18.1 and align to the new versioning model (Doc ID 2285040.1)
 ------- Feb-2017 - Updated to handle version 12.2
 ------- Jul-2016 - removed entries related to Automatic SQL Tuning Advisor maintenance window tasks
@@ -70,18 +71,17 @@ col VERSION                format a11 wrap
 col BANNER                 format a80 wrap
 col CONNECTED_TO           format a12 wrap
 col CON_ID                 format 99999 wrap
-col LAST_DBA_FUS_VERSION   format a17 wrap  
-col PRODUCT                format a51 wrap
+col LAST_DBA_FUS_VERSION   format a17 wrap
+col PRODUCT                format a40 wrap
 col FEATURE_BEING_USED     format a56 wrap
-col USAGE                  format a20 wrap
-col EXTRA_FEATURE_INFO     format a80 wrap
+col USAGE                  format a24 wrap
+col EXTRA_FEATURE_INFO     format a28 wrap
 col CURRENTLY_USED         format a14 wrap
 col CURRENT_CONTAINER_NAME format a30 wrap
 col CURRENT_CONTAINER_ID   format a20 wrap
 col PARAMETER              format a30 wrap
 col VALUE                  format a20 wrap
-col FIRST_USAGE_DATE       format a16 wrap
-alter session set nls_date_format='YYYY-MM-DD HH24:MI';
+alter session set nls_date_format='YYYY-MM-DD_HH24:MI';
 -- spool options_packs_usage_statistics.txt
 prompt OVERALL INFORMATION
 select i.HOST_NAME
@@ -94,8 +94,8 @@ select i.HOST_NAME
   , i.VERSION
   , v.BANNER
 from V$INSTANCE i
-  , V$DATABASE d
-  , V$VERSION v
+   , V$DATABASE d
+   , V$VERSION v
 where v.BANNER LIKE 'Oracle%' 
 or v.BANNER like 'Personal Oracle%';
 prompt
@@ -117,7 +117,8 @@ select c.CON_ID
          when c.OPEN_MODE not like 'READ%' then 'NOT OPEN! DBA_FEATURE_USAGE_STATISTICS is not accessible.'
          when c.CON_ID = sys_context('USERENV', 'CON_ID') and d.CDB='YES' and c.CON_ID not in (0, 1) then '*CURRENT CONTAINER. Only data for this PDB will be listed.'
          when c.CON_ID = sys_context('USERENV', 'CON_ID') and d.CDB='YES' and c.CON_ID = 1 then '*CURRENT CONTAINER is CDB$ROOT. Information for all open PDBs will be listed.'
-         else '' end as REMARKS
+         else ''
+    end as REMARKS
 from V$CONTAINERS c
    , V$DATABASE d
 order by CON_ID;
@@ -167,12 +168,11 @@ select distinct &&DCID as CON_ID
   , case when (select trim(max(LAST_SAMPLE_DATE) || max(TOTAL_SAMPLES)) from &&DFUS.FEATURE_USAGE_STATISTICS) = '0' then 'NEVER SAMPLED !!!' else '' end as REMARKS
 from &&DFUS.FEATURE_USAGE_STATISTICS
 order by CON_ID;
-prompt
+col CON_ID  NOPRINT
 prompt
 prompt ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 prompt PRODUCT USAGE
 prompt ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-col CON_ID  NOPRINT
 with
 MAP as (
 -- mapping between features tracked by DBA_FUS and their corresponding database products (options or packs)
@@ -242,12 +242,14 @@ SELECT '.HW'                                                 , 'Hybrid Columnar 
 SELECT '.HW'                                                 , 'Hybrid Columnar Compression'                             , '^12\.[2-9]|^1[89]\.|^2[0-9]\.'                , ' '       from dual union all
 SELECT '.HW'                                                 , 'Hybrid Columnar Compression Conventional Load'           , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT '.HW'                                                 , 'Hybrid Columnar Compression Row Level Locking'           , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
+SELECT '.HW'                                                 , 'ODA Infrastructure'                                       , '^1[9]\.|^2[0-9]\.'                           , ' '       from dual union all
 SELECT '.HW'                                                 , 'Sun ZFS with EHCC'                                       , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT '.HW'                                                 , 'ZFS Storage'                                             , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT '.HW'                                                 , 'Zone maps'                                               , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT 'Label Security'                                      , 'Label Security'                                          , '^11\.2|^1[289]\.|^2[0-9]\.'                   , ' '       from dual union all
-SELECT 'Multitenant'                                         , 'Oracle Multitenant'                                      , '^1[289]\.|^2[0-9]\.'                          , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
-SELECT 'Multitenant'                                         , 'Oracle Pluggable Databases'                              , '^1[289]\.|^2[0-9]\.'                          , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
+SELECT 'Multitenant'                                         , 'Oracle Multitenant'                                      , '^1[28]\.'                                     , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
+SELECT 'Multitenant'                                         , 'Oracle Multitenant'                                      , '^1[9]\.|^2[0-9]\.'                            , 'C005'    from dual union all -- licensing required only when more than three PDB containers are created
+SELECT 'Multitenant'                                         , 'Oracle Pluggable Databases'                              , '^1[28]\.'                                     , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
 SELECT 'OLAP'                                                , 'OLAP - Analytic Workspaces'                              , '^11\.2|^1[289]\.|^2[0-9]\.'                   , ' '       from dual union all
 SELECT 'OLAP'                                                , 'OLAP - Cubes'                                            , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT 'Partitioning'                                        , 'Partitioning (user)'                                     , '^11\.2|^1[289]\.|^2[0-9]\.'                   , ' '       from dual union all
@@ -276,17 +278,21 @@ SELECT 'Tuning Pack'                                         , 'SQL Tuning Advis
 SELECT 'Tuning Pack'                                         , 'SQL Tuning Set (user)'                                   , '^1[289]\.|^2[0-9]\.'                          , 'INVALID' from dual union all -- no longer part of Tuning Pack
 SELECT 'Tuning Pack'                                         , 'Tuning Pack'                                             , '^11\.2'                                       , ' '       from dual union all
 SELECT '.WebLogic Server Management Pack Enterprise Edition' , 'EM AS Provisioning and Patch Automation Pack'            , '^11\.2'                                       , ' '       from dual union all
-select '' PRODUCT, '' FEATURE, '' MVERSION, '' CONDITION from dual),
+select '' PRODUCT, '' FEATURE, '' MVERSION, '' CONDITION from dual
+),
 FUS as (
 -- the current data set to be used: DBA_FEATURE_USAGE_STATISTICS or CDB_FEATURE_USAGE_STATISTICS for Container Databases(CDBs)
 select &&DCID as CON_ID
   , &&DCNA as CON_NAME
   ,
     -- Detect and mark with Y the current DBA_FUS data set = Most Recent Sample based on LAST_SAMPLE_DATE
-    case when DBID || '#' || VERSION || '#' || to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD HH24:MI') = 
-    first_value (DBID    ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
-    first_value (VERSION ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' || 
-    first_value (to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD HH24:MI')) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) then 'Y' else 'N' end as CURRENT_ENTRY
+    case when DBID || '#' || VERSION || '#' || to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD_HH24:MI') =
+                first_value (DBID    ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
+                first_value (VERSION ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
+                first_value (to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD_HH24:MI')) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc)
+           then 'Y'
+           else 'N'
+    end as CURRENT_ENTRY
   , NAME            
   , LAST_SAMPLE_DATE
   , DBID            
@@ -294,40 +300,41 @@ select &&DCID as CON_ID
   , DETECTED_USAGES 
   , TOTAL_SAMPLES   
   , CURRENTLY_USED  
-  , to_char(FIRST_USAGE_DATE, 'YYYY-MM-DD HH24:MI') as FIRST_USAGE_DATE
-  , to_char(LAST_USAGE_DATE, 'YYYY-MM-DD HH24:MI') as LAST_USAGE_DATE
+  , FIRST_USAGE_DATE
+  , LAST_USAGE_DATE 
   , AUX_COUNT       
   , FEATURE_INFO
-from &&DFUS.FEATURE_USAGE_STATISTICS xy)
-  , PFUS as (
+from &&DFUS.FEATURE_USAGE_STATISTICS xy
+),
+PFUS as (
 -- Product-Feature Usage Statitsics = DBA_FUS entries mapped to their corresponding database products
 select CON_ID
   , CON_NAME
   , PRODUCT
   , NAME as FEATURE_BEING_USED
-  , case when CONDITION = 'BUG'
+  , case  when CONDITION = 'BUG'
                --suppressed due to exceptions/defects
-         then '3.SUPPRESSED_DUE_TO_BUG'
-         when detected_usages > 0                 -- some usage detection - current or past
-         and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
-         and CURRENT_ENTRY = 'Y'                -- current record set
-         and (trim(CONDITION) is null        -- no extra conditions
-         or CONDITION_MET = 'TRUE'     -- extra condition is met
-         and CONDITION_COUNTER = 'FALSE' )  -- extra condition is not based on counter
-         then '6.CURRENT_USAGE'
-         when detected_usages > 0                 -- some usage detection - current or past
-         and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
-         and CURRENT_ENTRY = 'Y'                -- current record set
-         and (CONDITION_MET = 'TRUE'     -- extra condition is met
-         and CONDITION_COUNTER = 'TRUE'  )  -- extra condition is     based on counter
-         then '5.PAST_OR_CURRENT_USAGE'          -- FEATURE_INFO counters indicate current or past usage
-         when detected_usages > 0                 -- some usage detection - current or past
-         and (trim(CONDITION) is null        -- no extra conditions
-         or CONDITION_MET = 'TRUE'  )  -- extra condition is met
-         then '4.PAST_USAGE'
-         when CURRENT_ENTRY = 'Y'
-         then '2.NO_CURRENT_USAGE'   -- detectable feature shows no current usage
-         else '1.NO_PAST_USAGE'
+          then '3.SUPPRESSED_DUE_TO_BUG'
+          when     detected_usages > 0                 -- some usage detection - current or past
+               and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
+               and CURRENT_ENTRY  = 'Y'                -- current record set
+               and (    trim(CONDITION) is null        -- no extra conditions
+                     or CONDITION_MET     = 'TRUE'     -- extra condition is met
+                    and CONDITION_COUNTER = 'FALSE' )  -- extra condition is not based on counter
+               then '6.CURRENT_USAGE'
+          when     detected_usages > 0                 -- some usage detection - current or past
+               and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
+               and CURRENT_ENTRY  = 'Y'                -- current record set
+               and (    CONDITION_MET     = 'TRUE'     -- extra condition is met
+                    and CONDITION_COUNTER = 'TRUE'  )  -- extra condition is     based on counter
+               then '5.PAST_OR_CURRENT_USAGE'          -- FEATURE_INFO counters indicate current or past usage
+          when     detected_usages > 0                 -- some usage detection - current or past
+               and (    trim(CONDITION) is null        -- no extra conditions
+                     or CONDITION_MET     = 'TRUE'  )  -- extra condition is met
+               then '4.PAST_USAGE'
+          when CURRENT_ENTRY = 'Y'
+               then '2.NO_CURRENT_USAGE'   -- detectable feature shows no current usage
+          else '1.NO_PAST_USAGE'
     end as USAGE
   , LAST_SAMPLE_DATE
   , DBID            
@@ -335,72 +342,81 @@ select CON_ID
   , DETECTED_USAGES 
   , TOTAL_SAMPLES   
   , CURRENTLY_USED  
-  , case when CONDITION like 'C___' and CONDITION_MET = 'FALSE' then to_date('') else FIRST_USAGE_DATE end as FIRST_USAGE_DATE
-  , case when CONDITION like 'C___' and CONDITION_MET = 'FALSE' then to_date('') else LAST_USAGE_DATE end as LAST_USAGE_DATE
+  , case  when CONDITION like 'C___' and CONDITION_MET = 'FALSE' then to_date('') else FIRST_USAGE_DATE end as FIRST_USAGE_DATE
+  , case  when CONDITION like 'C___' and CONDITION_MET = 'FALSE' then to_date('') else LAST_USAGE_DATE end as LAST_USAGE_DATE
   , EXTRA_FEATURE_INFO
-from (select m.PRODUCT, m.CONDITION, m.MVERSION,
+from (
+select m.PRODUCT
+  , m.CONDITION
+  , m.MVERSION
+  ,
        -- if extra conditions (coded on the MAP.CONDITION column) are required, check if entries satisfy the condition
-       case when CONDITION = 'C001' 
-         and (   regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
-         or regexp_like(to_char(FEATURE_INFO), 'compression[ -]used: *TRUE', 'i')                 )
-         then 'TRUE'  -- compression has been used
-         when CONDITION = 'C002' and (   regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         or regexp_like(to_char(FEATURE_INFO), 'encryption used: *TRUE', 'i')                  )
-         then 'TRUE'  -- encryption has been used
-         when CONDITION = 'C003' and CON_ID=1 and AUX_COUNT > 1
-         then 'TRUE'  -- more than one PDB are created
-         when CONDITION = 'C004' and '&&OCS'= 'N'
-         then 'TRUE'  -- not in oracle cloud
-         else 'FALSE'
-       end as CONDITION_MET,
+       case when CONDITION = 'C001' and (regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                                    and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
+                                    or regexp_like(to_char(FEATURE_INFO), 'compression[ -]used: *TRUE', 'i'))
+                  then 'TRUE'  -- compression has been used
+             when CONDITION = 'C002' and (regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                                     or regexp_like(to_char(FEATURE_INFO), 'encryption used: *TRUE', 'i')                  )
+                  then 'TRUE'  -- encryption has been used
+             when CONDITION = 'C003' and CON_ID=1 and AUX_COUNT > 1
+                  then 'TRUE'  -- more than one PDB are created
+             when CONDITION = 'C005' and CON_ID=1 and AUX_COUNT > 3
+                  then 'TRUE'  -- more than three PDBs are created
+             when CONDITION = 'C004' and '&&OCS'= 'N'
+                  then 'TRUE'  -- not in oracle cloud
+             else 'FALSE'
+       end as CONDITION_MET
+  ,
        -- check if the extra conditions are based on FEATURE_INFO counters. They indicate current or past usage.
-       case when CONDITION = 'C001' and     regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
-         then 'TRUE'  -- compression counter > 0
-         when CONDITION = 'C002' and     regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         then 'TRUE'  -- encryption counter > 0
-         else 'FALSE'
-       end as CONDITION_COUNTER,
-       case when CONDITION = 'C001' then regexp_substr(to_char(FEATURE_INFO), 'compression[ -]used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
-            when CONDITION = 'C002' then regexp_substr(to_char(FEATURE_INFO), 'encryption used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
-            when CONDITION = 'C003' then 'AUX_COUNT=' || AUX_COUNT
-            when CONDITION = 'C004' and '&&OCS'= 'Y' then 'feature included in Oracle Cloud Services Package' 
-            else ''
-       end as EXTRA_FEATURE_INFO
-       , f.CON_ID          
-       , f.CON_NAME        
-       , f.CURRENT_ENTRY   
-       , f.NAME            
-       , f.LAST_SAMPLE_DATE
-       , f.DBID            
-       , f.VERSION         
-       , f.DETECTED_USAGES 
-       , f.TOTAL_SAMPLES   
-       , f.CURRENTLY_USED  
-       , f.FIRST_USAGE_DATE
-       , f.LAST_USAGE_DATE 
-       , f.AUX_COUNT       
-       , f.FEATURE_INFO
-  from MAP m
-  join FUS f on m.FEATURE = f.NAME and regexp_like(f.VERSION, m.MVERSION)
-  where nvl(f.TOTAL_SAMPLES, 0) > 0                        -- ignore features that have never been sampled
+       case when CONDITION = 'C001' and regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                                    and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
+                  then 'TRUE'  -- compression counter > 0
+             when CONDITION = 'C002' and regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                  then 'TRUE'  -- encryption counter > 0
+             else 'FALSE'
+       end as CONDITION_COUNTER
+  , case when CONDITION = 'C001' then regexp_substr(to_char(FEATURE_INFO), 'compression[ -]used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
+         when CONDITION = 'C002' then regexp_substr(to_char(FEATURE_INFO), 'encryption used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
+         when CONDITION = 'C003' then 'AUX_COUNT=' || AUX_COUNT
+         when CONDITION = 'C005' then 'AUX_COUNT=' || AUX_COUNT
+         when CONDITION = 'C004' and '&&OCS'= 'Y' then 'feature included in Oracle Cloud Services Package'
+         else ''
+         end as EXTRA_FEATURE_INFO
+  , f.CON_ID          
+  , f.CON_NAME        
+  , f.CURRENT_ENTRY   
+  , f.NAME            
+  , f.LAST_SAMPLE_DATE
+  , f.DBID            
+  , f.VERSION         
+  , f.DETECTED_USAGES 
+  , f.TOTAL_SAMPLES   
+  , f.CURRENTLY_USED  
+  , f.FIRST_USAGE_DATE
+  , f.LAST_USAGE_DATE 
+  , f.AUX_COUNT       
+  , f.FEATURE_INFO
+from MAP m
+join FUS f on m.FEATURE = f.NAME 
+and regexp_like(f.VERSION, m.MVERSION)
+where nvl(f.TOTAL_SAMPLES, 0) > 0                        -- ignore features that have never been sampled
 )
-  where nvl(CONDITION, '-') != 'INVALID'                   -- ignore features for which licensing is not required without further conditions
-    and not (CONDITION = 'C003' and CON_ID not in (0, 1))  -- multiple PDBs are visible only in CDB$ROOT; PDB level view is not relevant
+where nvl(CONDITION, '-') != 'INVALID'                   -- ignore features for which licensing is not required without further conditions
+and not (CONDITION in ('C003', 'C005') 
+and CON_ID not in (0, 1))                                -- multiple PDBs are visible only in CDB$ROOT; PDB level view is not relevant
 )
 select grouping_id(CON_ID) as gid
   , CON_ID   
   , decode(grouping_id(CON_ID), 1, '--ALL--', max(CON_NAME)) as CON_NAME
   , PRODUCT  
   , decode(max(USAGE)
-  , '1.NO_PAST_USAGE'        , 'NO_USAGE'             
-  , '2.NO_CURRENT_USAGE'     , 'NO_USAGE'             
-  , '3.SUPPRESSED_DUE_TO_BUG', 'SUPPRESSED_DUE_TO_BUG'
-  , '4.PAST_USAGE'           , 'PAST_USAGE'           
-  , '5.PAST_OR_CURRENT_USAGE', 'PAST_OR_CURRENT_USAGE'
-  , '6.CURRENT_USAGE'        , 'CURRENT_USAGE'        
-  , 'UNKNOWN') as USAGE
+  , '1.NO_PAST_USAGE'        , 'NO_USAGE'             ,
+    '2.NO_CURRENT_USAGE'     , 'NO_USAGE'             ,
+    '3.SUPPRESSED_DUE_TO_BUG', 'SUPPRESSED_DUE_TO_BUG',
+    '4.PAST_USAGE'           , 'PAST_USAGE'           ,
+    '5.PAST_OR_CURRENT_USAGE', 'PAST_OR_CURRENT_USAGE',
+    '6.CURRENT_USAGE'        , 'CURRENT_USAGE'        ,
+    'UNKNOWN') as USAGE
   , max(LAST_SAMPLE_DATE) as LAST_SAMPLE_DATE
   , min(FIRST_USAGE_DATE) as FIRST_USAGE_DATE
   , max(LAST_USAGE_DATE)  as LAST_USAGE_DATE
@@ -481,12 +497,14 @@ SELECT '.HW'                                                 , 'Hybrid Columnar 
 SELECT '.HW'                                                 , 'Hybrid Columnar Compression'                             , '^12\.[2-9]|^1[89]\.|^2[0-9]\.'                , ' '       from dual union all
 SELECT '.HW'                                                 , 'Hybrid Columnar Compression Conventional Load'           , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT '.HW'                                                 , 'Hybrid Columnar Compression Row Level Locking'           , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
+SELECT '.HW'                                                 , 'ODA Infrastructure'                                       , '^1[9]\.|^2[0-9]\.'                           , ' '       from dual union all
 SELECT '.HW'                                                 , 'Sun ZFS with EHCC'                                       , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT '.HW'                                                 , 'ZFS Storage'                                             , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT '.HW'                                                 , 'Zone maps'                                               , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT 'Label Security'                                      , 'Label Security'                                          , '^11\.2|^1[289]\.|^2[0-9]\.'                   , ' '       from dual union all
-SELECT 'Multitenant'                                         , 'Oracle Multitenant'                                      , '^1[289]\.|^2[0-9]\.'                          , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
-SELECT 'Multitenant'                                         , 'Oracle Pluggable Databases'                              , '^1[289]\.|^2[0-9]\.'                          , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
+SELECT 'Multitenant'                                         , 'Oracle Multitenant'                                      , '^1[28]\.'                                     , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
+SELECT 'Multitenant'                                         , 'Oracle Multitenant'                                      , '^1[9]\.|^2[0-9]\.'                            , 'C005'    from dual union all -- licensing required only when more than three PDB containers are created
+SELECT 'Multitenant'                                         , 'Oracle Pluggable Databases'                              , '^1[28]\.'                                     , 'C003'    from dual union all -- licensing required only when more than one PDB containers are created
 SELECT 'OLAP'                                                , 'OLAP - Analytic Workspaces'                              , '^11\.2|^1[289]\.|^2[0-9]\.'                   , ' '       from dual union all
 SELECT 'OLAP'                                                , 'OLAP - Cubes'                                            , '^1[289]\.|^2[0-9]\.'                          , ' '       from dual union all
 SELECT 'Partitioning'                                        , 'Partitioning (user)'                                     , '^11\.2|^1[289]\.|^2[0-9]\.'                   , ' '       from dual union all
@@ -515,17 +533,20 @@ SELECT 'Tuning Pack'                                         , 'SQL Tuning Advis
 SELECT 'Tuning Pack'                                         , 'SQL Tuning Set (user)'                                   , '^1[289]\.|^2[0-9]\.'                          , 'INVALID' from dual union all -- no longer part of Tuning Pack
 SELECT 'Tuning Pack'                                         , 'Tuning Pack'                                             , '^11\.2'                                       , ' '       from dual union all
 SELECT '.WebLogic Server Management Pack Enterprise Edition' , 'EM AS Provisioning and Patch Automation Pack'            , '^11\.2'                                       , ' '       from dual union all
-select '' PRODUCT, '' FEATURE, '' MVERSION, '' CONDITION from dual),
+select '' PRODUCT, '' FEATURE, '' MVERSION, '' CONDITION from dual
+),
 FUS as (
 -- the current data set to be used: DBA_FEATURE_USAGE_STATISTICS or CDB_FEATURE_USAGE_STATISTICS for Container Databases(CDBs)
 select &&DCID as CON_ID
   , &&DCNA as CON_NAME
-  ,
-    -- Detect and mark with Y the current DBA_FUS data set = Most Recent Sample based on LAST_SAMPLE_DATE
-    case when DBID || '#' || VERSION || '#' || to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD HH24:MI') =
-        first_value (DBID    ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
-        first_value (VERSION ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
-        first_value (to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD HH24:MI')) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) then 'Y' else 'N' end as CURRENT_ENTRY
+  , -- Detect and mark with Y the current DBA_FUS data set = Most Recent Sample based on LAST_SAMPLE_DATE
+    case when DBID || '#' || VERSION || '#' || to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD_HH24:MI') = 
+      first_value (DBID    ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
+      first_value (VERSION ) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc) || '#' ||
+      first_value (to_char(LAST_SAMPLE_DATE, 'YYYY-MM-DD_HH24:MI')) over (partition by &&DCID order by LAST_SAMPLE_DATE desc nulls last, DBID desc)
+    then 'Y'
+    else 'N'
+    end as CURRENT_ENTRY
   , NAME            
   , LAST_SAMPLE_DATE
   , DBID            
@@ -537,36 +558,38 @@ select &&DCID as CON_ID
   , LAST_USAGE_DATE 
   , AUX_COUNT       
   , FEATURE_INFO
-from &&DFUS.FEATURE_USAGE_STATISTICS xy),
+from &&DFUS.FEATURE_USAGE_STATISTICS xy
+),
 PFUS as (
 -- Product-Feature Usage Statitsics = DBA_FUS entries mapped to their corresponding database products
 select CON_ID
   , CON_NAME
   , PRODUCT
   , NAME as FEATURE_BEING_USED
-  , case when CONDITION = 'BUG'
+  , case  when CONDITION = 'BUG'
                --suppressed due to exceptions/defects
-         then '3.SUPPRESSED_DUE_TO_BUG'
-        when     detected_usages > 0                 -- some usage detection - current or past
-        and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
-        and CURRENT_ENTRY  = 'Y'                -- current record set
-        and (    trim(CONDITION) is null        -- no extra conditions
-        or CONDITION_MET     = 'TRUE'     -- extra condition is met
-        and CONDITION_COUNTER = 'FALSE' )  -- extra condition is not based on counter
-        then '6.CURRENT_USAGE'
-        when     detected_usages > 0                 -- some usage detection - current or past
-        and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
-        and CURRENT_ENTRY  = 'Y'                -- current record set
-        and (    CONDITION_MET     = 'TRUE'     -- extra condition is met
-        and CONDITION_COUNTER = 'TRUE'  )  -- extra condition is     based on counter
-        then '5.PAST_OR_CURRENT_USAGE'          -- FEATURE_INFO counters indicate current or past usage
-        when     detected_usages > 0                 -- some usage detection - current or past
-        and (    trim(CONDITION) is null        -- no extra conditions
-        or CONDITION_MET     = 'TRUE'  )  -- extra condition is met
-        then '4.PAST_USAGE'
-        when CURRENT_ENTRY = 'Y'
-        then '2.NO_CURRENT_USAGE'   -- detectable feature shows no current usage
-        else '1.NO_PAST_USAGE' end as USAGE
+               then '3.SUPPRESSED_DUE_TO_BUG'
+          when     detected_usages > 0                 -- some usage detection - current or past
+               and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
+               and CURRENT_ENTRY  = 'Y'                -- current record set
+               and (    trim(CONDITION) is null        -- no extra conditions
+                     or CONDITION_MET     = 'TRUE'     -- extra condition is met
+                    and CONDITION_COUNTER = 'FALSE' )  -- extra condition is not based on counter
+               then '6.CURRENT_USAGE'
+          when     detected_usages > 0                 -- some usage detection - current or past
+               and CURRENTLY_USED = 'TRUE'             -- usage at LAST_SAMPLE_DATE
+               and CURRENT_ENTRY  = 'Y'                -- current record set
+               and (    CONDITION_MET     = 'TRUE'     -- extra condition is met
+                    and CONDITION_COUNTER = 'TRUE'  )  -- extra condition is     based on counter
+               then '5.PAST_OR_CURRENT_USAGE'          -- FEATURE_INFO counters indicate current or past usage
+          when     detected_usages > 0                 -- some usage detection - current or past
+               and (    trim(CONDITION) is null        -- no extra conditions
+                     or CONDITION_MET     = 'TRUE'  )  -- extra condition is met
+               then '4.PAST_USAGE'
+          when CURRENT_ENTRY = 'Y'
+               then '2.NO_CURRENT_USAGE'   -- detectable feature shows no current usage
+          else '1.NO_PAST_USAGE'
+    end as USAGE
   , LAST_SAMPLE_DATE
   , DBID            
   , VERSION         
@@ -578,64 +601,71 @@ select CON_ID
   , EXTRA_FEATURE_INFO
 from (select m.PRODUCT, m.CONDITION, m.MVERSION,
        -- if extra conditions (coded on the MAP.CONDITION column) are required, check if entries satisfy the condition
-       case when CONDITION = 'C001' and (   regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
-         or regexp_like(to_char(FEATURE_INFO), 'compression[ -]used: *TRUE', 'i')                 )
-         then 'TRUE'  -- compression has been used
-         when CONDITION = 'C002' and (   regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         or regexp_like(to_char(FEATURE_INFO), 'encryption used: *TRUE', 'i')                  )
-         then 'TRUE'  -- encryption has been used
-         when CONDITION = 'C003' and CON_ID=1 and AUX_COUNT > 1
-         then 'TRUE'  -- more than one PDB are created
-         when CONDITION = 'C004' and '&&OCS'= 'N'
-         then 'TRUE'  -- not in oracle cloud
-         else 'FALSE' end as CONDITION_MET
-    ,      -- check if the extra conditions are based on FEATURE_INFO counters. They indicate current or past usage.
-       case when CONDITION = 'C001' and     regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
-         then 'TRUE'  -- compression counter > 0
-         when CONDITION = 'C002' and     regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
-         then 'TRUE'  -- encryption counter > 0
-         else 'FALSE' end as CONDITION_COUNTER
-    , case when CONDITION = 'C001' then regexp_substr(to_char(FEATURE_INFO), 'compression[ -]used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
-           when CONDITION = 'C002' then regexp_substr(to_char(FEATURE_INFO), 'encryption used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
-           when CONDITION = 'C003' then   'AUX_COUNT=' || AUX_COUNT
-           when CONDITION = 'C004' and '&&OCS'= 'Y'
-           then   'feature included in Oracle Cloud Services Package'
-           else '' end as EXTRA_FEATURE_INFO
-    , f.CON_ID          
-    , f.CON_NAME        
-    , f.CURRENT_ENTRY   
-    , f.NAME            
-    , f.LAST_SAMPLE_DATE
-    , f.DBID            
-    , f.VERSION         
-    , f.DETECTED_USAGES 
-    , f.TOTAL_SAMPLES   
-    , f.CURRENTLY_USED  
-    , f.FIRST_USAGE_DATE
-    , f.LAST_USAGE_DATE 
-    , f.AUX_COUNT       
-    , f.FEATURE_INFO
-  from MAP m
-  join FUS f on m.FEATURE = f.NAME and regexp_like(f.VERSION, m.MVERSION)
-  where nvl(f.TOTAL_SAMPLES, 0) > 0                        -- ignore features that have never been sampled
+       case  when CONDITION = 'C001' and (regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                                     and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
+                                     or regexp_like(to_char(FEATURE_INFO), 'compression[ -]used: *TRUE', 'i')                 )
+                  then 'TRUE'  -- compression has been used
+             when CONDITION = 'C002' and (regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                                     or regexp_like(to_char(FEATURE_INFO), 'encryption used: *TRUE', 'i')                  )
+                  then 'TRUE'  -- encryption has been used
+             when CONDITION = 'C003' and CON_ID=1 and AUX_COUNT > 1
+                  then 'TRUE'  -- more than one PDB are created
+             when CONDITION = 'C005' and CON_ID=1 and AUX_COUNT > 3
+                  then 'TRUE'  -- more than three PDB are created
+             when CONDITION = 'C004' and '&&OCS'= 'N'
+                  then 'TRUE'  -- not in oracle cloud
+             else 'FALSE'
+       end as CONDITION_MET,
+       -- check if the extra conditions are based on FEATURE_INFO counters. They indicate current or past usage.
+       case when CONDITION = 'C001' and regexp_like(to_char(FEATURE_INFO), 'compression[ -]used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                                    and FEATURE_INFO not like '%(BASIC algorithm used: 0 times, LOW algorithm used: 0 times, MEDIUM algorithm used: 0 times, HIGH algorithm used: 0 times)%' -- 12.1 bug - Doc ID 1993134.1
+                  then 'TRUE'  -- compression counter > 0
+             when CONDITION = 'C002' and regexp_like(to_char(FEATURE_INFO), 'encryption used:[ 0-9]*[1-9][ 0-9]*time', 'i')
+                  then 'TRUE'  -- encryption counter > 0
+             else 'FALSE'
+       end as CONDITION_COUNTER
+  , case when CONDITION = 'C001' then regexp_substr(to_char(FEATURE_INFO), 'compression[ -]used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
+            when CONDITION = 'C002' then regexp_substr(to_char(FEATURE_INFO), 'encryption used:(.*?)(times|TRUE|FALSE)', 1, 1, 'i')
+            when CONDITION = 'C003' then 'AUX_COUNT=' || AUX_COUNT
+            when CONDITION = 'C005' then 'AUX_COUNT=' || AUX_COUNT
+            when CONDITION = 'C004' and '&&OCS'= 'Y' then 'feature included in Oracle Cloud Services Package'
+            else ''
+       end as EXTRA_FEATURE_INFO
+  , f.CON_ID          
+  , f.CON_NAME        
+  , f.CURRENT_ENTRY   
+  , f.NAME            
+  , f.LAST_SAMPLE_DATE
+  , f.DBID            
+  , f.VERSION         
+  , f.DETECTED_USAGES 
+  , f.TOTAL_SAMPLES   
+  , f.CURRENTLY_USED  
+  , f.FIRST_USAGE_DATE
+  , f.LAST_USAGE_DATE 
+  , f.AUX_COUNT       
+  , f.FEATURE_INFO
+from MAP m
+join FUS f on m.FEATURE = f.NAME 
+and regexp_like(f.VERSION, m.MVERSION)
+where nvl(f.TOTAL_SAMPLES, 0) > 0                        -- ignore features that have never been sampled
 )
-  where nvl(CONDITION, '-') != 'INVALID'                   -- ignore features for which licensing is not required without further conditions
-    and not (CONDITION = 'C003' and CON_ID not in (0, 1))  -- multiple PDBs are visible only in CDB$ROOT; PDB level view is not relevant
+where nvl(CONDITION, '-') != 'INVALID'                   -- ignore features for which licensing is not required without further conditions
+and not (CONDITION in ('C003', 'C005') 
+and CON_ID not in (0, 1))                                -- multiple PDBs are visible only in CDB$ROOT; PDB level view is not relevant
 )
 select CON_ID            
   , CON_NAME          
   , PRODUCT           
   , FEATURE_BEING_USED
-  , decode(USAGE
-  , '1.NO_PAST_USAGE'        , 'NO_PAST_USAGE'        
-  , '2.NO_CURRENT_USAGE'     , 'NO_CURRENT_USAGE'     
-  , '3.SUPPRESSED_DUE_TO_BUG', 'SUPPRESSED_DUE_TO_BUG'
-  , '4.PAST_USAGE'           , 'PAST_USAGE'           
-  , '5.PAST_OR_CURRENT_USAGE', 'PAST_OR_CURRENT_USAGE'
-  , '6.CURRENT_USAGE'        , 'CURRENT_USAGE'        
-  , 'UNKNOWN') as USAGE
+  , decode(USAGE,
+    '1.NO_PAST_USAGE'        , 'NO_PAST_USAGE'        ,
+    '2.NO_CURRENT_USAGE'     , 'NO_CURRENT_USAGE'     ,
+    '3.SUPPRESSED_DUE_TO_BUG', 'SUPPRESSED_DUE_TO_BUG',
+    '4.PAST_USAGE'           , 'PAST_USAGE'           ,
+    '5.PAST_OR_CURRENT_USAGE', 'PAST_OR_CURRENT_USAGE',
+    '6.CURRENT_USAGE'        , 'CURRENT_USAGE'        ,
+    'UNKNOWN') as USAGE
   , LAST_SAMPLE_DATE  
   , DBID              
   , VERSION           
@@ -683,5 +713,5 @@ prompt This may be due to inclusion of usage by sample schemas (such as HR, PM, 
 prompt
 prompt Please refer to MOS DOC ID 1317265.1 and 1309070.1 for more information.
 prompt
-prompt End of script (v 18.1 Apr-2018)
+prompt End of script (v 21.0 Oct-2021)
 -- spool off
