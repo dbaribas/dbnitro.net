@@ -87,10 +87,10 @@ IGNORE_ERRORS="OGG-00987"
 # ------------------------------------------------------------------------
 # Verify OS Parameters and Variables
 #
-ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|middleware|agent"
-ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|middleware"
+ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware|agent"
+ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware"
 ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware|agent"
-ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|OraHome|agent"
+ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|agent"
 ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
 #
 if [[ $(uname) == "SunOS" ]]; then
