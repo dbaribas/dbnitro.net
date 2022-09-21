@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.63"
+SoftwareVersion="1.0.65"
 DateCreation="07/01/2021"
-DateModification="12/09/2022"
+DateModification="15/09/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -87,10 +87,10 @@ IGNORE_ERRORS="OGG-00987"
 # ------------------------------------------------------------------------
 # Verify OS Parameters and Variables
 #
-ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware|agent"
-ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware"
+ORA_HOMES_IGNORE_1="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|goldengate|ogg|gg|middleware|agent"
+ORA_HOMES_IGNORE_2="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|goldengate|ogg|gg|middleware"
 ORA_HOMES_IGNORE_3="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|middleware|agent"
-ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|agent"
+ORA_HOMES_IGNORE_4="REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin|goldengate|ogg|gg|agent"
 ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
 #
 if [[ $(uname) == "SunOS" ]]; then
@@ -459,6 +459,7 @@ else
   alias g='rlwrap ${OGG_HOME}/ggsci'
   alias ggh='cd ${OGG_HOME}'
   alias gglog='tail -f -n 100 ${ALERTGG} | egrep -i -v ${IGNORE_ERRORS}'
+  alias ggmon='${DBNITRO}/GoldenGateMonitor.sh'
   echo " -- Golden Gate Environment: ${OGGHOME}"
   return 1
 fi
@@ -598,6 +599,7 @@ alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
+alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/.glogin.sql'
 alias adrci='rlwrap adrci'
@@ -690,6 +692,7 @@ alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
+alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/.glogin.sql'
 alias adrci='rlwrap adrci'
@@ -806,6 +809,7 @@ alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
 alias dblog='tail -f -n 100 ${ALERTDB} | egrep -i -v ${IGNORE_ERRORS}'
 alias dglog='tail -f -n 100 ${ALERTDG} | egrep -i -v ${IGNORE_ERRORS}'
+alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/.glogin.sql'
 alias rman='rlwrap rman'
@@ -823,6 +827,7 @@ alias ogg='set_OGG'
 alias INFO='get_INFO'
 alias REPORT='get_REPORT'
 alias OPTIONS='get_OPTIONS'
+alias HUGEPAGES='${DBNITRO}/GoldenGateMonitor.sh'
 #
 if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
   HOME_RW=$(echo "${RED} RW ${BLA}")
@@ -876,6 +881,7 @@ export CLASSPATH=${ORACLE_HOME}/jlib
 export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
 export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
 alias oh='cd ${ORACLE_HOME}'
+alias opl='${OPATCH}/opatch lspatches | sort'
 alias p='ps -ef | egrep pmon | egrep -v egrep' # ???
 #
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)
@@ -915,6 +921,7 @@ export CLASSPATH=${ORACLE_HOME}/jlib
 export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
 export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin
 alias oh='cd ${ORACLE_HOME}'
+alias opl='${OPATCH}/opatch lspatches | sort'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep' # ???
