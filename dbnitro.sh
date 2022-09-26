@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.1"
+SoftwareVersion="1.0.3"
 DateCreation="22/06/2022"
-DateModification="22/06/2022"
+DateModification="15/09/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -23,6 +23,18 @@ if [[ $(which wget | wc -l | awk '{ print $1 }') == 0 ]]; then
   echo " -- You need to install wget app --"
   exit 1
 fi
+#
+function HELP() {
+SetClear
+SepLine
+echo -e "\
+|#| INSTALL...: YOU CAN INSTALL THE DBNITRO SCRIPTS AND FUNCTIONS
+|#| UPDATE....: YOU CAN UPDATE THE DBNITRO INSTALLATION
+|#| OLD_ENV...: YOU CAN INSTALL AND ENABLE THE FUNCTIONALITIES IN AN OLD ENVIRONMENT
+|#| REMOVE....: YOU CAN REMOVE THE DBNITRO INSTALLATION
+|#| HELP......: YOU CAN CHECK THE OPTIONS"
+SepLine
+}
 #
 # ------------------------------------------------------------------------
 # Creating and Installing the DBNITRO Components
@@ -46,21 +58,23 @@ fi
 function SetUpDBNITRO() {
 cd ${DBNITRO}/
 #
-wget -O ${DBNITRO}/.OracleMenu.sh                  https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
-wget -O ${DBNITRO}/.Oracle_ASM_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
-wget -O ${DBNITRO}/.Oracle_DBA_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
-wget -O ${DBNITRO}/.Oracle_RAC_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RAC_Functions
-wget -O ${DBNITRO}/.Oracle_EXA_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_EXA_Functions
-wget -O ${DBNITRO}/.Oracle_ODG_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODG_Functions
-wget -O ${DBNITRO}/.Oracle_OGG_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_OGG_Functions
-wget -O ${DBNITRO}/.Oracle_STR_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_STR_Functions
-wget -O ${DBNITRO}/.Oracle_PDB_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_PDB_Functions
-wget -O ${DBNITRO}/.Oracle_ODA_Functions           https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
-wget -O ${DBNITRO}/.Oracle_WALL_Functions          https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
-wget -O ${DBNITRO}/.Oracle_RMAN_Functions          https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
-wget -O ${DBNITRO}/Oracle_SQL_DBA_Info.sql         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_DBA_Info.sql
-wget -O ${DBNITRO}/Oracle_SQL_Report_v.3.0.1.sql   https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_Report_v.3.0.1.sql
-wget -O ${DBNITRO}/Oracle_SQL_Check_Hugepages.sh   https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_Check_Hugepages.sh
+wget -O ${DBNITRO}/.OracleMenu.sh                                https://raw.githubusercontent.com/dbaribas/dbnitro/main/OracleMenu.sh
+wget -O ${DBNITRO}/.Oracle_ASM_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ASM_Functions
+wget -O ${DBNITRO}/.Oracle_DBA_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Functions
+wget -O ${DBNITRO}/.Oracle_RAC_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RAC_Functions
+wget -O ${DBNITRO}/.Oracle_EXA_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_EXA_Functions
+wget -O ${DBNITRO}/.Oracle_ODG_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODG_Functions
+wget -O ${DBNITRO}/.Oracle_OGG_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_OGG_Functions
+wget -O ${DBNITRO}/.Oracle_STR_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_STR_Functions
+wget -O ${DBNITRO}/.Oracle_PDB_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_PDB_Functions
+wget -O ${DBNITRO}/.Oracle_ODA_Functions                         https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_ODA_Functions
+wget -O ${DBNITRO}/.Oracle_WALL_Functions                        https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_WALL_Functions
+wget -O ${DBNITRO}/.Oracle_RMAN_Functions                        https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_RMAN_Functions
+wget -O ${DBNITRO}/Oracle_SQL_DBA_Info.sql                       https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_DBA_Info.sql
+wget -O ${DBNITRO}/Oracle_SQL_Report_v.3.0.1.sql                 https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_Report_v.3.0.1.sql
+wget -O ${DBNITRO}/Oracle_SQL_Check_Hugepages.sql                https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_Check_Hugepages.sql
+wget -O ${DBNITRO}/Oracle_DBA_Check_Hugepages.sh                 https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_DBA_Check_Hugepages.sh
+wget -O ${DBNITRO}/GoldenGateMonitor.sh                          https://raw.githubusercontent.com/dbaribas/dbnitro/main/GoldenGateMonitor.sh
 wget -O ${DBNITRO}/Oracle_SQL_Options_Packs_Usage_Statistics.sql https://raw.githubusercontent.com/dbaribas/dbnitro/main/Oracle_SQL_Options_Packs_Usage_Statistics.sql
 #
 chmod a+x ${DBNITRO}/.OracleMenu.sh
@@ -184,9 +198,18 @@ else
 fi
 }
 #
+function SetUpOldOracle() {
+cat >> /home/oracle/.bash_profile <<EOF
+-- TO SELECT ANY ORACLE PRODUCT, JUST TYPE: db --            
+-- IT WILL SHOW YOU ALL OPTIONS YOU CAN USE OR TYPE: HELP --
+alias db='. ${DBNITRO}/.OracleMenu.sh'
+umask 0022
+EOF
+}
+#
 function MainMenu() {
 PS3="Select the Option: "
-select OPT in INSTALL UPDATE OLD_ENV REMOVE QUIT; do
+select OPT in INSTALL UPDATE OLD_ENV REMOVE HELP QUIT; do
 if [[ "${OPT}" == "QUIT" ]]; then
   echo " -- Exit Menu --"
 elif [[ "${OPT}" == "INSTALL" ]]; then
@@ -209,10 +232,13 @@ elif [[ "${OPT}" == "OLD_ENV" ]]; then
   CreateFolder
   SetUpDBNITRO
   SetUpPURGELOGS
-  echo "alias db='. ${DBNITRO}/.OracleMenu.sh'" >> /home/oracle/.bash_profile
+  SetUpOldOracle
 elif [[ "${OPT}" == "REMOVE" ]]; then
   echo " -- Remove DBNITRO Environment --"
   RemoveFolder
+elif [[ "${OPT}" == "HELP" ]]; then
+  echo " -- DBNITRO SETUP HELP --"
+  HELP
 else
   echo " -- Invalid Option --"
   continue
