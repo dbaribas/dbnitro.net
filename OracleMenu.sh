@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.65"
+SoftwareVersion="1.0.67"
 DateCreation="07/01/2021"
-DateModification="15/09/2022"
+DateModification="26/10/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -538,7 +538,7 @@ elif [[ "${PDBS}" == "QUIT" ]]; then
 else
   export ORACLE_PDB_SID="${PDBS}"
   echo "PLUGGABLE DATABASE: ${ORACLE_PDB_SID}"
-  export PS1=$'[ ${ORACLE_SID} ]|[ ${ORACLE_PDB_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+  export PS1=$'[ ${ORACLE_SID} ]|[ PDB:${ORACLE_PDB_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
   return 1
 fi
 done
@@ -759,7 +759,7 @@ local OPT=$1
 export ORACLE_HOSTNAME="${HOST}"
 export ORACLE_TERM=xterm
 export ORACLE_SID="${OPT}"
-export ORACLE_HOME=$(cat ${ORATAB} | egrep "${ORACLE_SID}" | cut -f2 -d ':')
+export ORACLE_HOME=$(cat ${ORATAB} | egrep -iw "${ORACLE_SID}" | cut -f2 -d ':')
 export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
