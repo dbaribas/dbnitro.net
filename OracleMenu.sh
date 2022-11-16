@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.67"
+SoftwareVersion="1.0.69"
 DateCreation="07/01/2021"
-DateModification="26/10/2022"
+DateModification="16/11/2022"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -26,8 +26,13 @@ function SetClear() {
 #
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
+REPORTS="${DBNITRO}/reports"
+BINARIES="${DBNITRO}/bin"
+VARIABLES="${DBNITRO}/var"
+FUNCTIONS="${DBNITRO}/functions"
+STATEMENTS="${DBNITRO}/statements"
 #
-if [[ ! -d ${DBNITRO}/ ]]; then
+if [[ ! -d ${FOLDER}/ ]]; then
   SetClear
   SepLine
   echo " -- YOUR SCRIPT FOLDER DOES NOT EXISTS, YOU HAVE TO CREATE THAT BEFORE YOU CONTINUE --"
@@ -38,6 +43,41 @@ if [[ ${DBNITRO} == "" ]]; then
   SetClear
   SepLine
   echo " -- YOUR SCRIPT FOLDER IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
+if [[ ${REPORTS} == "" ]]; then
+  SetClear
+  SepLine
+  echo " -- YOUR FOLDER REPORTS IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
+if [[ ${BINARIES} == "" ]]; then
+  SetClear
+  SepLine
+  echo " -- YOUR FOLDER BIN IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
+if [[ ${VARIABLES} == "" ]]; then
+  SetClear
+  SepLine
+  echo " -- YOUR FOLDER VAR IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
+if [[ ${FUNCTIONS} == "" ]]; then
+  SetClear
+  SepLine
+  echo " -- YOUR FOLDER FUNCTIONS IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
+  return 1
+fi
+#
+if [[ ${STATEMENTS} == "" ]]; then
+  SetClear
+  SepLine
+  echo " -- YOUR FOLDER STATEMENTS IS EMPTY, YOU HAVE TO CONFIGURE THAT BEFORE YOU CONTINUE --"
   return 1
 fi
 #
@@ -75,7 +115,11 @@ echo -e "\
 |#| OMS.........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS
 |#| AGENT.......: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER AGENT HOME AND TOOLS
 |#| GOLDENGATE..: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
-|#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
+|#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb
+|#| INFO........: YOU CAN SEE THE ORACLE DATABASE INFORMATIONS
+|#| REPORT......: YOU CAN SEE THE ORACLE DATABASE REPORT
+|#| OPTIONS.....: YOU CAN SEE THE ORACLE DATABASE OPTIONS
+|#| HUGEPAGES...: YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
 SepLine
 }
 #
@@ -334,7 +378,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   return 0
 else
 sqlplus -S '/ as sysdba' <<EOF
-@${DBNITRO}/Oracle_SQL_DBA_Info.sql
+@${DBNITRO}/statements/Oracle_SQL_DBA_Info.sql
 quit;
 EOF
 fi
@@ -352,7 +396,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   return 0
 else
 sqlplus -S '/ as sysdba' <<EOF
-@${DBNITRO}/Oracle_SQL_Options_Packs_Usage_Statistics.sql
+@${DBNITRO}/statements/Oracle_SQL_Options_Packs_Usage_Statistics.sql
 quit;
 EOF
 fi
@@ -370,7 +414,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   return 0
 else
 sqlplus -S '/ as sysdba' <<EOF
-@${DBNITRO}/Oracle_SQL_Report_v.3.0.1.sql
+@${DBNITRO}/statements/Oracle_SQL_Report_v.3.0.1.sql
 quit;
 EOF
 fi
@@ -380,8 +424,8 @@ fi
 # Setting GLOGIN Functions
 #
 function set_GLOGIN() {
-if [[ ! -f ${DBNITRO}/.glogin.sql ]]; then
-cat > ${DBNITRO}/.glogin.sql <<EOF
+if [[ ! -f ${DBNITRO}/statements/glogin.sql ]]; then
+cat > ${DBNITRO}/statements/glogin.sql <<EOF
 set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
 COLUMN NAME FORMAT A20
 COLUMN VALUE FORMAT A40
@@ -398,8 +442,8 @@ fi
 # Setting PDB GLOGIN Functions
 #
 function set_GLOGIN_PDB() {
-if [[ ! -f ${DBNITRO}/.glogin_pdb.sql ]]; then
-cat > ${DBNITRO}/.glogin_pdb.sql <<EOF
+if [[ ! -f ${DBNITRO}/statements/glogin_pdb.sql ]]; then
+cat > ${DBNITRO}/statements/glogin_pdb.sql <<EOF
 COLUMN NAME FORMAT A20
 COLUMN VALUE FORMAT A40
 COLUMN USERNAME FORMAT A30
@@ -459,7 +503,7 @@ else
   alias g='rlwrap ${OGG_HOME}/ggsci'
   alias ggh='cd ${OGG_HOME}'
   alias gglog='tail -f -n 100 ${ALERTGG} | egrep -i -v ${IGNORE_ERRORS}'
-  alias ggmon='${DBNITRO}/GoldenGateMonitor.sh'
+  alias ggmon='${DBNITRO}/bin/GoldenGateMonitor.sh'
   echo " -- Golden Gate Environment: ${OGGHOME}"
   return 1
 fi
@@ -514,7 +558,7 @@ elif [[ ${PLUGGABLES} == 0 ]]; then
   echo " -- YOUR ENVIRONMENT DOES NOT HAVE PLUGGABLE DATABASES YET --"
   return 0
 else
-sqlplus -S '/ as sysdba' > ${DBNITRO}/.Pluggable.${ORACLE_SID}.var <<EOF | tail -2
+sqlplus -S '/ as sysdba' > ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var <<EOF | tail -2
 set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
 select name from v\$containers where con_id not in (0,1,2) order by 1;
 quit;
@@ -525,7 +569,7 @@ fi
 # Select the CDB and PDB
 #
 echo "Options: "
-select PDBS in $(cat ${DBNITRO}/.Pluggable.${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
+select PDBS in $(cat ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var) "BACK TO CDB" QUIT; do
 if [[ "${PDBS}" == "BACK TO CDB" ]]; then
   export ORACLE_PDB_SID=""
   echo "PLUGGABLE DATABASE: CDB\$ROOT"
@@ -584,8 +628,8 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias resp='crsctl stat res -p -init'
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
-  alias rac-status='${DBNITRO}/rac-status.sh -a'
-  alias asmdu='${DBNITRO}/asmdu.sh -g'
+  alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
+  alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 else
   export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
@@ -601,7 +645,7 @@ alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
-alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/.glogin.sql'
+alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/statements/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep'
@@ -642,12 +686,12 @@ unset_var
 unalias_var
 alias_var
 set_GLOGIN
-source ${DBNITRO}/.Oracle_ASM_Functions
-source ${DBNITRO}/.Oracle_RAC_Functions
-source ${DBNITRO}/.Oracle_EXA_Functions
-source ${DBNITRO}/.Oracle_ODG_Functions
-source ${DBNITRO}/.Oracle_ASM_Functions
-source ${DBNITRO}/.Oracle_ODA_Functions
+source ${DBNITRO}/functions/Oracle_ASM_Functions
+source ${DBNITRO}/functions/Oracle_RAC_Functions
+source ${DBNITRO}/functions/Oracle_EXA_Functions
+source ${DBNITRO}/functions/Oracle_ODG_Functions
+source ${DBNITRO}/functions/Oracle_ASM_Functions
+source ${DBNITRO}/functions/Oracle_ODA_Functions
 local OPT=$1
 export ORACLE_HOSTNAME="${HOST}"
 export ORACLE_TERM=xterm
@@ -683,8 +727,8 @@ alias vlog='vim ${ALERTASM}'
 alias res='crsctl stat res -t'
 alias rest='crsctl stat res -t -init'
 alias resp='crsctl stat res -p -init'
-alias rac-status='${DBNITRO}/rac-status.sh -a'
-alias asmdu='${DBNITRO}/asmdu.sh -g'
+alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
+alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 alias asmcmd='rlwrap asmcmd'
 alias a='rlwrap asmcmd -p'
 alias oh='cd ${ORACLE_HOME}'
@@ -694,7 +738,7 @@ alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
-alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/.glogin.sql'
+alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/statements/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep'
@@ -744,22 +788,22 @@ unset_var
 unalias_var
 alias_var
 set_GLOGIN
-source ${DBNITRO}/.Oracle_DBA_Functions
-source ${DBNITRO}/.Oracle_RAC_Functions
-source ${DBNITRO}/.Oracle_EXA_Functions
-source ${DBNITRO}/.Oracle_ODG_Functions
-source ${DBNITRO}/.Oracle_OGG_Functions
-source ${DBNITRO}/.Oracle_STR_Functions
-source ${DBNITRO}/.Oracle_PDB_Functions
-source ${DBNITRO}/.Oracle_ASM_Functions
-source ${DBNITRO}/.Oracle_ODA_Functions
-source ${DBNITRO}/.Oracle_WALL_Functions
-source ${DBNITRO}/.Oracle_RMAN_Functions
+source ${DBNITRO}/functions/Oracle_DBA_Functions
+source ${DBNITRO}/functions/Oracle_RAC_Functions
+source ${DBNITRO}/functions/Oracle_EXA_Functions
+source ${DBNITRO}/functions/Oracle_ODG_Functions
+source ${DBNITRO}/functions/Oracle_OGG_Functions
+source ${DBNITRO}/functions/Oracle_STR_Functions
+source ${DBNITRO}/functions/Oracle_PDB_Functions
+source ${DBNITRO}/functions/Oracle_ASM_Functions
+source ${DBNITRO}/functions/Oracle_ODA_Functions
+source ${DBNITRO}/functions/Oracle_WALL_Functions
+source ${DBNITRO}/functions/Oracle_RMAN_Functions
 local OPT=$1
 export ORACLE_HOSTNAME="${HOST}"
 export ORACLE_TERM=xterm
 export ORACLE_SID="${OPT}"
-export ORACLE_HOME=$(cat ${ORATAB} | egrep -iw "${ORACLE_SID}" | cut -f2 -d ':')
+export ORACLE_HOME=$(cat ${ORATAB} | egrep -w "${ORACLE_SID}" | cut -f2 -d ':')
 export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
@@ -782,8 +826,8 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias res='crsctl stat res -t'
   alias rest='crsctl stat res -t -init'
   alias resp='crsctl stat res -p -init'
-  alias rac-status='${DBNITRO}/rac-status.sh -a'
-  alias asmdu='${DBNITRO}/asmdu.sh -g'
+  alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
+  alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
 else
@@ -811,7 +855,7 @@ alias dblog='tail -f -n 100 ${ALERTDB} | egrep -i -v ${IGNORE_ERRORS}'
 alias dglog='tail -f -n 100 ${ALERTDG} | egrep -i -v ${IGNORE_ERRORS}'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
-alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/.glogin.sql'
+alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/statements/glogin.sql'
 alias rman='rlwrap rman'
 alias r='rlwrap rman target /'
 alias dgmgrl='rlwrap dgmgrl'
@@ -827,7 +871,7 @@ alias ogg='set_OGG'
 alias INFO='get_INFO'
 alias REPORT='get_REPORT'
 alias OPTIONS='get_OPTIONS'
-alias HUGEPAGES='${DBNITRO}/GoldenGateMonitor.sh'
+alias HUGEPAGES='${DBNITRO}/bin/GoldenGateMonitor.sh'
 #
 if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
   HOME_RW=$(echo "${RED} RW ${BLA}")
