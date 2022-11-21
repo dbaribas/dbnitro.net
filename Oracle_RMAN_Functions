@@ -212,6 +212,34 @@ EOF
 
 
 
+function RMAN_004() {
+sqlplus -S / as sysdba <<EOF
+set feedback off timing off
+alter session set nls_date_format='dd/mm/yyyy';
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+COL INST FORMAT 99
+COL ITEM FORMAT A25
+COL UNITS FORMAT A20
+COL COMMENTS FORMAT A40 TRUNC
+COL START_TIME FORMAT A20
+COL TYPE FORMAT A16
+COL UNITS FORMAT A10
+col TIMESTAMP format a20
+SELECT INST_ID AS INST
+  , TO_CHAR(START_TIME, 'DD/MM/YYYY HH24:MI:SS') AS START_TIME
+  , TYPE
+  , ITEM
+  , UNITS
+  , SOFAR
+  , TO_CHAR(TIMESTAMP, 'DD/MM/YYYY HH24:MI:SS') as TIMESTAMP
+  , COMMENTS
+FROM GV$RECOVERY_PROGRESS
+order by 1,2,3;
+quit;
+EOF
+}
+
+
 
 
 

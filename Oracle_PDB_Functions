@@ -28,7 +28,7 @@ echo -e "\
 |#[ PDB_009 ] PDB: CHECK UNDO MODE                                    |#|[ PDB_010 ] PDB: CHECK STARTUP AND UPTIME OF ALL PDBS    |#|
 |#[ PDB_011 ] PDB: CHECK UPTIME OF ALL PDBS                           |#|[ PDB_012 ] PDB: CHECK CREATION TIME AND STATUS          |#|
 |#[ PDB_013 ] PDB: VERIFY SIZE AND STATUS OF DATABASES                |#|[ PDB_014 ] PDB: VERIFY SIZE BY DATABASES                |#|
-|#[ PDB_013 ] PDB: CHECK PRORPERTIES AND VALUES                       "
+|#[ PDB_015 ] PDB: CHECK PRORPERTIES AND VALUES                       "
 SepLine
 }
 #
