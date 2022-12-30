@@ -2,7 +2,7 @@ The OracleMenu.sh is a script to select different Oracle Homes, Oracle SIDs and 
 
 AutoInstallation
 
-wget -O /tmp/dbnitro.sh https://raw.githubusercontent.com/dbaribas/dbnitro/main/DBNitro.sh
+wget -O /tmp/dbnitro.sh https://raw.githubusercontent.com/dbaribas/dbnitro.net/main/DBNitro.sh
 
 chmod a+x /tmp/DBNitro.sh
 
