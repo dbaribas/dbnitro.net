@@ -28,11 +28,11 @@ fi
 DATE=$(date +%Y\/%m\/%d_%H\:%M)
 echo "${DATE}: Start Purging Logs" > ${LOG}
 #
-${DBNITRO}/purgeLogs -automigrate
-${DBNITRO}/purgeLogs -days 30
-${DBNITRO}/purgeLogs -orcl 30
-${DBNITRO}/purgeLogs -days 30 -aud -lsnr
-${DBNITRO}/purgeLogs -orcl 30 -aud -lsnr
+${DBNITRO}/bin/purgeLogs -automigrate
+${DBNITRO}/bin/purgeLogs -days 30
+${DBNITRO}/bin/purgeLogs -orcl 30
+${DBNITRO}/bin/purgeLogs -days 30 -aud -lsnr
+${DBNITRO}/bin/purgeLogs -orcl 30 -aud -lsnr
 #
 # ------------------------------------------------------------------------
 # Finishing Execution of purgeLogs
