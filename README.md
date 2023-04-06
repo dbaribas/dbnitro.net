@@ -27,7 +27,12 @@ With your help, patient and some laughs, we did this easier!!!
 
 # Alternative way.
 wget -O /opt/DBNitro.zip https://github.com/dbaribas/dbnitro.net/archive/refs/heads/main.zip
+
 unzip /opt/dbnitro.zip
+
 mv /opt/dbnitro.net-main /opt/dbnitro
+
 chown oracle.oinstall -R /opt/dbnitro
+
 chmod 775 -R /opt/dbnitro
+
