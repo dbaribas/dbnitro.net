@@ -1,0 +1,6 @@
+#!/bin/sh
+java=/usr/bin/java
+
+libs=lib/LicenceManager.jar
+
+$java -Xmx256m -classpath $libs com.fsolutions.lm.ui.LicenceManager

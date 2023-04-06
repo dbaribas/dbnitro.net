@@ -1,0 +1,5 @@
+@echo off
+
+SET libs=lib\LicenceManager.jar
+
+java -Xmx256m -classpath %libs% com.fsolutions.lm.ui.LicenceManager
