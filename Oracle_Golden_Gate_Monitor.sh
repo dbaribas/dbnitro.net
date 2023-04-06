@@ -22,41 +22,23 @@ fi
 #
 if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
-  PRINT=$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - )
-  RED="\033[1;31m"
-  RED2="\033[0;41m"
-  YEL="\033[1;33m"
-  BLU="\e[96m"
-  BLU2="\033[0;44m"
-  GRE="\033[1;32m"
-  BLA="\033[m"
 elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
-  PRINT=$(printf '%100s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - )
-  RED="\033[1;31m"
-  RED2="\033[0;41m"
-  YEL="\033[1;33m"
-  BLU="\e[96m"
-  BLU2="\033[0;44m"
-  GRE="\033[1;32m"
-  BLA="\033[m"
 elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
-  PRINT=$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' - )
-  RED="\e[1;31;40m"
-  RED2="\033[0;41m"
-  YEL="\e[1;33;40m"
-  BLU="\e[96m"
-  BLU2="\033[0;44m"
-  GRE="\e[1;32;40m"
-  BLA="\e[0m"
 fi
 #
 #--------------------------------------------------------------------------------------------
 # GoldenGate Monitoring 
 #
 SepLine() {
-  ${PRINT}
+if [[ $(uname) == "SunOS" ]]; then
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+elif [[ $(uname) == "AIX" ]]; then
+  printf '%100s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+elif [[ $(uname) == "Linux" ]]; then
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+fi
 }
 #
 #--------------------------------------------------------------------------------------------
@@ -130,7 +112,7 @@ elif [[ $(uname) == "AIX" ]]; then
   DISK_FREE=$(df -g ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $3 }')
 elif [[ $(uname) == "Linux" ]]; then
   DISK_TOTAL=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $3, $5 }')
+  DISK_USED=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $3, " - ", $5 }')
   DISK_FREE=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $4 }')
 fi
 SepLine
@@ -139,7 +121,7 @@ echo "FREE AND USED SPACE ON FILESYSTEM OF GOLDENGATE STAGE"
 #
 SepLine
 #
-echo -e "STAGE: ${OGG_HOME} | TOTAL: ${DISK_TOTAL} | USED: ${DISK_USED} | FREE: ${DISK_FREE}"
+echo "STAGE: ${OGG_HOME} | TOTAL: ${DISK_TOTAL} | USED: ${DISK_USED} | FREE: ${DISK_FREE}"
 #
 SepLine
 #
