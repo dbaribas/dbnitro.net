@@ -1,0 +1,44 @@
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.3"
+DateCreation="18/08/2021"
+DateModification="03/03/2022"
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
+#
+SepLine() {
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -  
+}
+#
+SetClear() {
+  printf "\033c"
+}
+#
+function RAC_HELP() {
+SetClear
+SepLine
+echo -e "\
+|#[ RAC_001 ] RAC: VERIFY DATABASE VERSION                            |#|[ RAC_002 ] RAC: VERIFY INSTALLED PATCHES - DETAILS      |#|"
+SepLine
+}
+#
+#########################################################################################################
+#
+# CLUSTER Funtions
+#
+#########################################################################################################
+# 
+#########################################################################################################
+#
+
+
+
+
+
+
+#
+#########################################################################################################
+# Finish of the System
+#########################################################################################################
+#
