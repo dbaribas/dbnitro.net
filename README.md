@@ -2,11 +2,11 @@ The OracleMenu.sh is a script to select different Oracle Homes, Oracle SIDs and 
 
 AutoInstallation
 
-wget -O /tmp/dbnitro.sh https://raw.githubusercontent.com/dbaribas/dbnitro.net/main/DBNitro.sh
+wget -O /tmp/dbnitro.sh https://raw.githubusercontent.com/dbaribas/dbnitro.net/main/DBNitroMenu.sh
 
-chmod a+x /tmp/DBNitro.sh
+chmod a+x /tmp/DBNitroMenu.sh
 
-sh /tmp/DBNitro.sh
+sh /tmp/DBNitroMenu.sh
 
 
 After you download and change like this example, you can just connect as grid or as oracle, and execute the alias: 
