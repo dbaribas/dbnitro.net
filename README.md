@@ -28,7 +28,7 @@ With your help, patient and some laughs, we did this easier!!!
 # Alternative way.
 wget -O /opt/DBNitro.zip https://github.com/dbaribas/dbnitro.net/archive/refs/heads/main.zip
 
-unzip /opt/DBNitro.zip
+unzip /opt/DBNitro.zip -d /opt/
 
 mv /opt/dbnitro.net-main /opt/dbnitro
 
