@@ -1,0 +1,6 @@
+ASM1:/u01/app/19.3.0.1/grid:N
+CDB1:/u01/app/oracle/product/19.3.0.1/db_EE_01:N
+CDB2:/u01/app/oracle/product/19.3.0.1/db_EE_02:N
+CDB3:/u01/app/oracle/product/19.3.0.1/db_EE_02:N
+CDB4:/u01/app/oracle/product/19.3.0.1/db_EE_03:N
+CDB5:/u01/app/oracle/product/19.3.0.1/db_EE_04:N
