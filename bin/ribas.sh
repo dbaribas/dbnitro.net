@@ -355,21 +355,21 @@ fi
 #
 #########################################################################################################
 #
-if [[ "${varWHOAMI}" = "root" ]]; then
+if [[ "${varWHOAMI}" == "root" ]]; then
   dialog --backtitle "www.DBNITRO.net" --title "ROOT User" --no-collapse --colors --msgbox "YOUR USER IS ROOT, PLEASE USE AN OTHER USER TO ACCESS THIS SYSTEM" 7 130
   exit 1
 fi
 #
 #########################################################################################################
 #
-if [[ "${varOS}" = "Unknown" ]]; then
+if [[ "${varOS}" == "Unknown" ]]; then
   dialog --backtitle "www.DBNITRO.net" --title "Operation System" --no-collapse --colors --msgbox "THE OPERATION SYSTEM: ${OS} IS NOT SUPPORTED ON THIS SYSTEM" 7 130
   exit 1
 fi
 #
 #########################################################################################################
 #
-if [[ "${ORACLE_HOME}" = "" ]]; then
+if [[ "${ORACLE_HOME}" == "" ]]; then
   dialog --backtitle "www.DBNITRO.net" --title "ORACLE_HOME" --no-collapse --colors --msgbox "THE ORACLE_HOME VARIABLE IS NOT SET YET, SET THE VARIABLE AND TRY AGAIN" 7 130
   exit 1
 fi
@@ -383,26 +383,26 @@ fi
 #
 #########################################################################################################
 #
-if [[ "${ORACLE_SID}" = "" ]]; then
+if [[ "${ORACLE_SID}" == "" ]]; then
   dialog --backtitle "www.DBNITRO.net" --title "ORACLE_SID" --no-collapse --colors --msgbox "THE ORACLE_SID VARIABLE IS NOT SET YET, SET THE VARIABLE AND TRY AGAIN" 7 130
   exit 1
 fi
 #
 #########################################################################################################
 #
-varORA_PROCESS=$(ps -ef | egrep pmon | egrep -i ${ORACLE_SID} | awk '{ print $NF }' | sed s/ora_pmon_//g)
+varORA_PROCESS=$(ps -ef | egrep pmon | egrep -i ${ORACLE_SID} | awk '{ print $NF }' | cut -d '_' -f3)
 #
-if ! [[ "${ORACLE_SID}" = "${varORA_PROCESS}" ]]; then
+if ! [[ "${ORACLE_SID}" == "${varORA_PROCESS}" ]]; then
   dialog --backtitle "www.DBNITRO.net" --title "ORACLE_SID" --no-collapse --colors --msgbox "THE ORACLE_SID VARIABLE IS NOT SET YET, SET THE VARIABLE AND TRY AGAIN" 7 130
   exit 1
 fi
 #
 #########################################################################################################
 #
-if [[ $(cat ${ORATAB} | egrep "ASM*" | egrep -v "^#" | egrep -v "^$" | egrep -v agent | awk 'BEGIN {FS=":"} { printf("\t%s\n", $2)} ' | uniq | awk '{ print $1 }' | wc -l) = 0 ]]; then
+if [[ $(cat ${ORATAB} | egrep "ASM*" | egrep -v "^#" | egrep -v "^$" | egrep -v agent | awk 'BEGIN {FS=":"} { printf("\t%s\n", $2)} ' | uniq | awk '{ print $1 }' | wc -l) == 0 ]]; then
   for ((i = 0 ; i <= 100; i+=10)); do sleep 0.01; echo $i; done | dialog --backtitle "www.DBNITRO.net" --title "Verifying the GRID_HOME" --gauge "THE GRID_HOME VARIABLE DOES NOT EXIST" 7 70
 else
-  if [[ "${GRID_HOME}" = "" ]]; then
+  if [[ "${GRID_HOME}" == "" ]]; then
     for ((i = 0 ; i <= 100; i+=10)); do sleep 0.01; echo $i; done | dialog --backtitle "www.DBNITRO.net" --title "Setting the GRID_HOME" --gauge "THE GRID_HOME VARIABLE IS SETTING NOW" 7 70
     #
     GRID_HOME=$(cat ${ORATAB} | egrep "ASM*" | egrep -v "^#" | egrep -v "^$" | egrep -v agent | awk 'BEGIN {FS=":"} { printf("\t%s\n", $2) }' | uniq | awk '{ print $1 }')
@@ -1202,7 +1202,7 @@ DATABASE() {
 # Verify DATABASE
 #########################################################################################################
 #
-if [[ "${varDB}" = "N" ]]; then
+if [[ "${varDB}" == "N" ]]; then
   dialog --backtitle "www.DBNITRO.net" --title "Database Menu" --no-collapse --colors --msgbox "Your Database is Not Available" 7 70
   MainMenu
 fi

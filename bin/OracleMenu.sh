@@ -27,6 +27,7 @@ SetClear() {
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
 REPORTS="${DBNITRO}/reports"
+BSACKUP="${DBNITRO}/backup"
 BINARIES="${DBNITRO}/bin"
 VARIABLES="${DBNITRO}/var"
 FUNCTIONS="${DBNITRO}/functions"
@@ -74,17 +75,19 @@ HELP() {
 SetClear
 SepLine
 echo -e "\
-|#| HOMES.......: YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)
-|#| OMS.........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS
-|#| AGENT.......: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (AGENT) HOME AND TOOLS
-|#| GRID........: YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS
-|#| DATABASE....: YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS
-|#| CDB/PDB.....: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb
-|#| GOLDENGATE..: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
-|#| INFO........: YOU CAN SEE THE ORACLE DATABASE INFO
-|#| REPORT......: YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})
-|#| OPTIONS.....: YOU CAN SEE THE ORACLE DATABASE OPTIONS
-|#| HUGEPAGES...: YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
+|#| HOMES........: YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)
+|#| OMS..........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS
+|#| AGENT........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (AGENT) HOME AND TOOLS
+|#| GRID.........: YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS
+|#| DATABASE.....: YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS
+|#| CDB/PDB......: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb
+|#| GOLDENGATE...: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
+|#| INFO.........: YOU CAN SEE THE ORACLE DATABASE INFO
+|#| DASH.........: YOU CAN SEE THE ORACLE DATABASE DASHBOARD
+|#| DASH_INSTALL.: YOU CAN INSTALL THE ORACLE DATABASE DASHBOARD
+|#| REPORT.......: YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})
+|#| OPTIONS......: YOU CAN SEE THE ORACLE DATABASE OPTIONS
+|#| HUGEPAGES....: YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
 SepLine
 }
 #
@@ -355,6 +358,50 @@ fi
 }
 #
 # ------------------------------------------------------------------------
+# Install Database Dashboard
+#
+get_DASH_INSTALL() {
+if [[ ${ORACLE_SID} == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  return 0
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
+else
+sqlplus -S '/ as sysdba' <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+@/opt/dbnitro/sql/Oracle_Create_Dashboard.sql
+quit;
+EOF
+fi
+}
+#
+# ------------------------------------------------------------------------
+# Show Database Dashboard
+#
+get_DASH() {
+if [[ ${ORACLE_SID} == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  return 0
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
+else
+sqlplus -S '/ as sysdba' <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+alter session set current_schema=system;
+SET LINESIZE 5000 pagesize 0 Arraysize 51 TAB OFF
+prompt ##############################################################
+prompt # ACCESSING THE DATABASE DASHBOARD
+prompt ##############################################################
+select * from table(jss.gtop(51));
+/
+quit;
+EOF
+fi
+}
+#
+# ------------------------------------------------------------------------
 # Show Database Options Usage Statistics
 #
 get_OPTIONS() {
@@ -402,7 +449,7 @@ COLUMN VALUE FORMAT A40
 COLUMN USERNAME FORMAT A30
 COLUMN PROFILE FORMAT A20
 COLUMN FILE_NAME FORMAT A80
-select 'Welcome, you are connected to ' || name || ' database' from v$database;
+-- select 'Welcome, you are connected to ' || name || ' database' as Message from v\$database;
 SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
 EOF
@@ -429,7 +476,7 @@ col global_name noprint
 -- select upper(sys_context('userenv', 'con_name') || '@' || sys_context('userenv', 'db_name')) global_name from dual;
 -- select upper(sys_context('userenv', 'db_name') || '@' || sys_context('userenv', 'db_name')) global_name from dual;
 select upper(sys_context('userenv', 'session_user') || '@' || sys_context('userenv', 'con_name') || '@' || sys_context('userenv', 'cdb_name')) global_name from dual;
-select 'Welcome, you are connected to ' || name || ' database' from v$database;
+-- select 'Welcome, you are connected to ' || name || ' database' as Message from v\$database;
 SET SQLPROMPT '&gname> '
 EOF
 fi
@@ -681,6 +728,7 @@ export GRID_HOME="${ORACLE_HOME}"
 export GRID_SID="${OPT}"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
+export SID="${ORACLE_SID}"
 export OB="${ORACLE_BASE}"
 export OH="${ORACLE_HOME}"
 export DBS="${ORACLE_HOME}/dbs"
@@ -789,6 +837,7 @@ export ORACLE_HOME="$(cat ${ORATAB} | egrep -i ":N|:Y" | egrep -w "${ORACLE_SID}
 export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
+export SID="${ORACLE_SID}"
 export OB="${ORACLE_BASE}"
 export OH="${ORACLE_HOME}"
 export DBS="${ORACLE_HOME}/dbs"
@@ -851,6 +900,8 @@ alias orat='${ORATOP}/oratop -f -i 3 / as sysdba'
 alias pdb='set_PDB'
 alias ogg='set_OGG'
 alias INFO='get_INFO'
+alias DASH='get_DASH'
+alias DASH_INSTALL='get_DASH_INSTALL'
 alias REPORT='get_REPORT'
 alias DBNITRO='${DBNITRO}/bin/ribas.sh'
 alias OPTIONS='get_OPTIONS'
