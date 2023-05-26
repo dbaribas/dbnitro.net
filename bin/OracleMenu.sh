@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.73"
+SoftwareVersion="1.0.75"
 DateCreation="07/01/2021"
-DateModification="27/12/2022"
+DateModification="26/05/2023"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -26,8 +26,8 @@ SetClear() {
 #
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
+BACKUP="${DBNITRO}/backup"
 REPORTS="${DBNITRO}/reports"
-BSACKUP="${DBNITRO}/backup"
 BINARIES="${DBNITRO}/bin"
 VARIABLES="${DBNITRO}/var"
 FUNCTIONS="${DBNITRO}/functions"
@@ -39,13 +39,6 @@ if [[ ! -d ${FOLDER}/ ]]; then
   echo " -- YOUR SCRIPT FOLDER DOES NOT EXISTS, YOU HAVE TO CREATE THAT BEFORE YOU CONTINUE --"
   return 1
 fi
-#
-# ------------------------------------------------------------------------
-# Source Functions
-#
-for FUNC in $(ls ${FUNCTIONS}/*_Functions); do
-  source ${FUNC}
-done
 #
 # ------------------------------------------------------------------------
 # Verify ROOT User
@@ -214,6 +207,7 @@ if [[ ! -f ${ORA_INST} ]]; then
   SetClear
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
+  SepLine
  return 1
 fi
 #
@@ -225,6 +219,7 @@ if [[ ! -f ${ORATAB} ]]; then
   SepLine
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
+  SepLine
   return 1
 fi
 #
@@ -236,8 +231,16 @@ if [[ ! -f ${ORA_INVENTORY} ]]; then
   SepLine
   echo " -- YOU DO NOT HAVE THE ORACLE INVENTORY IN YOUR ENVIRONMENT --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
+  SepLine
   return 1
 fi
+#
+# ------------------------------------------------------------------------
+# Source Functions
+#
+for FUNC in $(ls ${FUNCTIONS}/*_Functions); do
+  source ${FUNC}
+done
 #
 # ------------------------------------------------------------------------
 # Verify ASM
@@ -616,7 +619,7 @@ unalias_var
 alias_var
 local OPT=$1
 export ORACLE_HOSTNAME="${HOST}"
-export ORACLE_HOME="$(cat ${ORATAB} | egrep -i ":N|:Y" | egrep -w "${OPT}" | cut -f2 -d ':')"
+export ORACLE_HOME="${OPT}"
 export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
@@ -670,7 +673,7 @@ alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep'
 alias t='rlwrap lsnrctl'
-alias l='rlwrap lsnrctl status'
+alias l='lsnrctl status'
 #
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -v -i "root" | egrep -Ev "^$" | uniq)
 #
@@ -713,6 +716,9 @@ export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
 #
+# ------------------------------------------------------------------------
+# Set ASM Environment
+#
 set_ASM() {
 unset_var
 unalias_var
@@ -740,7 +746,7 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
 export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
 export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
-export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -i "+ASM*")
+export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -w "+ASM*")
 export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -i "crs")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
@@ -771,7 +777,7 @@ alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep'
 alias t='rlwrap lsnrctl'
-alias l='rlwrap lsnrctl status'
+alias l='lsnrctl status'
 #
 if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
   HOME_RW=$(echo "${RED} RW ${BLA}")
@@ -895,7 +901,7 @@ alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep pmon | egrep -v egrep'
 alias t='rlwrap lsnrctl'
-alias l='rlwrap lsnrctl status'
+alias l='lsnrctl status'
 alias orat='${ORATOP}/oratop -f -i 3 / as sysdba'
 alias pdb='set_PDB'
 alias ogg='set_OGG'
@@ -946,9 +952,9 @@ FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
 ORACLE_BASE.......: [${BLU} ${ORACLE_BASE} ${BLA}]
 ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
 HOME_READ/WRITE...: [${HOME_RW}]
-ORACLE_LISTENER...: [${DB_LISTNER}]
 ORACLE_SID........: [${RED} ${ORACLE_SID} ${BLA}]
-ORACLE_DB_STATUS..: [${DB_STATUS}]"
+ORACLE_DB_STATUS..: [${DB_STATUS}]
+ORACLE_LISTENER...: [${DB_LISTNER}]"
 SepLine
 #
 export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
