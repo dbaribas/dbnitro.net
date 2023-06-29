@@ -43,6 +43,10 @@ if [[ $(which wget | wc -l | awk '{ print $1 }') == 0 ]]; then
   echo " -- You need to install wget app --"
   exit 1
 fi
+if [[ $(which unzip | wc -l | awk '{ print $1 }') == 0 ]]; then
+  echo " -- You need to install unzip app --"
+  exit 1
+fi
 #
 # ------------------------------------------------------------------------
 # Help to use this script
@@ -105,6 +109,12 @@ chmod -R 775 /etc/cron.daily/purgeLogs.sh
 chown -R oracle.oinstall ${DBNITRO}/bin/purgeLogs
 chown -R oracle.oinstall /etc/cron.daily/purgeLogs.sh
 #
+# ROOT Crontab
+# Purge Logs GI
+# 00 20 * * * /opt/purgelogs/purgelogs.bin cleanup --orcl 30 --aud --lsnr --automigrate
+
+# Purge Logs DB
+# 00 21 * * * /opt/purgelogs/purgelogs.bin cleanup --days 30 --aud --lsnr --automigrate
 }
 #
 # ------------------------------------------------------------------------
