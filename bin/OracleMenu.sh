@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.75"
+SoftwareVersion="1.0.77"
 DateCreation="07/01/2021"
-DateModification="26/05/2023"
+DateModification="28/06/2023"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -423,6 +423,25 @@ fi
 }
 #
 # ------------------------------------------------------------------------
+# Show Dataguard Status
+#
+get_ODG_STATUS() {
+if [[ ${ORACLE_SID} == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  return 0
+elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  return 0
+else
+sqlplus -S '/ as sysdba' <<EOF
+@${DBNITRO}/sql/Oracle_SQL_DBA_Dataguard_Status.sql
+quit;
+EOF
+fi
+}
+
+#
+# ------------------------------------------------------------------------
 # Create Database Report
 #
 get_REPORT() {
@@ -525,6 +544,7 @@ else
   alias g='rlwrap ${OGG_HOME}/ggsci'
   alias ggh='cd ${OGG_HOME}'
   alias gglog='tail -f -n 100 ${ALERTGG} | egrep -i -v ${IGNORE_ERRORS}'
+  alias gglogv='vi ${ALERTGG}'
   alias ggmon='${DBNITRO}/bin/OracleGoldenGateMonitor.sh'
   echo " -- Golden Gate Environment: ${OGGHOME}"
   return 1
@@ -644,7 +664,9 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
   alias asmlog='tail -f -n 100 ${ALERTASM} | egrep -i -v ${IGNORE_ERRORS}'
+  alias asmlogv='vi ${ALERTASM}'
   alias crslog='tail -f -n 100 ${ALERTCRS} | egrep -i -v ${IGNORE_ERRORS}'
+  alias crslogv='vi ${ALERTCRS}'
   alias res='crsctl stat res -t'
   alias rest='crsctl stat res -t -init'
   alias resp='crsctl stat res -p -init'
@@ -660,6 +682,7 @@ fi
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
 alias lsnlog='tail -f -n 100 ${ALERTLST} | egrep -i -v ${IGNORE_ERRORS}'
+alias lsnlogv='vi ${ALERTLST}'
 alias ob='cd ${ORACLE_BASE}'
 alias oh='cd ${ORACLE_HOME}'
 alias dbs='cd ${ORACLE_HOME}/dbs'
@@ -729,13 +752,13 @@ export ORACLE_HOSTNAME="${HOST}"
 export ORACLE_TERM=xterm
 export ORACLE_SID="${OPT}"
 export ORACLE_HOME="${G_HOME}"
-export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
 export GRID_HOME="${ORACLE_HOME}"
+export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
 export GRID_SID="${OPT}"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
 export SID="${ORACLE_SID}"
-export OB="${ORACLE_BASE}"
+export OB="${GRID_BASE}"
 export OH="${ORACLE_HOME}"
 export DBS="${ORACLE_HOME}/dbs"
 export TNS="${ORACLE_HOME}/network/admin"
@@ -746,17 +769,23 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
 export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
 export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
-export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -w "+ASM*")
-export HOME_ADR_CRS=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -i "crs")
+export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -w "+ASM*")
+export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "crs")
+export GRID_ADR=$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-export ALERTASM="${ORACLE_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
-export ALERTCRS="${ORACLE_BASE}/${HOME_ADR_CRS}/trace/alert.log"
+export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
-alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
+alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
+alias gilsnlog='tail -f -n 100 ${GRID_BASE}/${GRID_ADR}/trace/listener.log | egrep -i -v ${IGNORE_ERRORS}'
+alias gilsnlogv='vi ${GRID_BASE}/${GRID_ADR}/trace/listener.log'
+alias trc='cd ${GRID_BASE}/${HOME_ADR}/trace'
 alias asmlog='tail -f -n 100 ${ALERTASM} | egrep -i -v ${IGNORE_ERRORS}'
+alias asmlogv='vi ${ALERTASM}'
 alias crslog='tail -f -n 100 ${ALERTCRS} | egrep -i -v ${IGNORE_ERRORS}'
+alias crslogv='vi ${ALERTCRS}'
 alias lsnlog='tail -f -n 100 ${ALERTLST} | egrep -i -v ${IGNORE_ERRORS}'
-alias vlog='vim ${ALERTASM}'
+alias lsnlogv='vi ${ALERTLST}'
 alias res='crsctl stat res -t'
 alias rest='crsctl stat res -t -init'
 alias resp='crsctl stat res -p -init'
@@ -764,7 +793,7 @@ alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
 alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 alias asmcmd='rlwrap asmcmd'
 alias a='rlwrap asmcmd -p'
-alias ob='cd ${ORACLE_BASE}'
+alias ob='cd ${GRID_BASE}'
 alias oh='cd ${ORACLE_HOME}'
 alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
@@ -815,7 +844,7 @@ FREE_MEMORY.......: [${GRE} ${F_MEM} ${BLA}]
 TOTAL_SWAP........: [${BLU} ${T_SWAP} ${BLA}]
 USED_SWAP.........: [${RED} ${U_SWAP} ${BLA}]
 FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
-ORACLE_BASE.......: [${BLU} ${ORACLE_BASE} ${BLA}]
+ORACLE_BASE.......: [${BLU} ${GRID_BASE} ${BLA}]
 ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
 HOME_READ/WRITE...: [${HOME_RW}]
 ORACLE_LISTENER...: [${DB_LISTNER}]
@@ -856,10 +885,14 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 #
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${G_HOME}"
-  export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
+  export GRID_BASE=$(locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g')
+  export GRID_ADR=$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")
   export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
   export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
   export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
+  alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
+  alias gilsnlog='tail -f -n 100 ${GRID_BASE}/${GRID_ADR}/trace/listener.log | egrep -i -v ${IGNORE_ERRORS}'
+  alias gilsnlogv='vi ${GRID_BASE}/${GRID_ADR}/trace/listener.log'
   alias res='crsctl stat res -t'
   alias rest='crsctl stat res -t -init'
   alias resp='crsctl stat res -p -init'
@@ -879,17 +912,19 @@ export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
 export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
 export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
-alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
+alias dbtrc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
 alias lsnlog='tail -f -n 100 ${ALERTLST} | egrep -i -v ${IGNORE_ERRORS}'
-alias vlog='vim ${ALERTDB}'
+alias lsnlogv='vi ${ALERTLST}'
+alias dblog='tail -f -n 100 ${ALERTDB} | egrep -i -v ${IGNORE_ERRORS}'
+alias dblogv='vi ${ALERTDB}'
+alias dglog='tail -f -n 100 ${ALERTDG} | egrep -i -v ${IGNORE_ERRORS}'
+alias dglogv='vi ${ALERTDG}'
 alias ob='cd ${ORACLE_BASE}'
 alias oh='cd ${ORACLE_HOME}'
 alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
-alias dblog='tail -f -n 100 ${ALERTDB} | egrep -i -v ${IGNORE_ERRORS}'
-alias dglog='tail -f -n 100 ${ALERTDG} | egrep -i -v ${IGNORE_ERRORS}'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
@@ -903,6 +938,8 @@ alias p='ps -ef | egrep pmon | egrep -v egrep'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
 alias orat='${ORATOP}/oratop -f -i 3 / as sysdba'
+alias oratop='${ORATOP}/oratop'
+alias odg-status='get_ODG_STATUS'
 alias pdb='set_PDB'
 alias ogg='set_OGG'
 alias INFO='get_INFO'
@@ -982,7 +1019,9 @@ alias oh='cd ${ORACLE_HOME}'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias p='ps -ef | egrep "wlserver" | egrep -v "grep|egrep"'
 alias emlog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
+alias emlogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias omslog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
+alias omslogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
 #
 OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)
 #
