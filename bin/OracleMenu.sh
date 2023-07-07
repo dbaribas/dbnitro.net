@@ -26,6 +26,7 @@ SetClear() {
 #
 FOLDER="/opt"
 DBNITRO="${FOLDER}/dbnitro"
+LOGS="${DBNITRO}/logs"
 BACKUP="${DBNITRO}/backup"
 REPORTS="${DBNITRO}/reports"
 BINARIES="${DBNITRO}/bin"
