@@ -76,7 +76,7 @@ fi
 SetUpDBNITRO() {
 echo "Downloading DBNITRO Files"
 cd ${FOLDER}/
-wget -O /opt/DBNitro.zip   https://github.com/dbaribas/dbnitro.net/archive/refs/heads/main.zip
+wget -O /opt/DBNitro.zip https://github.com/dbaribas/dbnitro.net/archive/refs/heads/main.zip
 unzip /opt/DBNitro.zip
 mv /opt/dbnitro.net-main /opt/dbnitro
 #
