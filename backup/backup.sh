@@ -91,7 +91,7 @@ ORAENV_ASK=NO
 #
 ORACLE_SID=$1
 #
-. /usr/local/bin/oraenv <<< ${ORACLE_SID}
+. /usr/local/bin/oraenv <<< ${ORACLE_SID} > /dev/null
 #
 DB_SID=$(grep -v '^\#' ${ORATAB} | grep -v '^$' | grep -i "^${ORACLE_SID}:" | cut -f3 | cut -f1 -d ':')
 #
@@ -835,7 +835,7 @@ allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
 allocate channel ch2 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
 allocate channel ch3 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
 allocate channel ch4 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
-backup full as ${CompressBKP} backupset format '${DirBase}/${FormatFull}' tag='${Global_Name}_FullArchAll_Compressed'
+backup database as ${CompressBKP} backupset format '${DirBase}/${FormatFull}' tag='${Global_Name}_FullArchAll_Compressed' 
 archivelog all format '${DirBase}/${FormatArch}' tag='${Global_Name}_FullArchAll_Compressed';
 }
 quit;
