@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="backupStatistic" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="8232c2c5-ae63-430b-936e-12002fccfe26">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="SQL">
+		<![CDATA[select *
+from (select INPUT_TYPE
+		,STATUS
+		,to_char(START_TIME,'DD/MM/yy hh24:mi') as INICIO
+		,to_char(END_TIME,'DD/MM/yy hh24:mi') as FINAL
+		,TIME_TAKEN_DISPLAY tempo
+		,OPTIMIZED
+		,d.OUTPUT_BYTES_DISPLAY tam_backup
+	from V$RMAN_BACKUP_JOB_DETAILS d
+	where START_TIME > sysdate-30
+	order by session_key desc)
+where rownum <=30]]>
+	</queryString>
+	<field name="INPUT_TYPE" class="java.lang.String"/>
+	<field name="STATUS" class="java.lang.String"/>
+	<field name="INICIO" class="java.lang.String"/>
+	<field name="FINAL" class="java.lang.String"/>
+	<field name="TEMPO" class="java.lang.String"/>
+	<field name="OPTIMIZED" class="java.lang.String"/>
+	<field name="TAM_BACKUP" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="17" splitType="Stretch">
+			<staticText>
+				<reportElement x="8" y="0" width="79" height="15" uuid="33cf7a10-9b53-4cb0-8aac-4deff8f62380"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="73" y="0" width="79" height="15" uuid="432d8926-73b6-4280-b994-a5ceea8227da"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="138" y="0" width="79" height="15" uuid="d2fdf5a3-8be4-4417-acdd-157e6e3289e9"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inicio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="217" y="0" width="79" height="15" uuid="ce4970b4-37e5-4b78-8426-b6b49623bca7"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Final]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="296" y="0" width="79" height="15" uuid="dd5ea58f-a713-4204-af14-033f2ff5219c"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tempo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="361" y="0" width="79" height="15" uuid="e322d546-172f-4f65-90cf-3234361b8df5"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Optimized]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="422" y="0" width="90" height="15" uuid="345846da-4a45-40a6-8d3c-012385b3ca31"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tamanho Backup]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<textField>
+				<reportElement x="8" y="0" width="79" height="15" uuid="ba41c75d-3be9-4f2c-be11-fb439d0a15c6"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INPUT_TYPE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="73" y="0" width="79" height="15" uuid="c204aabd-651d-4cde-8662-42f0baed7825"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STATUS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="138" y="0" width="79" height="15" uuid="6dbeb848-28ec-4522-947a-5371b7c4c2ec"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INICIO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="217" y="0" width="79" height="15" uuid="b7618e34-7441-4ecd-a601-2b45f011abcc"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FINAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="296" y="0" width="79" height="15" uuid="4a42a06e-b484-45b3-82bf-3e2f150bef68"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TEMPO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="361" y="0" width="79" height="15" uuid="018056a4-48ec-4e51-84d2-95db2e566095"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OPTIMIZED}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="423" y="0" width="79" height="15" uuid="a37f4a85-71bc-487f-9bc7-dc51ba24a95f"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TAM_BACKUP}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

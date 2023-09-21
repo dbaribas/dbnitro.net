@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="lastBackupsFiles" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="41362d38-ab62-49d3-bdc8-c6450ee72586">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT
+     tag,
+     device_type AS DEVICE,
+     handle AS CAMINHO,
+     START_TIME AS INICIO,
+     COMPLETION_TIME AS FINAL,
+     SIZE_BYTES_DISPLAY AS TAMANHO
+FROM
+     v$backup_piece_details
+WHERE
+     session_recid = ( SELECT max(session_recid) FROM V$RMAN_BACKUP_JOB_DETAILS WHERE START_TIME > sysdate-10 and input_type IN ('DB FULL','DB INCR') and status = 'COMPLETED' )
+     and START_TIME > sysdate -30
+ORDER BY
+     START_TIME ASC]]>
+	</queryString>
+	<field name="TAG" class="java.lang.String"/>
+	<field name="DEVICE" class="java.lang.String"/>
+	<field name="CAMINHO" class="java.lang.String"/>
+	<field name="INICIO" class="java.sql.Timestamp"/>
+	<field name="FINAL" class="java.sql.Timestamp"/>
+	<field name="TAMANHO" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="17" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="0" width="66" height="17" uuid="bb3ca4cb-0ae4-4ef3-b233-5740d7ac4c13"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tag]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="76" y="0" width="58" height="17" uuid="ba6ac599-505f-4f85-94f2-0ee5cf0b22de"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Device]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="134" y="2" width="223" height="15" uuid="990c9974-03b5-41e9-9e9e-ed2a5721db55"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Caminho]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="357" y="0" width="76" height="17" uuid="c2c0d916-7f83-42ba-8ff7-507b61268859"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inicio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="433" y="0" width="61" height="17" uuid="89a0b7d0-bbe5-466e-91e8-568b1566aa61"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Final]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="494" y="0" width="60" height="17" uuid="2e9a7fe2-7f24-4848-88b1-6206eb608843"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tamanho]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<textField>
+				<reportElement x="10" y="0" width="66" height="15" uuid="afb5c66c-8d7a-4587-9c78-ad0b0581c2c9"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TAG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="76" y="0" width="58" height="15" uuid="49bdaf55-9471-432e-bcbf-af43f6a247e3"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DEVICE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="134" y="2" width="223" height="15" uuid="eb844dfe-7b1e-4ac0-9a20-840b0ecd51c8"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAMINHO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="357" y="0" width="76" height="15" uuid="ad8b22b9-b353-4fb5-847f-fe4a50b5ee55"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INICIO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="433" y="0" width="61" height="15" uuid="9b1aebca-46aa-4fa3-a9e5-d22ee7528e48"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FINAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="494" y="0" width="60" height="15" uuid="74ab25a7-78ae-4d1c-b52c-8ea7fcbd4827"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TAMANHO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="instanceInfoTable" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="ac31769c-18e4-4bce-9a98-28c6816105fc">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Heading 3" fontSize="14" isBold="true"/>
+	<queryString>
+		<![CDATA[select
+	  inst_id
+	, instance_name
+	, host_name
+	, version
+	, to_char(startup_time,'dd/mm/yy hh24:mi') as startup_time
+	, status
+	, ACTIVE_STATE
+from
+	gv$instance]]>
+	</queryString>
+	<field name="INST_ID" class="java.math.BigDecimal"/>
+	<field name="INSTANCE_NAME" class="java.lang.String"/>
+	<field name="HOST_NAME" class="java.lang.String"/>
+	<field name="VERSION" class="java.lang.String"/>
+	<field name="STARTUP_TIME" class="java.lang.String"/>
+	<field name="STATUS" class="java.lang.String"/>
+	<field name="ACTIVE_STATE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="15" splitType="Stretch">
+			<staticText>
+				<reportElement style="Heading 3" x="16" y="0" width="92" height="15" uuid="d3970189-09d0-493b-8a8f-8e548ab6179c"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Instancia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Heading 3" x="81" y="0" width="99" height="15" uuid="23125fd8-6160-4a75-9221-1870bc815b45"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Servidor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Heading 3" x="180" y="0" width="92" height="15" uuid="a6ded083-1a7d-4796-9258-6c2f15dd7c9b"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Versão]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Heading 3" x="402" y="0" width="92" height="15" uuid="bf0bb627-77f9-442b-b4b1-77ee404dcf0a"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Startup Time]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Heading 3" x="245" y="0" width="64" height="15" uuid="6cf2ffb1-dc77-4008-a8cb-470c1b46ed67"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="309" y="0" width="100" height="15" uuid="e1784c0d-0430-4858-9fc3-13d94f6a4772"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Active Status]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField>
+				<reportElement x="16" y="0" width="92" height="15" uuid="54aee83d-1b29-48e5-b2f7-79cbe4347449"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INSTANCE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="81" y="0" width="99" height="15" uuid="f8319a5c-c9a7-433d-ba63-789a4b2a1717"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HOST_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="0" width="92" height="15" uuid="8cde858e-b4ca-4a70-9e46-9ed7f0e632f6"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VERSION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="402" y="0" width="92" height="15" uuid="c9924c3f-7539-49fa-98db-60c930c7746f"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STARTUP_TIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="245" y="0" width="64" height="15" uuid="47e9360e-3e8c-4d11-8846-bfbc38c6c92b"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STATUS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="309" y="0" width="100" height="15" uuid="f7e0097f-b91e-4c93-bfdf-5df116782732"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACTIVE_STATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tableSpaceDetail" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2529637b-c753-4ce4-bc6e-9467206bc3d1">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="SQL">
+		<![CDATA[select t.tablespace_name "Tablespace"
+	,round(ar.usado,2) "Usado"
+	,round(decode(NVL2(cresc.tablespace,0,sign(ar.Expansivel)),1,(ar.livre+ar.expansivel),ar.livre),2) "Livre"
+	,NVL2(cresc.limite,'ILIMITADO',round(ar.expansivel,2)) "Expansivel"
+	,round(decode(NVL2(cresc.tablespace,0,sign(ar.Expansivel)),1,ar.usado/(ar.total+ar.expansivel),(ar.usado/ar.total))*100,2) "Usado %"
+	,round(decode(NVL2(cresc.tablespace,0,sign(ar.Expansivel)),1,(ar.livre+ar.expansivel)/(ar.total+ar.expansivel),(ar.livre/ar.total))*100,2) "Livre %"
+	,round(decode(NVL2(cresc.tablespace,0,sign(ar.Expansivel)),1,(ar.total+ar.expansivel),ar.total),2) "Total"
+	,t.Contents "Conteudo"
+	,t.Extent_Management "Tipo Ger."
+from dba_tablespaces t,
+	(select df.tablespace_name tablespace
+			,(sum(df.bytes)-sum(NVL(df_fs.bytes,0)))/1024/1024 Usado
+			,sum(NVL(df_fs.bytes,0))/1024/1024 Livre
+			,sum(decode(df.autoextensible,'YES',decode(sign(df.maxbytes-df.bytes),1,df.maxbytes-df.bytes,0),0))/1024/1024 Expansivel
+			,sum(df.bytes)/1024/1024 Total
+		from dba_data_files df,
+			(select tablespace_name
+				,file_id
+				,sum(bytes) bytes
+			from dba_free_space
+			group by tablespace_name, file_id) df_fs
+		where df.tablespace_name = df_fs.tablespace_name (+)
+		and df.file_id = df_fs.file_id (+)
+		group by df.tablespace_name
+union
+select tf.tablespace_name tablespace
+	,sum(tf_fs.bytes_used)/1024/1024 Usado
+	,sum(tf_fs.bytes_free)/1024/1024 Livre
+	,sum(decode(tf.autoextensible,'YES',decode(sign(tf.maxbytes-tf.bytes),1,tf.maxbytes-tf.bytes,0),0))/1024/1024 Expansivel
+	,sum(tf.bytes)/1024/1024 Total
+from dba_temp_files tf, V$TEMP_SPACE_HEADER  tf_fs
+where tf.tablespace_name = tf_fs.tablespace_name
+and tf.file_id = tf_fs.file_id
+group by tf.tablespace_name) ar,
+(select df.tablespace_name tablespace
+	,'ILIMITADO' limite
+from dba_data_files df
+where df.maxbytes/1024/1024/1024 > 30
+and df.autoextensible = 'YES'
+group by df.tablespace_name
+union
+select tf.tablespace_name tablespace
+	,'ILIMITADO' limite
+from dba_temp_files tf
+where tf.maxbytes/1024/1024/1024 > 30
+and tf.autoextensible = 'YES'
+group by tf.tablespace_name) cresc
+where cresc.tablespace (+) = t.tablespace_name
+and ar.tablespace (+) = t.tablespace_name
+order by 1,5,6]]>
+	</queryString>
+	<field name="Tablespace" class="java.lang.String"/>
+	<field name="Usado" class="java.math.BigDecimal"/>
+	<field name="Livre" class="java.math.BigDecimal"/>
+	<field name="Expansivel" class="java.lang.String"/>
+	<field name="Usado %" class="java.math.BigDecimal"/>
+	<field name="Livre %" class="java.math.BigDecimal"/>
+	<field name="Total" class="java.math.BigDecimal"/>
+	<field name="Conteudo" class="java.lang.String"/>
+	<field name="Tipo Ger." class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="14">
+			<staticText>
+				<reportElement x="0" y="0" width="61" height="12" uuid="e1e2b250-145b-482b-9603-e72af0705e2e"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tablespace]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="61" y="0" width="61" height="12" uuid="fbc3b79b-da78-4a75-a333-a43d51eb472a"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Usado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="122" y="0" width="61" height="12" uuid="2514ecc4-78fb-4590-ab3c-ae9a9a794fa7"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Livre]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="183" y="0" width="61" height="12" uuid="ad7dfc29-1d8a-481f-8f7b-207aff11e58a"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expansivel]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="244" y="0" width="61" height="12" uuid="95b52180-3afb-4fe7-a7ca-00bf45d7f614"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Usado %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="305" y="0" width="61" height="12" uuid="bb36f9e1-48a3-4a23-9898-7c2af5db2688"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Livre %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="366" y="0" width="45" height="12" uuid="9022187b-7960-475d-a72d-fc7fff8c1ead"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="419" y="0" width="61" height="12" uuid="cc5cfbbb-ac08-484b-aca1-edf919f458c6"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Conteudo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="488" y="0" width="61" height="12" uuid="45e70aab-723b-4d85-9b35-7a4d6a5e84bc"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo Ger.]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="61" height="10" uuid="40846665-b885-4203-842c-1a8d652c69dd"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tablespace}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="61" y="0" width="61" height="10" uuid="88430acb-da14-4c49-9a54-67cdcfb7b22d"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Usado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="122" y="0" width="61" height="10" uuid="165e2f5b-23e1-44d2-806d-a4946b0903ce"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Livre}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="183" y="0" width="61" height="10" uuid="47900ab9-442a-42b9-9683-a6c62a25a3a7"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Expansivel}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="244" y="0" width="61" height="10" uuid="f6fcd71b-d983-454d-89d0-60d2f7821a62"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Usado %}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="305" y="0" width="61" height="10" uuid="36d33b8c-6722-4170-b893-55b000018c14"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Livre %}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="366" y="0" width="45" height="10" uuid="539846ea-1761-4914-8f7d-4f85fe818e6b"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="419" y="0" width="61" height="10" uuid="3b69c384-7dac-4eaf-be3d-8e0c7a79ce4f"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Conteudo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="488" y="0" width="61" height="10" uuid="26e053e3-ef43-4f59-8358-d4b4f8bd9eab"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tipo Ger.}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

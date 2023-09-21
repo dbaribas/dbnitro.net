@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="parentReport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8206deb4-42ad-4cac-af99-2f23ea1d391d">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="160"/>
+	<style name="Heading 4" fontSize="12" isBold="true" isItalic="true"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/Users/specht/Projetos/OracleKiller/etc/report_jasper/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="instanceName" class="java.lang.String"/>
+	<parameter name="Server" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select *
+from (select INPUT_TYPE
+		,STATUS
+
+		,to_char(START_TIME,'DD/MM/yy hh24:mi') as INICIO
+
+		,to_char(END_TIME,'DD/MM/yy hh24:mi') as FINAL
+
+		,TIME_TAKEN_DISPLAY tempo
+
+		,OPTIMIZED
+
+		,d.OUTPUT_BYTES_DISPLAY tam_backup
+
+	from V$RMAN_BACKUP_JOB_DETAILS d
+
+	where START_TIME > sysdate-30
+
+	order by session_key desc)
+
+where rownum <=30]]>
+	</queryString>
+	<field name="INPUT_TYPE" class="java.lang.String"/>
+	<field name="STATUS" class="java.lang.String"/>
+	<field name="INICIO" class="java.lang.String"/>
+	<field name="FINAL" class="java.lang.String"/>
+	<field name="TEMPO" class="java.lang.String"/>
+	<field name="OPTIMIZED" class="java.lang.String"/>
+	<field name="TAM_BACKUP" class="java.lang.String"/>
+	<variable name="client" class="java.lang.String"/>
+	<variable name="instance" class="java.lang.String"/>
+	<variable name="consultor" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="152" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="110" width="64" height="15" uuid="31dbc297-4cc1-457a-b0a9-c49cb0afbaef"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Servidor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="125" width="64" height="15" uuid="1da0a93a-b6db-4001-8f5c-8cd7a2aa1005"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Instância:]]></text>
+			</staticText>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="301" y="57" width="253" height="20" uuid="9dffa028-e03e-4cab-a7c8-f673f31d4804"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="0" y="0" width="225" height="57" uuid="e39317e6-f052-443e-a19b-42d6df2dfdd2"/>
+				<imageExpression><![CDATA[$P{SUBREPORT_DIR} + "images/logo.jpg"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="63" y="125" width="100" height="15" uuid="99bb3855-c098-465e-baaf-88c0ad4813da"/>
+				<textFieldExpression><![CDATA[$P{instanceName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="63" y="110" width="100" height="15" uuid="a82b052c-d3ec-4e4e-accc-9c3b80a11da4"/>
+				<textFieldExpression><![CDATA[$P{Server}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="97" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="28" width="554" height="59" uuid="c7336fdc-8fe4-4941-a5f4-bf011bc4c5cf"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "instanceInfoTable.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement style="Heading 4" x="0" y="0" width="224" height="24" forecolor="#000066" uuid="e0fa7056-b17d-4c9d-b102-ea948cc23ec5"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Ambiente Oracle]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="23" width="225" height="1" forecolor="#000066" uuid="4a32355a-642c-4192-8e07-c5389afea801"/>
+			</line>
+		</band>
+		<band height="80">
+			<staticText>
+				<reportElement x="0" y="0" width="225" height="23" forecolor="#000066" uuid="2e32bbcb-71b5-40ec-9cc9-137f5b363ebf"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tamanho do Banco]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="22" width="225" height="1" forecolor="#000066" uuid="a8aaac89-f8f2-4a74-aa88-639a323c74d0"/>
+			</line>
+			<subreport>
+				<reportElement x="0" y="28" width="554" height="42" uuid="2eb2532f-8240-4b8e-9ee5-2f7508a4d070"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "databaseSize.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="80">
+			<staticText>
+				<reportElement x="0" y="0" width="225" height="22" forecolor="#000066" uuid="9f710af7-2b60-443e-9e66-81539bcdd2f3"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estatísticas de Backups]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="0" y="28" width="554" height="44" uuid="b869c775-b014-4164-a800-3e3326f7d759"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "backupStatistic.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="0" y="22" width="225" height="1" forecolor="#000066" uuid="2450105e-fe8a-46a5-85a3-a977ec7833c6"/>
+			</line>
+		</band>
+		<band height="116">
+			<line>
+				<reportElement x="1" y="22" width="224" height="1" forecolor="#000066" uuid="fe348e76-9e16-4b9d-a1d6-d91066ed5767"/>
+			</line>
+			<staticText>
+				<reportElement x="1" y="0" width="224" height="23" forecolor="#000066" uuid="4acaa417-0a20-4ae6-998f-94dc6ac2175d"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Arquivos do Último Backups FULL]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="0" y="29" width="554" height="75" uuid="968f8ecd-38e4-4dcc-a45a-e9c5f8c11e78"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "lastBackupsFiles.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="119">
+			<staticText>
+				<reportElement x="0" y="0" width="225" height="24" forecolor="#000066" uuid="710c5b6c-bbfc-4db0-a7e1-497eadd597fb"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Table Space]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="23" width="224" height="1" forecolor="#000066" uuid="d933804a-de3d-4d3b-849a-780becf52933"/>
+			</line>
+			<subreport>
+				<reportElement x="0" y="30" width="554" height="69" uuid="275ac4a5-c6ef-4250-852a-579998fc6063"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "tableSpaceDetail.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="115" width="100" height="1" uuid="57295712-fb94-4d28-a707-6c143b08c044"/>
+			</break>
+		</band>
+	</detail>
+</jasperReport>
