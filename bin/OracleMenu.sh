@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.79"
+SoftwareVersion="1.0.81"
 DateCreation="07/01/2021"
-DateModification="25/09/2023"
+DateModification="28/09/2023"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -264,8 +264,8 @@ fi
 # Unsetting and Setting OS and ORATAB Variables
 #
 unset_var() {
-if [[ $(uname) == "SunOS" ]]; then
-  if [[ $(whoami) == "grid" ]]; then
+if [[ "$(uname)" == "SunOS" ]]; then
+  if [[ "$(whoami)" == "grid" ]]; then
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
@@ -273,7 +273,7 @@ if [[ $(uname) == "SunOS" ]]; then
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   #
-  elif [[ $(whoami) == "oracle" ]]; then
+  elif [[ "$(whoami)" == "oracle" ]]; then
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
@@ -281,8 +281,8 @@ if [[ $(uname) == "SunOS" ]]; then
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
   umask 0022
   fi
-elif [[ $(uname) == "AIX" ]]; then
-  if [[ $(whoami) == "grid" ]]; then
+elif [[ "$(uname)" == "AIX" ]]; then
+  if [[ "$(whoami)" == "grid" ]]; then
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
@@ -290,7 +290,7 @@ elif [[ $(uname) == "AIX" ]]; then
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   #
-  elif [[ $(whoami) == "oracle" ]]; then
+  elif [[ "$(whoami)" == "oracle" ]]; then
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
@@ -298,8 +298,8 @@ elif [[ $(uname) == "AIX" ]]; then
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ' 
   umask 0022
   fi
-elif [[ $(uname) == "Linux" ]]; then
-  if [[ $(whoami) == "grid" ]]; then
+elif [[ "$(uname)" == "Linux" ]]; then
+  if [[ "$(whoami)" == "grid" ]]; then
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
@@ -307,7 +307,7 @@ elif [[ $(uname) == "Linux" ]]; then
   export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
   umask 0022
   #
-  elif [[ $(whoami) == "oracle" ]]; then
+  elif [[ "$(whoami)" == "oracle" ]]; then
   for U_VAR in ${VARIABLES}; do
     unset ${U_VAR} > /dev/null 2>&1
   done
@@ -517,12 +517,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-OGG_STATUS=$(
-{
-  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
-  echo 'show parameter enable_goldengate_replication;'
-} | sqlplus -S / as sysdba
-)
+OGG_STATUS="$(echo "show parameter enable_goldengate_replication;" | sqlplus -S / as sysdba | tail -2)"
 fi
 #
 # ------------------------------------------------------------------------
@@ -567,26 +562,9 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   return 0
 else
 #
-VERSION=$(
-{
-  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
-  echo 'select substr(version,1,2) as version from v$instance;'
-} | sqlplus -S / as sysdba
-)
-#
-CONTAINER=$(
-{
-  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
-  echo 'select cdb from v$database;'
-} | sqlplus -S / as sysdba
-)
-#
-PLUGGABLES=$(
-{
-  echo 'set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;'
-  echo 'select count(NAME) from v$containers where con_id not in (0,1,2);'
-} | sqlplus -S / as sysdba
-)
+   VERSION="$(echo "select substr(version,1,2) as version from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+ CONTAINER="$(echo "select cdb from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+PLUGGABLES="$(echo "select count(NAME) from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba | tail -2)"
 fi
 #
 # ------------------------------------------------------------------------
@@ -701,42 +679,28 @@ alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
 alias list='${DBNITRO}/bin/OracleLabel.sh'
 #
-OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -v -i "root" | egrep -Ev "^$" | uniq)
+OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -v -i "root" | egrep -Ev "^$" | uniq)"
 #
 if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
-  HOME_RW=$(echo "${RED} RW ${BLA}")
+  HOME_RW="RW"
 else
-  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} == "Y" ]]; then
-    HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} == "N" ]]; then
-    HOME_RW=$(echo "${RED} RW ${BLA}")
-  fi
+  HOME_STATUS="$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)"
+  if [[ ${HOME_STATUS} == "Y" ]]; then HOME_RW="RO"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="RW"; fi
 fi
 #
-LSNRCTL=$(ps -ef | egrep -i "tnslsnr" | egrep -v "egrep" | wc -l)
-if [[ "${LSNRCTL}" != 0 ]]; then
-  DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
-else
-  DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
-fi
-SetClear
-SepLine
-echo -e "\
-${RED2}DBNITRO.net.......:${BLA} [${BLU2} Oracle HOME ${BLA}]
-SERVER_UPTIME.....: [${RED} ${UPTIME} ${BLA}]
-TOTAL_MEMORY......: [${BLU} ${T_MEM} ${BLA}]
-USED_MEMORY.......: [${RED} ${U_MEM} ${BLA}]
-FREE_MEMORY.......: [${GRE} ${F_MEM} ${BLA}]
-TOTAL_SWAP........: [${BLU} ${T_SWAP} ${BLA}]
-USED_SWAP.........: [${RED} ${U_SWAP} ${BLA}]
-FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
-ORACLE_BASE.......: [${BLU} ${ORACLE_BASE} ${BLA}]
-ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
-OWNER.............: [${RED} ${OWNER} ${BLA}]
-HOME_READ/WRITE...: [${HOME_RW}]
-ORACLE_LISTENER...: [${DB_LISTNER}]"
-SepLine
+LSNRCTL="$(ps -ef | egrep -i "tnslsnr" | egrep -v "egrep" | wc -l)"
+if [[ "${LSNRCTL}" != 0 ]]; then DB_LISTNER="ONLINE"; else DB_LISTNER="OFFLINE"; fi
+#
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-22s|%-60s|\n" " ORACLE_BASE..........: " " ${ORACLE_BASE} "
+printf "|%-22s|%-60s|\n" " ORACLE_HOME..........: " " ${ORACLE_HOME} "
+printf "|%-22s|%-60s|\n" " OWNER_HOME...........: " " ${OWNER} "
+printf "|%-22s|%-60s|\n" " ORACLE_VERSION.......: " " $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') "
+printf "|%-22s|%-60s|\n" " HOME_READ/WRITE......: " " ${HOME_RW} "
+printf "|%-22s|%-60s|\n" " LISTENER.............: " " ${DB_LISTNER} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
 #
 export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
@@ -813,48 +777,31 @@ alias l='lsnrctl status'
 alias list='${DBNITRO}/bin/OracleLabel.sh'
 #
 if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
-  HOME_RW=$(echo "${RED} RW ${BLA}")
+  HOME_RW="RW"
 else
-  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} == "Y" ]]; then
-    HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} == "N" ]]; then
-    HOME_RW=$(echo "${RED} RW ${BLA}")
-  fi
+  HOME_STATUS="$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)"
+  if [[ "${HOME_STATUS}" == "Y" ]]; then HOME_RW="RO"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="RW"; fi
 fi
 #
-PROC=$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)
-if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
-  DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
-else
-  DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
-fi
+OWNER="$(ls -l ${GRID_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
-LSNRCTL=$(ps -ef | egrep -i "tnslsnr" | egrep -v "egrep" | wc -l)
-if [[ "${LSNRCTL}" != 0 ]]; then
-  DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
-else
-  DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
-fi
+PROC="$(ps -ef | egrep -i "asm_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)"
+if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then DB_STATUS="ONLINE"; else DB_STATUS="OFFLINE"; fi
 #
-SetClear
-SepLine
-echo -e "\
-${RED2}DBNITRO.net.......:${BLA} [${BLU2} Oracle ASM ${BLA}]
-SERVER_UPTIME.....: [${RED} ${UPTIME} ${BLA}]
-TOTAL_MEMORY......: [${BLU} ${T_MEM} ${BLA}]
-USED_MEMORY.......: [${RED} ${U_MEM} ${BLA}]
-FREE_MEMORY.......: [${GRE} ${F_MEM} ${BLA}]
-TOTAL_SWAP........: [${BLU} ${T_SWAP} ${BLA}]
-USED_SWAP.........: [${RED} ${U_SWAP} ${BLA}]
-FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
-ORACLE_BASE.......: [${BLU} ${GRID_BASE} ${BLA}]
-ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
-HOME_READ/WRITE...: [${HOME_RW}]
-ORACLE_LISTENER...: [${DB_LISTNER}]
-ORACLE_ASM........: [${RED} ${ORACLE_SID} ${BLA}]
-ORACLE_DB_STATUS..: [${DB_STATUS}]"
-SepLine
+LSNRCTL="$(ps -ef | egrep -i "tnslsnr" | egrep -v "egrep" | wc -l)"
+if [[ "${LSNRCTL}" != 0 ]]; then DB_LISTNER="ONLINE"; else DB_LISTNER="OFFLINE"; fi
+#
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-22s|%-60s|\n" " GRID_BASE............: " " ${GRID_BASE} "
+printf "|%-22s|%-60s|\n" " GRID_HOME............: " " ${GRID_HOME} "
+printf "|%-22s|%-60s|\n" " GRID_SID.............: " " ${GRID_SID} "
+printf "|%-22s|%-60s|\n" " GRID_OWNER...........: " " ${OWNER} "
+printf "|%-22s|%-60s|\n" " GRID_VERSION.........: " " $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') "
+printf "|%-22s|%-60s|\n" " HOME_READ/WRITE......: " " ${HOME_RW} "
+printf "|%-22s|%-60s|\n" " LISTENER.............: " " ${DB_LISTNER} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
 #
 export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
@@ -955,50 +902,129 @@ alias DBNITRO='${DBNITRO}/bin/ribas.sh'
 alias OPTIONS='get_OPTIONS'
 alias HUGEPAGES='${DBNITRO}/bin/Oracle_DBA_Check_Hugepages.sh'
 #
-if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
-  HOME_RW=$(echo "${RED} RW ${BLA}")
+if [[ ! -f "${ORACLE_HOME}/install/orabasetab" ]]; then
+  HOME_RW="RW"
 else
-  HOME_STATUS=$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)
-  if [[ ${HOME_STATUS} == "Y" ]]; then
-    HOME_RW=$(echo "${GRE} RO ${BLA}")
-  elif [[ ${HOME_STATUS} == "N" ]]; then
-    HOME_RW=$(echo "${RED} RW ${BLA}")
+  HOME_STATUS="$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)"
+  if [[ "${HOME_STATUS}" == "Y" ]]; then HOME_RW="RO"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="RW"; fi
+fi
+#
+OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
+#
+PROC="$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)"
+if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then DB_STATUS="ONLINE"; else DB_STATUS="OFFLINE"; fi
+#
+LSNRCTL="$(ps -ef | egrep -i "tnslsnr" | egrep -v "egrep" | wc -l)"
+if [[ "${LSNRCTL}" != 0 ]]; then DB_LISTNER="ONLINE"; else DB_LISTNER="OFFLINE"; fi
+#
+if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l | xargs)" != "0" ]]; then
+  V_INSTANCE_STATUS="$(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+  if [[ "${V_INSTANCE_STATUS}" == "OPEN" ]]; then 
+          V_DB_NAME="$(echo "select to_char(name) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+   V_DB_UNIQUE_NAME="$(echo "select to_char(db_unique_name) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+             V_DBID="$(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_DB_STATUS="$(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+          V_DB_ROLE="$(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_DB_UPTIME="$(echo "select to_char(startup_time, 'dd/mm/yyyy hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+        V_OPEN_MODE="$(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+         V_LOG_MODE="$(echo "select to_char(log_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_FORCE_LOG="$(echo "select to_char(force_logging) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_FLASHBACK="$(echo "select to_char(flashback_on) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+         V_SGA_SIZE="$(echo "select to_char(value/1024/1024/1024) || ' GB' from v\$parameter where name = 'sga_max_size';" | sqlplus -S / as sysdba | tail -2)"
+         V_PGA_SIZE="$(echo "select to_char(value/1024/1024/1024) || ' GB' from v\$parameter where name = 'pga_aggregate_target';" | sqlplus -S / as sysdba | tail -2)"
+    V_DATAFILE_SIZE="$(echo "select to_char(sum(bytes)/1024/1024) || ' GB' from dba_data_files;" | sqlplus -S / as sysdba | tail -2)"
+         V_FRA_SIZE="$(echo "select to_char(sum(space_limit)/1024/1024/1024) || ' GB'from v\$recovery_file_dest;" | sqlplus -S / as sysdba| tail -2)"
+   V_USERS_SESSIONS="$(echo "select to_char(count(*)) from v\$session WHERE username IS NOT NULL and username not in ('SYS', 'SYSTEM');" | sqlplus -S / as sysdba| tail -2)"
+     V_CHARACTERSET="$(echo "select to_char(value) from nls_database_parameters where parameter = 'NLS_CHARACTERSET';" | sqlplus -S / as sysdba | tail -2)"
+    printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+    printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+    printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+    printf "|%-22s|%-60s|\n" " DATABASE NAME........: " " ${V_DB_NAME} "
+    printf "|%-22s|%-60s|\n" " DATABASE UNIQUE NAME.: " " ${V_DB_UNIQUE_NAME} "
+    printf "|%-22s|%-60s|\n" " DBID.................: " " ${V_DBID} "
+    printf "|%-22s|%-60s|\n" " DATABASE STATUS......: " " ${V_DB_STATUS} "
+    printf "|%-22s|%-60s|\n" " DATABASE ROLE........: " " ${V_DB_ROLE} "
+    printf "|%-22s|%-60s|\n" " DATABASE UPTIME......: " " ${V_DB_UPTIME} "
+    printf "|%-22s|%-60s|\n" " INSTANCE STATUS......: " " ${V_INSTANCE_STATUS} "
+    printf "|%-22s|%-60s|\n" " OPEN MODE............: " " ${V_OPEN_MODE} "
+    printf "|%-22s|%-60s|\n" " LOG MODE.............: " " ${V_LOG_MODE} "
+    printf "|%-22s|%-60s|\n" " FORCE LOG............: " " ${V_FORCE_LOG} "
+    printf "|%-22s|%-60s|\n" " FLASHBACK............: " " ${V_FLASHBACK} "
+    printf "|%-22s|%-60s|\n" " SGA / PGA SIZE.......: " " ${V_SGA_SIZE} | ${V_PGA_SIZE} "
+    printf "|%-22s|%-60s|\n" " DATAFILE SIZE........: " " ${V_DATAFILE_SIZE} "
+    printf "|%-22s|%-60s|\n" " FRA SIZE.............: " " ${V_FRA_SIZE} "
+    printf "|%-22s|%-60s|\n" " USERS / SESSIONS.....: " " ${V_USERS_SESSIONS} "
+    printf "|%-22s|%-60s|\n" " CHARACTERSET.........: " " ${V_CHARACTERSET} "
+    printf "|%-22s|%-60s|\n" " ORACLE_BASE..........: " " ${ORACLE_BASE} "
+    printf "|%-22s|%-60s|\n" " ORACLE_HOME..........: " " ${ORACLE_HOME} "
+    printf "|%-22s|%-60s|\n" " ORACLE_SID...........: " " ${ORACLE_SID} "
+    printf "|%-22s|%-60s|\n" " ORACLE_VERSION.......: " " $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') "
+    printf "|%-22s|%-60s|\n" " HOME_READ/WRITE......: " " ${HOME_RW} "
+    printf "|%-22s|%-60s|\n" " DATABASE_STATUS......: " " ${DB_STATUS} "
+    printf "|%-22s|%-60s|\n" " LISTENER.............: " " ${DB_LISTNER} "
+    printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
   fi
+#
+  if [[ "${V_INSTANCE_STATUS}" == "MOUNTED" ]]; then 
+          V_DB_NAME="$(echo "select to_char(name) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+   V_DB_UNIQUE_NAME="$(echo "select to_char(db_unique_name) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+             V_DBID="$(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_DB_STATUS="$(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+          V_DB_ROLE="$(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_DB_UPTIME="$(echo "select to_char(startup_time, 'dd/mm/yyyy hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+        V_OPEN_MODE="$(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+         V_LOG_MODE="$(echo "select to_char(log_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_FORCE_LOG="$(echo "select to_char(force_logging) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+        V_FLASHBACK="$(echo "select to_char(flashback_on) from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+         V_SGA_SIZE="$(echo "select to_char(value/1024/1024/1024) || ' GB' from v\$parameter where name = 'sga_max_size';" | sqlplus -S / as sysdba | tail -2)"
+         V_PGA_SIZE="$(echo "select to_char(value/1024/1024/1024) || ' GB' from v\$parameter where name = 'pga_aggregate_target';" | sqlplus -S / as sysdba | tail -2)"
+    V_DATAFILE_SIZE="DATABASE NOT OPENED"
+         V_FRA_SIZE="$(echo "select to_char(sum(space_limit)/1024/1024/1024) || ' GB' from v\$recovery_file_dest;" | sqlplus -S / as sysdba | tail -2)"
+   V_USERS_SESSIONS="$(echo "select to_char(count(*)) from v\$session WHERE username IS NOT NULL and username not in ('SYS', 'SYSTEM');" | sqlplus -S / as sysdba | tail -2)"
+     V_CHARACTERSET="DATABASE NOT OPENED"
+    printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+    printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+    printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+    printf "|%-22s|%-60s|\n" " DATABASE NAME........: " " ${V_DB_NAME} "
+    printf "|%-22s|%-60s|\n" " DATABASE UNIQUE NAME.: " " ${V_DB_UNIQUE_NAME} "
+    printf "|%-22s|%-60s|\n" " DBID.................: " " ${V_DBID} "
+    printf "|%-22s|%-60s|\n" " DATABASE STATUS......: " " ${V_DB_STATUS} "
+    printf "|%-22s|%-60s|\n" " DATABASE ROLE........: " " ${V_DB_ROLE} "
+    printf "|%-22s|%-60s|\n" " DATABASE UPTIME......: " " ${V_DB_UPTIME} "
+    printf "|%-22s|%-60s|\n" " INSTANCE STATUS......: " " ${V_INSTANCE_STATUS} "
+    printf "|%-22s|%-60s|\n" " OPEN MODE............: " " ${V_OPEN_MODE} "
+    printf "|%-22s|%-60s|\n" " LOG MODE.............: " " ${V_LOG_MODE} "
+    printf "|%-22s|%-60s|\n" " FORCE LOG............: " " ${V_FORCE_LOG} "
+    printf "|%-22s|%-60s|\n" " FLASHBACK............: " " ${V_FLASHBACK} "
+    printf "|%-22s|%-60s|\n" " SGA / PGA SIZE.......: " " ${V_SGA_SIZE} | ${V_PGA_SIZE} "
+    printf "|%-22s|%-60s|\n" " DATAFILE SIZE........: " " ${V_DATAFILE_SIZE} "
+    printf "|%-22s|%-60s|\n" " FRA SIZE.............: " " ${V_FRA_SIZE} "
+    printf "|%-22s|%-60s|\n" " USERS / SESSIONS.....: " " ${V_USERS_SESSIONS} "
+    printf "|%-22s|%-60s|\n" " CHARACTERSET.........: " " ${V_CHARACTERSET} "
+    printf "|%-22s|%-60s|\n" " ORACLE_BASE..........: " " ${ORACLE_BASE} "
+    printf "|%-22s|%-60s|\n" " ORACLE_HOME..........: " " ${ORACLE_HOME} "
+    printf "|%-22s|%-60s|\n" " ORACLE_SID...........: " " ${ORACLE_SID} "
+    printf "|%-22s|%-60s|\n" " ORACLE_VERSION.......: " " $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') "
+    printf "|%-22s|%-60s|\n" " HOME_READ/WRITE......: " " ${HOME_RW} "
+    printf "|%-22s|%-60s|\n" " DATABASE_STATUS......: " " ${DB_STATUS} "
+    printf "|%-22s|%-60s|\n" " LISTENER.............: " " ${DB_LISTNER} "
+    printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+  fi
+#
+elif [[ "$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l | xargs)" == "0" ]]; then
+  printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+  printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+  printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+  printf "|%-22s|%-60s|\n" " ORACLE_BASE..........: " " ${ORACLE_BASE} "
+  printf "|%-22s|%-60s|\n" " ORACLE_HOME..........: " " ${ORACLE_HOME} "
+  printf "|%-22s|%-60s|\n" " ORACLE_SID...........: " " ${ORACLE_SID} "
+  printf "|%-22s|%-60s|\n" " ORACLE_OWNER.........: " " ${OWNER} "
+  printf "|%-22s|%-60s|\n" " ORACLE_VERSION.......: " " $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') "
+  printf "|%-22s|%-60s|\n" " HOME_READ/WRITE......: " " ${HOME_RW} "
+  printf "|%-22s|%-60s|\n" " DATABASE_STATUS......: " " ${DB_STATUS} "
+  printf "|%-22s|%-60s|\n" " LISTENER.............: " " ${DB_LISTNER} "
+  printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
 fi
-#
-PROC=$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)
-if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then
-  DB_STATUS=$(echo "${GRE} ONLINE ${BLA}")
-else
-  DB_STATUS=$(echo "${RED} OFFLINE ${BLA}")
-fi
-#
-LSNRCTL=$(ps -ef | egrep -i "tnslsnr" | egrep -v "egrep" | wc -l)
-if [[ "${LSNRCTL}" != 0 ]]; then
-  DB_LISTNER=$(echo "${GRE} ONLINE ${BLA}")
-else
-  DB_LISTNER=$(echo "${RED} OFFLINE ${BLA}")
-fi
-#
-SetClear
-SepLine
-echo -e "\
-${RED2}DBNITRO.net.......:${BLA} [${BLU2} Oracle DATABASE ${BLA}]
-SERVER_UPTIME.....: [${RED} ${UPTIME} ${BLA}]
-TOTAL_MEMORY......: [${BLU} ${T_MEM} ${BLA}]
-USED_MEMORY.......: [${RED} ${U_MEM} ${BLA}]
-FREE_MEMORY.......: [${GRE} ${F_MEM} ${BLA}]
-TOTAL_SWAP........: [${BLU} ${T_SWAP} ${BLA}]
-USED_SWAP.........: [${RED} ${U_SWAP} ${BLA}]
-FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
-ORACLE_BASE.......: [${BLU} ${ORACLE_BASE} ${BLA}]
-ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
-HOME_READ/WRITE...: [${HOME_RW}]
-ORACLE_SID........: [${RED} ${ORACLE_SID} ${BLA}]
-ORACLE_DB_STATUS..: [${DB_STATUS}]
-ORACLE_LISTENER...: [${DB_LISTNER}]"
-SepLine
-#
 export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
@@ -1029,30 +1055,18 @@ alias omslog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
 alias omslogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
 alias list='${DBNITRO}/bin/OracleLabel.sh'
 #
-OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)
+OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
-OMS_STATUS=$(ps -ef | egrep -i "wlserver" | egrep -v "grep|egrep" | wc -l)
-if [[ "${OMS_STATUS}" != 0 ]]; then
-  OMS=$(echo "${GRE} ONLINE ${BLA}")
-else
-  OMS=$(echo "${RED} OFFLINE ${BLA}")
-fi
+OMS_STATUS="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "wlserver" | wc -l | xargs)"
+if [[ "${OMS_STATUS}" != 0 ]]; then OMS="ONLINE"; else OMS="OFFLINE"; fi
 #
-SetClear
-SepLine
-echo -e "\
-${RED2}DBNITRO.net.......:${BLA} [${BLU2} Oracle OMS ${BLA}]
-SERVER_UPTIME.....: [${RED} ${UPTIME} ${BLA}]
-TOTAL_MEMORY......: [${BLU} ${T_MEM} ${BLA}]
-USED_MEMORY.......: [${RED} ${U_MEM} ${BLA}]
-FREE_MEMORY.......: [${GRE} ${F_MEM} ${BLA}]
-TOTAL_SWAP........: [${BLU} ${T_SWAP} ${BLA}]
-USED_SWAP.........: [${RED} ${U_SWAP} ${BLA}]
-FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
-ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
-ONWER.............: [${RED} ${OWNER} ${BLA}]
-OMS_STATUS........: [${OMS}]"
-SepLine
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-22s|%-60s|\n" " OMS_HOME.............: " " ${ORACLE_HOME} "
+printf "|%-22s|%-60s|\n" " OMS_OWNER............: " " ${OWNER} "
+printf "|%-22s|%-60s|\n" " OMS_STATUS...........: " " ${OMS} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
 #
 export PS1=$'[ OMS ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
@@ -1082,30 +1096,18 @@ alias ad='rlwrap adrci'
 alias p='ps -ef | egrep "agent" | egrep -v egrep'
 alias list='${DBNITRO}/bin/OracleLabel.sh'
 #
-OWNER=$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)
+OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
-AGENT_STATUS=$(ps -ef | egrep -i -v "grep|egrep|zabbix" | egrep -i "agent_|perl" | uniq | sort | wc -l | xargs)
-if [[ "${AGENT_STATUS}" != 0 ]]; then
-  AGENT=$(echo "${GRE} ONLINE ${BLA}")
-else
-  AGENT=$(echo "${RED} OFFLINE ${BLA}")
-fi
+AGENT_STATUS="$(ps -ef | egrep -i -v "grep|egrep|zabbix" | egrep -i "agent_|perl" | uniq | sort | wc -l | xargs)"
+if [[ "${AGENT_STATUS}" != 0 ]]; then AGENT="ONLINE"; else AGENT="OFFLINE"; fi
 #
-SetClear
-SepLine
-echo -e "\
-${RED2}DBNITRO.net.......:${BLA} [${BLU2} Oracle AGENT ${BLA}]
-SERVER_UPTIME.....: [${RED} ${UPTIME} ${BLA}]
-TOTAL_MEMORY......: [${BLU} ${T_MEM} ${BLA}]
-USED_MEMORY.......: [${RED} ${U_MEM} ${BLA}]
-FREE_MEMORY.......: [${GRE} ${F_MEM} ${BLA}]
-TOTAL_SWAP........: [${BLU} ${T_SWAP} ${BLA}]
-USED_SWAP.........: [${RED} ${U_SWAP} ${BLA}]
-FREE_SWAP.........: [${GRE} ${F_SWAP} ${BLA}]
-ORACLE_HOME.......: [${BLU} ${ORACLE_HOME} ${BLA}]
-ONWER.............: [${RED} ${OWNER} ${BLA}]
-AGENT_STATUS......: [${AGENT}]"
-SepLine
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-16s|%-60s|\n" " DBNITRO.net            " " ORACLE :: ${SELECTION} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
+printf "|%-22s|%-60s|\n" " AGENT_HOME...........: " " ${ORACLE_HOME} "
+printf "|%-22s|%-60s|\n" " AGENT_OWNER..........: " " ${OWNER} "
+printf "|%-22s|%-60s|\n" " AGENT_STATUS.........: " " ${AGENT} "
+printf "+%-16s+%-50s+\n" "------------------------" "------------------------------------------------------------"
 #
 export PS1=$'[ AGENT ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
@@ -1116,6 +1118,7 @@ umask 0022
 # Main Menu
 #
 MainMenu() {
+SetClear
 PS3="Select the Option: "
 select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} QUIT; do
 if [[ "${OPT}" == "QUIT" ]]; then
@@ -1124,18 +1127,23 @@ if [[ "${OPT}" == "QUIT" ]]; then
 elif [[ "${OPT}" == "+ASM"* ]]; then
   if [[ "${ASM_USER}" == "YES" ]]; then
     set_ASM ${OPT}
+    SELECTION="ASM"
   else
     echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
     echo " -- YOU MUST CONNECT AS OS USER: ${ASM_OWNER} --"
     continue
   fi
 elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  SELECTION="HOME"
   set_HOME ${OPT}
 elif [[ "${ORA_OMS[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  SELECTION="OMS"
   set_OMS ${OPT}
 elif [[ "${ORA_AGENT[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  SELECTION="AGENT"
   set_AGENT ${OPT}
 elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  SELECTION="DATABASE"
   set_DB ${OPT}
 else
   echo " -- Invalid Option --"
