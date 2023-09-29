@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.7"
+SoftwareVersion="1.0.9"
 DateCreation="22/06/2022"
-DateModification="18/04/2023"
+DateModification="29/09/2023"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -43,6 +43,7 @@ if [[ $(which wget | wc -l | awk '{ print $1 }') == 0 ]]; then
   echo " -- You need to install wget app --"
   exit 1
 fi
+#
 if [[ $(which unzip | wc -l | awk '{ print $1 }') == 0 ]]; then
   echo " -- You need to install unzip app --"
   exit 1
@@ -79,10 +80,15 @@ cd ${FOLDER}/
 wget -O /opt/DBNitro.zip https://github.com/dbaribas/dbnitro.net/archive/refs/heads/main.zip
 unzip /opt/DBNitro.zip
 mv /opt/dbnitro.net-main /opt/dbnitro
+rm -f /opt/DBNitro.zip
 #
 chmod a+x ${DBNITRO}/bin/OracleMenu.sh
 chmod g+w ${DBNITRO}/bin/OracleMenu.sh
 chmod 775 ${DBNITRO}/bin/OracleMenu.sh
+#
+chmod a+x ${DBNITRO}/bin/OracleList.sh
+chmod g+w ${DBNITRO}/bin/OracleList.sh
+chmod 775 ${DBNITRO}/bin/OracleList.sh
 #
 chmod a+x ${DBNITRO}/bin/*.sh
 chmod a+x ${DBNITRO}/bin/oraenv++
@@ -136,6 +142,8 @@ fi
 export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 alias db='. ${DBNITRO}/bin/OracleMenu.sh'
+alias list='${DBNITRO}/bin/OracleList.sh'
+list
 umask 0022
 EOF
 else
@@ -163,6 +171,8 @@ fi
 export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 alias db='. ${DBNITRO}/bin/OracleMenu.sh'
+alias list='${DBNITRO}/bin/OracleList.sh'
+list
 umask 0022
 EOF
 else
@@ -178,6 +188,7 @@ SetUpOldOracle() {
 echo "Seting UP ORACLE User on old environment"
 cat >> /home/oracle/.bash_profile <<EOF
 alias db='. ${DBNITRO}/bin/OracleMenu.sh'
+alias list'${DBNITRO}/bin/OracleList.sh'
 umask 0022
 EOF
 }
@@ -196,7 +207,7 @@ elif [[ "${OPT}" == "INSTALL" ]]; then
   SetUpGrid
   SetUpOracle
   SetUpDBNITRO
-  SetUpPURGELOGS
+  ### SetUpPURGELOGS
   SetupLogonBanner
   echo " -- Press ENTER to continue --"
   read
@@ -208,7 +219,7 @@ elif [[ "${OPT}" == "UPDATE" ]]; then
   SetUpGrid
   SetUpOracle
   SetUpDBNITRO
-  SetUpPURGELOGS
+  ### SetUpPURGELOGS
   SetupLogonBanner
   echo " -- Press ENTER to continue --"
   read
@@ -217,7 +228,7 @@ elif [[ "${OPT}" == "UPDATE" ]]; then
 elif [[ "${OPT}" == "OLD_ENV" ]]; then
   echo " -- Install DBNITRO Environment for OLD Servers --"
   SetUpDBNITRO
-  SetUpPURGELOGS
+  ### SetUpPURGELOGS
   SetUpOldOracle
   SetupLogonBanner
   echo " -- Press ENTER to continue --"
