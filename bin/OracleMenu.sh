@@ -1130,6 +1130,3 @@ MainMenu
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
-### locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g'
-### ps -ef | grep lsnr | grep -v grep | awk ' { print $9 } ' | tr '[A-Z]' '[a-z]' | sort
-### srvctl status listener | awk ' { print $2 } ' | tr '[A-Z]' '[a-z]' | uniq | sort
