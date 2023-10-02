@@ -91,7 +91,7 @@ fi
 # ------------------------------------------------------------------------
 # Verify ORACLE Services
 #
-if [[ "${ORA_SERVICES}" | xargs == "0" ]]; then
+if [[ "${ORA_SERVICES} | xargs" == "0" ]]; then
   echo " -- YOU DO NOT HAVE THE ORACLE INVENTORY IN YOUR ENVIRONMENT --"
   echo " -- PLEASE CHECK YOUR CONFIGURATION --"
   exit 1
