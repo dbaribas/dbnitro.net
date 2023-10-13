@@ -2,9 +2,9 @@
 # "-------------------------------------------------------------------------------------------------------------"
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="3.2.17"
+SoftwareVersion="3.2.19"
 DateCreation="25/01/2011"
-DateModification="12/04/2023"
+DateModification="11/10/2023"
 EMAIL_1="andre.ribas@icloud.com"
 EMAIL_2="dba.ribas@gmail.com"
 WEBSITE="http://dbnitro.net"
@@ -30,7 +30,7 @@ function SetClear() {
 StartTime=$(date +%s)
 # "-------------------------------------------------------------------------------------------------------------"
 #
-if [[ $(whoami) == "root" ]]; then
+if [[ "$(whoami)" == "root" ]]; then
   SetClear
   SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
@@ -108,11 +108,10 @@ if [[ "${ORACLE_SID}" == "${DB_SID}" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): THE [ ORATAB and ORACLE_SID ] MATCH RIGH ON YOUR ENVIRONMENT"
   SepLine
 else
-  SetClear
   SepLine
   echo "$(date +%Y%m%d_%H\:%M\:%S): THE [ ORATAB and ORACLE_SID ] DO NOT MATCH RIGH ON YOUR ENVIRONMENT"
   SepLine
-  return 1
+  exit 1
 fi
 #
 # "-------------------------------------------------------------------------------------------------------------"
@@ -343,7 +342,7 @@ if [[ "${DefaultDevice}" == "DISK" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Backup ControlFile"                                                       >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup current controlfile format '${DirBase}/${FormatCTRL}' tag='${Global_Name}_ControlFile';
 quit;
 EOF
@@ -354,7 +353,7 @@ elif [[ "${DefaultDevice}" == "SBT_TAPE" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Backup ControlFile"                                                       >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup current controlfile format '${FormatCTRL}' tag='${Global_Name}_ControlFile';
 quit;
 EOF
@@ -380,7 +379,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck ControlFile"                                                     >> ${LogFile}
 SepLine                                                                                                                 >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck copy of controlfile;
 crosscheck copy of controlfile tag='${Global_Name}_ControlFile';
 quit;
@@ -400,7 +399,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate ControlFile"                                                      >> ${LogFile}
 SepLine                                                                                                                >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                       >> ${LogFile}
-set echo on;
+${ShowCommand}
 validate current controlfile;
 # validate controlfilecopy all;
 quit;
@@ -420,7 +419,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean ControlFile"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                      >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired backup of controlfile;
 delete noprompt expired backup of controlfile tag='${Global_Name}_ControlFile';
 quit;
@@ -440,7 +439,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List ControlFile"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                      >> ${LogFile}
-set echo on;
+${ShowCommand}
 list copy of controlfile;
 list copy of controlfile tag='${Global_Name}_ControlFile';
 quit;
@@ -463,7 +462,7 @@ if [[ "${DefaultDevice}" == "DISK" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing SPFILE Backup"                                                            >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup spfile format '${DirBase}/${FormatSPFile}' tag='${Global_Name}_SPFile';
 quit;
 EOF
@@ -474,7 +473,7 @@ elif [[ "${DefaultDevice}" == "SBT_TAPE" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing SPFILE Backup"                                                            >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup spfile format '${FormatSPFile}' tag='${Global_Name}_SPFile';
 quit;
 EOF
@@ -499,7 +498,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing SPFILE Crosscheck"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                      >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup of spfile;
 crosscheck backuppiece tag='${Global_Name}_SPFile';
 quit;
@@ -519,7 +518,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean SPFILE"                                                             >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                      >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired backup of spfile;
 delete noprompt expired backup of spfile tag='${Global_Name}_SPFile';
 quit;
@@ -539,7 +538,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List SPFile"                                                              >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                      >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of spfile;
 list backup of spfile tag='${Global_Name}_SPFile';
 quit;
@@ -563,7 +562,7 @@ if [[ "${CompressBackup}" == "YES" ]] && [[ "${Parallel}" == "YES" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Backup - Compressed"                                                 >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -583,7 +582,7 @@ elif [[ "${CompressBackup}" == "NO" ]] && [[ "${Parallel}" == "YES" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Backup"                                                                >> ${LogFile}
   SepLine                                                                                                                 >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                          >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -603,7 +602,7 @@ else
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Backup"                                                              >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup database format '${DirBase}/${FormatFull}' tag='${Global_Name}_Full';
@@ -621,7 +620,7 @@ if [[ "${CompressBackup}" == "YES" ]] && [[ "${Parallel}" == "YES" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Backup - Compressed"                                                 >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -641,7 +640,7 @@ elif [[ "${CompressBackup}" == "NO" ]] && [[ "${Parallel}" == "YES" ]]; then
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Backup"                                                              >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -661,7 +660,7 @@ else
   echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Backup"                                                              >> ${LogFile}
   SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup database format '${FormatFull}' tag='${Global_Name}_Full';
@@ -690,7 +689,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Crosscheck"                                                          >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backup of database;
 quit;
@@ -710,7 +709,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Full Backup"                                                     >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate database;
 quit;
 EOF
@@ -729,7 +728,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Full Check Logical Backup"                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup check logical database;
 quit;
 EOF
@@ -748,7 +747,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Full Backup"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of database;
 list backup of database tag='${Global_Name}_Full';
 quit;
@@ -769,7 +768,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Full Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_Full_Compressed';
@@ -785,7 +784,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Full Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_Full';
@@ -801,7 +800,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Full Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_Full';
@@ -828,7 +827,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Archivelog All - Compressed"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -849,7 +848,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Archivelog All"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -870,7 +869,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Archivelog All"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup database format '${DirBase}/${FormatFull}' tag='${Global_Name}_FullArchAll'
@@ -889,7 +888,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Archivelog All - Compressed"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -910,7 +909,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Archivelog All"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -931,7 +930,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Full Archivelog All"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup database format '${FormatFull}' tag='${Global_Name}_FullArchAll'
@@ -961,7 +960,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Full Archivelog All"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backup of database;
 crosscheck archivelog all;
@@ -982,7 +981,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Full Archivelog All"                                             >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 validate archivelog all;
 quit;
 EOF
@@ -1001,7 +1000,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Check Logical Full Archivelog All"                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate check logical database archivelog all;
 quit;
 EOF
@@ -1021,7 +1020,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Full Archivelog All - Compressed"                                    >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of database;
 list backup tag='${Global_Name}_FullArchAll_Compressed';
 quit;
@@ -1035,7 +1034,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Full Archivelog All"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of database;
 list backup tag='${Global_Name}_FullArchAll';
 quit;
@@ -1049,7 +1048,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Full Archivelog All"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of database;
 list backup tag='${Global_Name}_FullArchAll';
 quit;
@@ -1071,7 +1070,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Execute Clean Full Archivelog All - Compressed"                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_FullArchAll_Compressed';
@@ -1087,7 +1086,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Execute Clean Full Archivelog All"                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_FullArchAll';
@@ -1103,7 +1102,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Execute Clean Full Archivelog All"                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_FullArchAll';
@@ -1130,7 +1129,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Archivelog All"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1151,7 +1150,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Archivelog All"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1171,7 +1170,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Archivelog All"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup archivelog all format '${DirBase}/${FormatArch}' delete input tag='${Global_Name}_ArchAll';
@@ -1189,7 +1188,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Archivelog All"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -1209,7 +1208,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Archivelog All"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -1229,7 +1228,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Archivelog All"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup archivelog all format '${FormatArch}' delete input tag='${Global_Name}_ArchAll';
@@ -1258,7 +1257,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Archivelog All"                                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck archivelog all;
 quit;
 EOF
@@ -1277,7 +1276,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Archivelog All"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of archivelog all;
 list backup of archivelog all tag='${Global_Name}_ArchAll';
 quit;
@@ -1297,7 +1296,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Archivelog All"                                                     >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt archivelog all completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt archivelog all completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_ArchAll';
@@ -1323,7 +1322,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 0 - Compressed"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1343,7 +1342,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 0"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1363,7 +1362,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 0"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup incremental level 0 database format '${DirBase}/${FormatIncLev0}' tag='${Global_Name}_IncLev0';
@@ -1381,7 +1380,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 0 - Compressed"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -1401,7 +1400,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 0"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -1421,7 +1420,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 0"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup incremental level 0 database format '${FormatIncLev0}' tag='${Global_Name}_IncLev0';
@@ -1451,7 +1450,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 0 - Compressed"                              >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag='${Global_Name}_IncLev0_Compressed';
 crosscheck backup of database tag='${Global_Name}_IncLev0_Compressed';
@@ -1466,7 +1465,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 0"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag='${Global_Name}_IncLev0';
 crosscheck backup of database tag='${Global_Name}_IncLev0';
@@ -1481,7 +1480,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 0"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag='${Global_Name}_IncLev0';
 crosscheck backup of database tag='${Global_Name}_IncLev0';
@@ -1503,7 +1502,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Incremental Level 0"                                             >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate incremental level 0 database;
 quit;
 EOF
@@ -1522,7 +1521,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Logical Validate Incremental Level 0"                                     >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate check logical database;
 backup validate database archivelog all;
 backup validate check logical database archivelog all;
@@ -1545,7 +1544,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 0 - Compressed"                                    >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup tag='${Global_Name}_InvLev0_Compressed';
 quit;
 EOF
@@ -1558,7 +1557,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 0"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup tag='${Global_Name}_InvLev0';
 quit;
 EOF
@@ -1571,7 +1570,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 0"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup tag='${Global_Name}_InvLev0';
 quit;
 EOF
@@ -1592,7 +1591,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 0 - Compressed"                                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev0_Compressed';
@@ -1608,7 +1607,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 0"                                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev0';
@@ -1624,7 +1623,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 0"                                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev0';
@@ -1651,7 +1650,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Differential - Compressed"                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1672,7 +1671,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Differential"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1692,7 +1691,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Differential"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup incremental level 1 database format '${DirBase}/${FormatIncLev1Diff}' tag='${Global_Name}_IncLev1Diff';
@@ -1710,7 +1709,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Differential - Compressed"                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -1730,7 +1729,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Differential"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -1750,7 +1749,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Differential"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup incremental level 1 database format '${FormatIncLev1Diff}' tag='${Global_Name}_IncLev1Diff';
@@ -1780,7 +1779,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 1 Differential - Compressed"                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag='${Global_Name}_IncLev1Diff_Compressed';
 quit;
@@ -1794,7 +1793,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 1 Differential"                              >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag='${Global_Name}_IncLev1Diff';
 quit;
@@ -1808,7 +1807,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 1 Differential"                              >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag='${Global_Name}_IncLev1Diff';
 quit;
@@ -1829,7 +1828,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Incremental 1 Differential"                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate incremental level 1 database;
 quit;
 EOF
@@ -1848,7 +1847,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Incremental Level 1 Differential Logical"                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate check logical database;
 quit;
 EOF
@@ -1868,7 +1867,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 1 Differential - Compressed"                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup completed before 'sysdate - ${RetTimeDatabase}';
 list backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Diff_Compressed';
 quit;
@@ -1882,7 +1881,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 1 Differential"                                    >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup completed before 'sysdate - ${RetTimeDatabase}';
 list backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Diff';
 quit;
@@ -1896,7 +1895,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 1 Differential"                                    >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup completed before 'sysdate - ${RetTimeDatabase}';
 list backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Diff';
 quit;
@@ -1918,7 +1917,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 1 Differential - Compressed"                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Diff_Compressed';
@@ -1934,7 +1933,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 1 Differential"                                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Diff';
@@ -1950,7 +1949,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 1 Differential"                                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Diff';
@@ -1977,7 +1976,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Cumulative - Compressed"                              >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -1997,7 +1996,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Cumulative"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -2017,7 +2016,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Cumulative"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup incremental level 1 cumulative database format '${DirBase}/${FormatIncLev1Cum}' tag='${Global_Name}_IncLev1Cum';
@@ -2035,7 +2034,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Cumulative - Compressed"                              >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2055,7 +2054,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Cumulative"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2075,7 +2074,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Incremental Level 1 Cumulative"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup incremental level 1 cumulative database format '${FormatIncLev1Cum}' tag='${Global_Name}_IncLev1Cum';
@@ -2105,7 +2104,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 1 Cumulative - Compressed"                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag = '${ORACLE_SID}_IncLev1Cum_Compressed';
 quit;
@@ -2119,7 +2118,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 1 Cumulative"                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag = '${ORACLE_SID}_IncLev1Cum';
 quit;
@@ -2133,7 +2132,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Incremental Level 1 Cumulative"                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backuppiece tag = '${ORACLE_SID}_IncLev1Cum';
 quit;
@@ -2154,7 +2153,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Incremental Level 1 Cumulative"                                  >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate incremental level 1 cumulative database;
 quit;
 EOF
@@ -2173,7 +2172,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Incremental Level 1 Cumulative Logical"                          >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate check logical database archivelog all;
 quit;
 EOF
@@ -2193,7 +2192,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 1 Cumulative - Compressed"                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup tag='${Global_Name}_IncLev1Cum_Compressed';
 quit;
 EOF
@@ -2206,7 +2205,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 1 Cumulative"                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup tag='${Global_Name}_IncLev1Cum';
 quit;
 EOF
@@ -2219,7 +2218,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Incremental Level 1 Cumulative"                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup tag='${Global_Name}_IncLev1Cum';
 quit;
 EOF
@@ -2240,7 +2239,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 1 Cumulative - Compressed"                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Cum_Compressed';
@@ -2256,7 +2255,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 1 Cumulative"                                     >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Cum';
@@ -2272,7 +2271,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Incremental Level 1 Cumulative"                                     >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt obsolete;
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_IncLev1Cum';
@@ -2299,7 +2298,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Database - Compressed"                                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -2320,7 +2319,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Database"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2341,7 +2340,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Database"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup as copy database format '${DirBase}/${FormatCopyDB}' tag='${Global_Name}_CopyDB'
@@ -2360,7 +2359,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Database - Compressed"                                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2381,7 +2380,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Database"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2402,7 +2401,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Database"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup as copy database format '${FormatCopyDB}' tag='${Global_Name}_CopyDB'
@@ -2433,7 +2432,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Copy Database - Compressed"                                    >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck copy of database;
 crosscheck copy tag='${Global_Name}_CopyDB_Compressed';
@@ -2448,7 +2447,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Copy Database"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck copy of database;
 crosscheck copy tag='${Global_Name}_CopyDB';
@@ -2463,7 +2462,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Copy Database"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck copy of database;
 crosscheck copy tag='${Global_Name}_CopyDB';
@@ -2485,7 +2484,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Copy Database"                                                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate copy of database;
 quit;
 EOF
@@ -2504,7 +2503,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Copy Database Logical"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate check logical copy of database;
 quit;
 EOF
@@ -2524,7 +2523,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Copy Database - Compressed"                                          >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list copy of database;
 list backup tag='${Global_Name}_CopyDB_Compressed';
 quit;
@@ -2538,7 +2537,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Copy Database"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list copy of database;
 list backup tag='${Global_Name}_CopyDB';
 quit;
@@ -2552,7 +2551,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Copy Database"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list copy of database;
 list backup tag='${Global_Name}_CopyDB';
 quit;
@@ -2574,7 +2573,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Copy Database - Compressed"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired copy of database;
 delete noprompt expired copy of database completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt expired copy of database completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDB_Compressed';
@@ -2589,7 +2588,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Copy Database"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired copy of database;
 delete noprompt expired copy of database completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt expired copy of database completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDB';
@@ -2604,7 +2603,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Copy Database"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired copy of database;
 delete noprompt expired copy of database completed before 'sysdate - ${RetTimeDatabase}';
 delete noprompt expired copy of database completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDB';
@@ -2630,7 +2629,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Datafile - Compressed"                                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -2650,7 +2649,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Datafile"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -2670,7 +2669,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Datafile"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup as copy datafile ${Options} format '${DirBase}/${FormatCopyDF}' tag='${Global_Name}_CopyDF';
@@ -2688,7 +2687,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Datafile - Compressed"                                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2708,7 +2707,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Datafile"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2728,7 +2727,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Copy Datafile"                                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 backup as copy datafile ${Options} format '${FormatCopyDF}' tag='${Global_Name}_CopyDF';
@@ -2757,7 +2756,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Copy Datafile"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck datafilecopy all;
 quit;
 EOF
@@ -2776,7 +2775,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Copy Datafile;"                                                  >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 validate datafilecopy all;
 quit;
 EOF
@@ -2795,7 +2794,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Copy Datafile Logical"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate check logical datafilecopy all;
 quit;
 EOF
@@ -2815,7 +2814,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Copy Datafile - Compressed"                                          >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list datafilecopy all;
 list backup completed before 'sysdate - ${RetTimeDatabase}';
 list backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDF_Compressed';
@@ -2830,7 +2829,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Copy Datafile"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list datafilecopy all;
 list backup completed before 'sysdate - ${RetTimeDatabase}';
 list backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDF';
@@ -2845,7 +2844,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Copy Datafile"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list datafilecopy all;
 list backup completed before 'sysdate - ${RetTimeDatabase}';
 list backup completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDF';
@@ -2868,7 +2867,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Copy Datafile - Compressed"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired datafilecopy all;
 delete noprompt datafilecopy tag='${Global_Name}_CopyDF_Compressed';
 delete noprompt datafilecopy completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDF_Compressed';
@@ -2883,7 +2882,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Copy Datafile"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired datafilecopy all;
 delete noprompt datafilecopy tag='${Global_Name}_CopyDF';
 delete noprompt datafilecopy completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDF';
@@ -2898,7 +2897,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean Copy Datafile"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired datafilecopy all;
 delete noprompt datafilecopy tag='${Global_Name}_CopyDF';
 delete noprompt copy completed before 'sysdate - ${RetTimeDatabase}' tag='${Global_Name}_CopyDF';
@@ -2924,7 +2923,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Tablespace Backup - Compressed"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -2944,7 +2943,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Tablespace Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -2964,7 +2963,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Tablespace Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 alter system switch logfile;
 backup tablespace ${Options} format '${DirBase}/${FormatTBS}' tag='${Global_Name}_${Options}_TBS';
 quit;
@@ -2980,7 +2979,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Tablespace Backup - Compressed"                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -3000,7 +2999,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Tablespace Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -3020,7 +3019,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Tablespace Backup"                                                        >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 alter system switch logfile;
 backup tablespace ${Options} format '${FormatTBS}' tag='${Global_Name}_${Options}_TBS';
 quit;
@@ -3047,7 +3046,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Tablespace"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate tablespace ${Options};
 quit;
 EOF
@@ -3066,7 +3065,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Tablespace"                                                          >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of tablespace ${Options};
 quit;
 EOF
@@ -3089,7 +3088,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Pluggable Backup - Compressed"                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -3109,7 +3108,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Pluggable Backup"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type ${DefaultDevice} ${Parms} maxpiecesize 32G;
@@ -3129,7 +3128,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Pluggable Backup"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 alter system switch logfile;
 backup pluggable database ${Options} format '${DirBase}/${FormatPDB}' tag='${Global_Name}_${Options}_PDB';
 quit;
@@ -3145,7 +3144,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Pluggable Backup - Compressed"                                            >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -3165,7 +3164,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Pluggable Backup"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 alter system switch logfile;
 allocate channel ch1 type '${DefaultDevice}' ${Parms} maxpiecesize 32G;
@@ -3185,7 +3184,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Pluggable Backup"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 alter system switch logfile;
 backup pluggable database ${Options} format '${FormatPDB}' tag='${Global_Name}_${Options}_PDB';
 quit;
@@ -3212,7 +3211,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck Pluggable"                                                     >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck backup of pluggable database ${Options};
 quit;
@@ -3232,7 +3231,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Pluggable"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 validate pluggable database ${Options};
 quit;
 EOF
@@ -3251,7 +3250,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Validate Pluggable Logical"                                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 backup validate pluggable database ${Options};
 backup validate check logical pluggable database ${Options};
 quit;
@@ -3271,7 +3270,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Pluggable"                                                           >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup of pluggable database ${Options};
 quit;
 EOF
@@ -3291,7 +3290,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Crosscheck"                                                               >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 crosscheck backup;
 crosscheck archivelog all;
 crosscheck copy of controlfile;
@@ -3315,7 +3314,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Clean All"                                                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 delete noprompt expired backup;
 delete noprompt expired archivelog all;
 delete noprompt expired backup of controlfile;
@@ -3340,7 +3339,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Report"                                                                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 report schema;
 quit;
 EOF
@@ -3359,7 +3358,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List Backup Summary"                                                      >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list backup summary;
 quit;
 EOF
@@ -3378,7 +3377,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Report Obsolete"                                                          >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 report obsolete;
 quit;
 EOF
@@ -3397,7 +3396,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List of Failures"                                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list failure;
 quit;
 EOF
@@ -3416,7 +3415,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing List of Failures Closed"                                                  >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 list failure closed;
 quit;
 EOF
@@ -3435,7 +3434,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Advise of Failures"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 advise failure;
 advise failure all;
 quit;
@@ -3455,7 +3454,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Repair of Failures"                                                       >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 repair failure;
 quit;
 EOF
@@ -3474,7 +3473,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Restore Database Preview Summary"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 restore database preview;
 restore database preview summary;
 quit;
@@ -3494,7 +3493,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Restore Validate Database"                                                >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 restore validate database;
 quit;
 EOF
@@ -3515,7 +3514,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Restore Database Preview"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 restore database preview;
 quit;
 EOF
@@ -3536,7 +3535,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Restore Database Preview Summary"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 restore database preview summary;
 quit;
 EOF
@@ -3557,7 +3556,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Recover Database Preview"                                                 >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 recover database preview;
 quit;
 EOF
@@ -3577,7 +3576,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing Recover Database Preview Summary"                                         >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 recover database preview summary;
 quit;
 EOF
@@ -3647,7 +3646,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing RMAN Set Configuration"                                                   >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 CONFIGURE BACKUP OPTIMIZATION ON;
 CONFIGURE CONTROLFILE AUTOBACKUP ON;
@@ -3674,7 +3673,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing RMAN Set Configuration"                                            >> ${LogFile}
 SepLine                                                                                                        >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                               >> ${LogFile}
-set echo on;
+${ShowCommand}
 run {
 CONFIGURE BACKUP OPTIMIZATION ON;
 CONFIGURE CONTROLFILE AUTOBACKUP ON;
@@ -3742,7 +3741,7 @@ SepLine                                                                         
 echo "$(date +%Y%m%d_%H\:%M\:%S): Executing RMAN Show Configuration"                                                  >> ${LogFile}
 SepLine                                                                                                               >> ${LogFile}
 rman target / ${CatalogDB} <<EOF                                                                                        >> ${LogFile}
-set echo on;
+${ShowCommand}
 show all;
 quit;
 EOF
@@ -3755,94 +3754,23 @@ SepLine                                                                         
 #
 # "-------------------------------------------------------------------------------------------------------------"
 #
-DBStatus=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select status from v\$instance;
-quit;
-EOF
-)
+DBStatus="$(echo "select status from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
 #
-# "-------------------------------------------------------------------------------------------------------------"
+Global_Name="$(echo "select value from v\$parameter where name = 'db_name';" | sqlplus -S / as sysdba | tail -2)"
 #
-Global_Name=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select value from v\$parameter where name = 'db_name';
-quit;
-EOF
-)
+DBVERSION="$(echo "select distinct substr(value,1,2) as value from v\$parameter where name = 'optimizer_features_enable';" | sqlplus -S / as sysdba | tail -2)"
 #
-# "-------------------------------------------------------------------------------------------------------------"
+DDBROLE="$(echo "select database_role from v\$database;" | sqlplus -S / as sysdba | tail -2)"
 #
-DBVERSION=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct substr(value,1,2) as value from v\$parameter where name = 'optimizer_features_enable';
-quit;
-EOF
-)
+ISRACDB="$(echo "select distinct case when value = 'TRUE' then 'CLUSTER' when value = 'FALSE' then 'NONCLUSTER' end from v\$parameter where name = 'cluster_database';" | sqlplus -S / as sysdba | tail -2)"
 #
-# "-------------------------------------------------------------------------------------------------------------"
+ISCONTAINERDB="$(echo "select distinct case when cdb = 'YES' then 'CONTAINER' when cdb = 'NO' then 'NONCONTAINER' end from v\$database;" | sqlplus -S / as sysdba | tail -2)"
 #
-DDBROLE=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select database_role from v\$database;
-quit;
-EOF
-)
+ISBIGFILE="$(echo "select distinct case when bigfile = 'YES' then 'BIGFILE' when bigfile = 'NO' then 'NONBIGFILE' end from dba_tablespaces;" | sqlplus -S / as sysdba | tail -2)"
 #
-# "-------------------------------------------------------------------------------------------------------------"
+DB_SIZEG="$(echo "select to_char(sum(bytes)/1024/1024/1024,'9G999G999D999') from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);" | sqlplus -S / as sysdba | tail -2)"
 #
-ISRACDB=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct case when value = 'TRUE' then 'CLUSTER' when value = 'FALSE' then 'NONCLUSTER' end from v\$parameter where name = 'cluster_database';
-quit;
-EOF
-)
-#
-# "-------------------------------------------------------------------------------------------------------------"
-#
-ISCONTAINERDB=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct case when cdb = 'YES' then 'CONTAINER' when cdb = 'NO' then 'NONCONTAINER' end from v\$database;
-quit;
-EOF
-)
-#
-# "-------------------------------------------------------------------------------------------------------------"
-#
-ISBIGFILE=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct case when bigfile = 'YES' then 'BIGFILE' when bigfile = 'NO' then 'NONBIGFILE' end from dba_tablespaces;
-quit;
-EOF
-)
-#
-# "-------------------------------------------------------------------------------------------------------------"
-#
-DB_SIZEG=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select to_char(sum(bytes)/1024/1024/1024,'9G999G999D999') "SIZE GB" from (select sum(bytes) bytes from dba_data_files 
-union all 
-select sum(bytes) bytes from dba_temp_files 
-union all 
-select sum(bytes * members) from v\$log 
-union all 
-select sum(block_size * file_size_blks) from v\$controlfile);
-quit;
-EOF
-)
-#
-DB_SIZET=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select to_char(sum(bytes)/1024/1024/1024/1024,'9G999G999D999') "SIZE TB" from (select sum(bytes) bytes from dba_data_files 
-union all 
-select sum(bytes) bytes from dba_temp_files 
-union all 
-select sum(bytes * members) from v\$log 
-union all 
-select sum(block_size * file_size_blks) from v\$controlfile);
-quit;
-EOF
-)
+DB_SIZET="$(echo "select to_char(sum(bytes)/1024/1024/1024/1024,'9G999G999D999') from (select sum(bytes) bytes from dba_data_files union all select sum(bytes) bytes from dba_temp_files union all select sum(bytes * members) from v\$log union all select sum(block_size * file_size_blks) from v\$controlfile);" | sqlplus -S / as sysdba | tail -2)"
 #
 # "-------------------------------------------------------------------------------------------------------------"
 #
@@ -4055,12 +3983,7 @@ if [[ "$(echo ${3} | tr '[a-z]' '[A-Z]')" == "" ]]; then
   exit 1
 else
 #
-PDBS=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct case when name = '' then 'NOTEXISTS' when name = '${3}' then '${3}' end from v\$containers where name = upper(('${3}'));
-quit;
-EOF
-)
+PDBS="$(echo "select distinct case when name = '' then 'NOTEXISTS' when name = '${3}' then '${3}' end from v\$containers where name = upper(('${3}'));" | sqlplus -S / as sysdba | tail -2)"
 #
 if [[ "$(echo ${3} | tr '[a-z]' '[A-Z]')" = "${PDBS}" ]]; then
   SepLine
@@ -4082,12 +4005,7 @@ elif [[ "$(echo ${2} | tr '[a-z]' '[A-Z]')" == "TBS" ]]; then
     exit 1
   else
 #
-TBSNAMES=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select tablespace_name as tbs_name from dba_tablespaces where tablespace_name = upper(('${3}'));
-quit;
-EOF
-)
+TBSNAMES="$(echo "select tablespace_name as tbs_name from dba_tablespaces where tablespace_name = upper(('${3}'));" | sqlplus -S / as sysdba | tail -2)"
 #
 if [[ "$(echo ${3} | tr '[a-z]' '[A-Z]')" == "${TBSNAMES}" ]]; then
   SepLine
@@ -4110,19 +4028,10 @@ if [[ "$(echo ${3} | tr '[a-z]' '[A-Z]')" == "" ]]; then
 else
 if [[ "${DBVERSION}" -ge "12" ]]; then
 #
-DDATAFILE=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct file_id from cdb_data_files where file_id = '${3}';
-quit;
-EOF
-)
+DDATAFILE="$(echo "select distinct file_id from cdb_data_files where file_id = '${3}';" | sqlplus -S / as sysdba | tail -2)"
+#
 else
-DDATAFILE=$(sqlplus -S / as sysdba <<EOF
-set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off;
-select distinct file_id from dba_data_files where file_id = '${3}';
-quit;
-EOF
-)
+DDATAFILE="$(echo "select distinct file_id from dba_data_files where file_id = '${3}';" | sqlplus -S / as sysdba | tail -2)"
 #
 fi
 #
@@ -4143,6 +4052,7 @@ fi
 # Environment Variables
 #
 TERM=xterm                                                                    # The Default TERM
+ShowCommand="set echo on;"                                                    # Show the Commands on Each Execution
 RetTimeArchive="2"                                                            # How many days will be on the archivelog backup place
 RetTimeDatabase="2"                                                           # How many days will be on the database backup place
 SendMail="N"                                                                  # Y or N - To Send Emails after Backup
@@ -4166,23 +4076,23 @@ OraHome=${ORACLE_HOME}                                                        # 
 DirScripts=/opt/dbnitro/backup                                                # Directory of Scripts
 DirLogs=${DirScripts}/logs                                                    # Directory of Logs
 DirTemp=${DirScripts}/temp                                                    # Directory of Temp
-DirBase=/opt/oracle/backup/${Global_Name}                                     # Directory of Backup
+DirBase=/backup/${Global_Name}                                                # Directory of Backup
 DirRemote=""                                                                  #
 DirFull=${DirBase}                                                            # Directory of Datapump on OS
 DirArchive=${DirBase}                                                         # 
 DirDatapump="backup"                                                          # Directory Name of Datapump
 DirDtPump=${DirBase}/dump                                                     # Directory of Datapump
-FormatFull="%T_SID_%d_DBID_%I_NB_%s.full"                                     # Format of Backup Files
-FormatArch="%T_SID_%d_DBID_%I_NB_%s.arch"                                     # Format of Backup Files
-FormatCTRL="%T_SID_%d_DBID_%I_NB_%s.ctrl"                                     # Format of Backup Files
-FormatSPFile="%T_SID_%d_DBID_%I_NB_%s.spfile"                                 # Format of Backup Files
-FormatIncLev0="%T_SID_%d_DBID_%I_NB_%s_inc_lev_0.incr"                        # Format of Backup Files
-FormatIncLev1Diff="%T_SID_%d_DBID_%I_NB_%s_inc_lev_1.diff"                    # Format of Backup Files
-FormatIncLev1Cum="%T_SID_%d_DBID_%I_NB_%s_inc_lev_1_cum.incr"                 # Format of Backup Files
-FormatCopyDB="%T_SID_%d_DBID_%I_NB_%s.copydb"                                 # Format of Backup Files
-FormatCopyDF="%T_SID_%d_DBID_%I_NB_%s_DATAFILE_${Options}.copydf"             # Format of Backup Files
-FormatTBS="%T_SID_%d_DBID_%I_NB_%s_TBS_${Options}.tbs"                        # Format of Backup Files
-FormatPDB="%T_SID_%d_DBID_%I_NB_%s_PDB_${Options}.pdb.full"                   # Format of Backup Files
+FormatFull="%T_DB_%d_DBID_%I_NB_%s.full"                                     # Format of Backup Files
+FormatArch="%T_DB_%d_DBID_%I_NB_%s.arch"                                     # Format of Backup Files
+FormatCTRL="%T_DB_%d_DBID_%I_NB_%s.ctrl"                                     # Format of Backup Files
+FormatSPFile="%T_DB_%d_DBID_%I_NB_%s.spfile"                                 # Format of Backup Files
+FormatIncLev0="%T_DB_%d_DBID_%I_NB_%s_inc_lev_0.incr"                        # Format of Backup Files
+FormatIncLev1Diff="%T_DB_%d_DBID_%I_NB_%s_inc_lev_1.diff"                    # Format of Backup Files
+FormatIncLev1Cum="%T_DB_%d_DBID_%I_NB_%s_inc_lev_1_cum.incr"                 # Format of Backup Files
+FormatCopyDB="%T_DB_%d_DBID_%I_NB_%s.copydb"                                 # Format of Backup Files
+FormatCopyDF="%T_DB_%d_DBID_%I_NB_%s_DATAFILE_${Options}.copydf"             # Format of Backup Files
+FormatTBS="%T_DB_%d_DBID_%I_NB_%s_TBS_${Options}.tbs"                        # Format of Backup Files
+FormatPDB="%T_DB_%d_DBID_%I_NB_%s_PDB_${Options}.pdb.full"                   # Format of Backup Files
 LockFile=${DirScripts}/backup_${Global_Name}_${BackupType}.lock               # Lock File
 LogFile=${DirLogs}/$(date +%Y%m%d_%H%M)_${Global_Name}_${BackupType}.log      # Log File
 #
@@ -4739,118 +4649,3 @@ SepLine
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
-
-
-
-
-
-
-
-
-
-
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Crontab Configuration
-# ----------------------------------------------------------------------------------------------------------------------
-#
-# Crosscheck & Clean Up
-00 00 * * * /opt/dbnitro/backup/backup.sh FREE CleanAll >> /opt/dbnitro/backup/logs/CleanAll.log
-
-# Backup Full of Database Using RMAN
-30 22 * * * /opt/dbnitro/backup/backup.sh FREE FullArchAll >> /opt/dbnitro/backup/logs/FullArchAll.log
-30 02 * * * /opt/dbnitro/backup/backup.sh FREE FullArchAllClean >> /opt/dbnitro/backup/logs/AullArchAllClean.log
-
-# Backup Archivelog All of Database Using RMAN
-00,15,30,45 * * * * /opt/dbnitro/backup/backup.sh FREE ArchAll >> /opt/dbnitro/backup/logs/ArchAll.log
-30 00 * * * /opt/dbnitro/backup/backup.sh FREE ArchAllClean >> /opt/dbnitro/backup/logs/ArchAllClean.log
-
-# Backup Tablespace SYSTEM of Database Using RMAN
-20 * * * * /opt/dbnitro/backup/backup.sh FREE TBS system >> /opt/dbnitro/backup/logs/TBS_system.log
-40 * * * * /opt/dbnitro/backup/backup.sh FREE TBS sysaux >> /opt/dbnitro/backup/logs/TBS_sysaux.log
-
-# Backup Copy Database
-10 * * * * /opt/dbnitro/backup/backup.sh FREE CopyDB >> /opt/dbnitro/backup/logs/CopyDB.log
-10 21 * * * /opt/dbnitro/backup/backup.sh FREE CopyDBClean >> /opt/dbnitro/backup/logs/CopyDBClean.log
-
-# Backup Copy Datafiles
-50 * * * * /opt/dbnitro/backup/backup.sh FREE CopyDF 1 >> /opt/dbnitro/backup/logs/CopyDF_1.log
-55 * * * * /opt/dbnitro/backup/backup.sh FREE CopyDF 5 >> /opt/dbnitro/backup/logs/CopyDF_5.log
-50 21 * * * /opt/dbnitro/backup/backup.sh FREE CopyDFClean >> /opt/dbnitro/backup/logs/CopyDFClean.log
-
-# Backup PDB XEPDB1 of Database Using RMAN
-45 * * * * /opt/dbnitro/backup/backup.sh FREE PDB FREEPDB1 >> /opt/dbnitro/backup/logs/PDB_xepdb1.log
-45 * * * * /opt/dbnitro/backup/backup.sh FREE PDBClean >> /opt/dbnitro/backup/logs/PDB_xepdb1_Clear.log
-
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Cronjobs on Unix Like Environments.
-# ----------------------------------------------------------------------------------------------------------------------
-#
-
-Mac OS X = /usr/lib/cron/tabs/
-BSD Unix = /var/cron/tabs/
-Solaris  = /var/spool/cron/crontabs/
-HP-UX    = /var/spool/cron/crontabs/
-Debian   = /var/spool/cron/crontabs/
-Ubuntu   = /var/spool/cron/crontabs/
-AIX      = /var/spool/cron/
-Red Hat  = /var/spool/cron/
-CentOS   = /var/spool/cron/
-Ferdora  = /var/spool/cron/
-
-
-
-#
-# ----------------------------------------------------------------------------------------------------------------------
-# Multiples Options
-# ----------------------------------------------------------------------------------------------------------------------
-#
-# Pluggable Databases
-select listagg(NAME, ',') within group (order by NAME) as pdb_name into :pdbs FROM V\\$CONTAINERS WHERE NAME in upper(('xepdb1'));
-
-# Tablespaces
-select listagg(TABLESPACE_NAME, ',') within group (order by TABLESPACE_NAME) as tbs_name into :tbsname from dba_tablespaces where tablespace_name in upper(('$3'));
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Verify the LOG of Crontab Oracle Backups
-# ----------------------------------------------------------------------------------------------------------------------
-#
-
-tail -f /var/spool/mail/oracle
-
-
-
-
-
-
-
-
-delete noprompt archivelog all backed up 1 times to device type disk;
-delete noprompt archivelog all backed up 1 times to device type sbt_tape;
-
-BACKUP VALIDATE DATABASE ARCHIVELOG ALL;
-BACKUP VALIDATE CHECK LOGICAL DATABASE ARCHIVELOG ALL;
-RESTORE DATABASE VALIDATE;
-RESTORE ARCHIVELOG ALL VALIDATE;
-VALIDATE DATABASE;
-VALIDATE CHECK LOGICAL DATABASE;
-VALIDATE DATABASE ROOT;
-VALIDATE CHECK LOGICAL DATABASE ROOT;
-VALIDATE PLUGGABLE DATABASE pdb1;
-VALIDATE CHECK LOGICAL PLUGGABLE DATABASE pdb1;
-
-
-
-
-
-
-CONFIGURE ARCHIVELOG DELETION POLICY TO BACKED UP 2 TIMES TO SBT;
-CONFIGURE ARCHIVELOG DELETION POLICY TO SHIPPED TO ALL STANDBY;
-CONFIGURE ARCHIVELOG DELETION POLICY TO APPLIED ON ALL STANDBY;
-
-
-
-
