@@ -64,7 +64,7 @@ echo -e "\
 # ------------------------------------------------------------------------
 # Creating and Installing the DBNITRO Components
 #
-FOLDER="/opt"                       # ===> HERE YOU HAVE TO CONFIGURE THE PATH OF DBNITRO, WHERE IT WILL BE INSTALLED
+ FOLDER="/opt"                       # ===> HERE YOU HAVE TO CONFIGURE THE PATH OF DBNITRO, WHERE IT WILL BE INSTALLED
 DBNITRO="${FOLDER}/dbnitro"
 #
 RemoveFolder() {
@@ -123,6 +123,23 @@ chown -R oracle.oinstall /etc/cron.daily/purgeLogs.sh
 # 00 21 * * * /opt/purgelogs/purgelogs.bin cleanup --days 30 --aud --lsnr --automigrate
 }
 #
+#
+# ------------------------------------------------------------------------
+# Setup PurgLogs from Oracle Products (ONLY WITH GRID INFRASTRUCTURE)
+#
+SetUpPURGETFA() {
+echo "Installing PURGE TFA Scripts"
+cd ${DBNITRO}/
+mv ${DBNITRO}/bin/purgeTFA.sh /etc/cron.daily/purgeTFA.sh
+#
+chmod a+x /etc/cron.daily/purgeTFA.sh
+#
+chmod -R 775 /etc/cron.daily/purgeTFA.sh
+#
+chown -R oracle.oinstall /etc/cron.daily/purgeTFA.sh
+#
+}
+#
 # ------------------------------------------------------------------------
 # Add the Content on Grid Profile
 #
@@ -143,7 +160,6 @@ export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/g
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 alias db='. ${DBNITRO}/bin/OracleMenu.sh'
 alias list='${DBNITRO}/bin/OracleList.sh'
-list
 umask 0022
 EOF
 else
@@ -172,7 +188,6 @@ export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/o
 export PS1=\$'[ \${LOGNAME}@\h:\$(pwd): ]\$ '
 alias db='. ${DBNITRO}/bin/OracleMenu.sh'
 alias list='${DBNITRO}/bin/OracleList.sh'
-list
 umask 0022
 EOF
 else
@@ -208,6 +223,7 @@ elif [[ "${OPT}" == "INSTALL" ]]; then
   SetUpOracle
   SetUpDBNITRO
   ### SetUpPURGELOGS
+  ### SetUpPURGETFA
   SetupLogonBanner
   echo " -- Press ENTER to continue --"
   read
@@ -220,6 +236,7 @@ elif [[ "${OPT}" == "UPDATE" ]]; then
   SetUpOracle
   SetUpDBNITRO
   ### SetUpPURGELOGS
+  ### SetUpPURGETFA
   SetupLogonBanner
   echo " -- Press ENTER to continue --"
   read
@@ -229,6 +246,7 @@ elif [[ "${OPT}" == "OLD_ENV" ]]; then
   echo " -- Install DBNITRO Environment for OLD Servers --"
   SetUpDBNITRO
   ### SetUpPURGELOGS
+  ### SetUpPURGETFA
   SetUpOldOracle
   SetupLogonBanner
   echo " -- Press ENTER to continue --"
