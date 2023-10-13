@@ -755,7 +755,7 @@ prompt ##############################################################
 column USERNAME for a15
 column "SID/SERIAL" for a15
 column "WAITING SEG" format a12 heading "WAITING|SEG"
-column SQL_TEXT for a90
+column SQL_TEXT for a100
 column machine for a35
 column osuser for a15
 select S.USERNAME
@@ -2094,9 +2094,11 @@ col rank form 99
 col sql_id for a15
 col MACHINE for a30
 col event for a30
-col username for a25
-col OSUSER for a25
-col PROGRAM for a40
+-- col CPUMins for a10
+-- col CPUHours for a10
+col username for a20
+col OSUSER for a20
+col PROGRAM for a30
 select rownum as rank
   , a.sid
   , a.serial#
@@ -2105,26 +2107,26 @@ select rownum as rank
   , a.osuser
   , a.machine
   , a.program
---  , a.event
+--, a.event
   , a.CPUMins
   , a.CPUHours
   , a.CPUDays
 from (select v.sid
         , serial#
-	, sql_id
+        , sql_id
         , username
         , osuser
         , machine
         , program
---	, event
-    , round(v.value/(100*60), 0) CPUMins
-	, round(v.value/60/60)/100 CPUHours
-	, round(v.value/60/60/24)/100 CPUDays
-        FROM gv\$statname s, gv\$sesstat v, gv\$session sess
-        WHERE s.name = 'CPU used by this session'
-          and sess.sid = v.sid
-          and v.statistic# = s.statistic#
-          and v.value > 0
+    --  , event
+        , round(v.value/(100*60), 0) CPUMins
+        , round(v.value/60/60)/100 CPUHours
+        , round(v.value/60/60/24)/100 CPUDays
+      FROM gv\$statname s, gv\$sesstat v, gv\$session sess
+      WHERE s.name = 'CPU used by this session'
+      and sess.sid = v.sid
+      and v.statistic# = s.statistic#
+      and v.value > 0
       ORDER BY v.value DESC) a
 where rownum < 21
 and osuser not in ('GRID','grid','ORACLE','oracle');
@@ -5558,6 +5560,40 @@ END;
 /
 quit;
 EOF
+}
+#
+#########################################################################################################
+# DBA: SQL ID WITH PARAMETER
+#########################################################################################################
+#
+SQLID() {
+local SQLID=$1
+if [[ "${SQLID}" == "" ]]; then
+  echo ""
+  echo " -- YOU NEED TO EXECUTE THIS FUNCTION WITH THE SQL_ID AFTER THE NAME: EXAMPLE: SQLID xxx000xxx000xxx"
+  echo ""
+else
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # SQL ID
+prompt ##############################################################
+col sql_id for a15
+col sql_text for a50
+SELECT sql_id
+  , sql_text
+  , elapsed_time / 1000000 AS elapsed_seconds
+  , cpu_time / 1000000 AS cpu_seconds
+  , executions
+  , buffer_gets
+  , disk_reads
+  , optimizer_cost
+  , plan_hash_value
+FROM gv\$sql
+WHERE sql_id = '${SQLID}';
+quit;
+EOF
+fi
 }
 #
 #########################################################################################################
