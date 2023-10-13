@@ -174,11 +174,15 @@ if [[ "$(whoami)" == "oracle" ]] || [[ "$(whoami)" == "grid" ]] ; then
       #
       # DATABASE STATUS
       #
-DATABASE_STATUS=$( { echo "set pages 0 lin 1000 feedback off;"; echo "select status || ' | ' || (select case when value = 'TRUE' then '(RAC)' else '(SING)' end from v\$parameter where name = 'cluster_database') as status from v\$instance;"; } | sqlplus -S / as sysdba)
+DATABASE_STATUS="$(echo "select status || ' ' || (select case when value = 'TRUE' then '(RAC)' else '(SING)' end from v\$parameter where name = 'cluster_database') as status from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
 #
 # DATABASE ROLE
 #
-DATABASE_ROLE=$( { echo "set pages 0 lin 1000 feedback off;"; echo "select database_role from v\$database;"; } | sqlplus -S / as sysdba)
+DATABASE_ROLE="$(echo "select database_role from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+#
+# DATABASE STARTED UP
+#
+DATABASE_STARTED="$(echo "select to_char(startup_time, 'DD/MM/YYYY') from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
 #
 # DB RESULT
 #
