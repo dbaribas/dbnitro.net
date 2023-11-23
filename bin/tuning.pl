@@ -9,12 +9,12 @@ use DBD::Oracle;
 # -------------------------------------------------------------------------------------
 # Variables of Connection on Oracle Database
 # -------------------------------------------------------------------------------------
-my $oracle_hostname = 'usvzrz6001';
-my $oracle_database = 'OVZ010P';
+my $oracle_hostname = '';
+my $oracle_database = '';
 my $oracle_port     = '1521';
 my $oracle_username = 'SYSTEM';
-my $oracle_password = 'Yh73uMb.23';
-my $oracle_schema   = 'M1';
+my $oracle_password = '';
+my $oracle_schema   = '';
 
 # -------------------------------------------------------------------------------------
 # How many SQLs each criteria (down) you want to analyse?
