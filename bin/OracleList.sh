@@ -2,7 +2,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.9"
 DateCreation="18/09/2023"
-DateModification="11/12/2023"
+DateModification="14/12/2023"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -124,7 +124,9 @@ OracleServices() {
 #
 if [[ "${ASM_PROC}" != "0" ]] || [[ "${CRSD_PROC}" != "0" ]] || [[ "${OCSSD_PROC}" != "0" ]] || [[ "${OHASD_PROC}" != "0" ]] || [[ "${LISTENER_PROC}" != "0" ]] || [[ "${AGENT_PROC}" != "0" ]] || [[ "${OMS_PROC}" != "0" ]] || [[ "${OGG_PROC}" != "0" ]] || [[ "${DATABASE_PROC}" != "0" ]]; then
 #
-printf "%-16s%-s\n" "-- ORACLE PRODUCTS RUNNING SERVICES --"
+printf "+%-50s+\n"    "--------------------------------------------------"
+printf "|%-50s%-s|\n" " ORACLE SERVICES RUNNING                          "
+printf "+%-50s+\n"    "--------------------------------------------------"
 #
 printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
 printf "|%-16s|%-16s|%-16s|%-50s|\n" " SERVICE              " " STATUS               " " INFO                 " " ORACLE HOME                                                "
@@ -265,7 +267,11 @@ OracleProducts() {
 # MIDDLEWARE OK
 # GOLDENGATE OK
 #
-printf "%-16s%-s\n" "-- ORACLE PRODUCTS OWNER --"
+if [[ "$(echo ${ASM_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${DATABASE_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${CLIENT_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${AGENT_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${OMS_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${OGG_HOME} | wc -l | xargs)" != "0" ]]; then
+#
+printf "+%-50s+\n"    "--------------------------------------------------"
+printf "|%-50s%-s|\n" " ORACLE PRODUCTS INSTALLED                        "
+printf "+%-50s+\n"    "--------------------------------------------------"
 #
 printf "+%-16s+%-50s+%-16s+\n" "----------------------" "------------------------------------------------------------" "----------------------"
 printf "|%-16s|%-50s|%-16s|\n" " HOME NAME            " " HOME                                                       " " OWNER                "
@@ -337,6 +343,7 @@ if [[ "$(echo ${OGG_HOME} | wc -l | xargs)" != "0" ]]; then
   done
 fi
 #
+fi
 }
 #
 OracleServices
