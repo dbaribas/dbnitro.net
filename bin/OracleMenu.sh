@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.89"
+SoftwareVersion="1.0.91"
 DateCreation="07/01/2021"
-DateModification="03/01/2024"
+DateModification="19/01/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -115,19 +115,20 @@ if [[ $(uname) == "SunOS" ]]; then
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"     | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"     | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"     | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"   | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"   | cut -f1 -d ':'               | uniq               | sort           | wc -l)
-  LSNRCTL="$(ps -ef                | egrep -v "grep|egrep|zabbix|webmin"    | egrep -i "tnslsnr" | wc -l)"
-  T_MEM=$(free -g -h               | egrep -i "Mem"                         | awk '{ print $2 }')
-  U_MEM=$(free -g -h               | egrep -i "Mem"                         | awk '{ print $3 }')
-  F_MEM=$(free -g -h               | egrep -i "Mem"                         | awk '{ print $4 }')
-  T_SWAP=$(free -g -h              | egrep -i "Swap"                        | awk '{ print $2 }')
-  U_SWAP=$(free -g -h              | egrep -i "Swap"                        | awk '{ print $3 }')
-  F_SWAP=$(free -g -h              | egrep -i "Swap"                        | awk '{ print $4 }')
+  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                    | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"     | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"     | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"     | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"   | cut -f1 -d ':'               | uniq               | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"   | cut -f1 -d ':'               | uniq               | sort           | wc -l)
+  LSNRCTL="$(ps -ef                | egrep -i -v "grep|egrep|zabbix|webmin"    | egrep -i "tnslsnr" | wc -l)"
+  GRID_PROC="$(ps -ef              | egrep -i -v "grep|egrep|zabbix|webmin"    | egrep -i "asm_"    | wc -l)"
+  T_MEM=$(free -g -h               | egrep -i "Mem"                            | awk '{ print $2 }')
+  U_MEM=$(free -g -h               | egrep -i "Mem"                            | awk '{ print $3 }')
+  F_MEM=$(free -g -h               | egrep -i "Mem"                            | awk '{ print $4 }')
+  T_SWAP=$(free -g -h              | egrep -i "Swap"                           | awk '{ print $2 }')
+  U_SWAP=$(free -g -h              | egrep -i "Swap"                           | awk '{ print $3 }')
+  F_SWAP=$(free -g -h              | egrep -i "Swap"                           | awk '{ print $4 }')
   RED="\033[1;31m"
   RED2="\033[0;41m"
   YEL="\033[1;33m"
@@ -149,16 +150,17 @@ elif [[ $(uname) == "AIX" ]]; then
   HOST=$(hostname -s)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${USER}@{HOST}:${PED}: ]$ ')
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"     | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"     | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"     | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"   | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*".  | cut -f1 -d ':'               | uniq               | sort           | wc -l)
-  LSNRCTL="$(ps -ef                | egrep -i -v "grep|egrep|zabbix|webmin" | egrep -i "tnslsnr" | wc -l)"
-  T_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                      | awk '{ print $2 }')
-  U_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                      | awk '{ print $3 }')
-  F_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                      | awk '{ print $4 }')
+  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                    | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"     | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"     | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"     | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"   | cut -f1 -d ':'               | uniq               | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*".  | cut -f1 -d ':'               | uniq               | sort           | wc -l)
+  LSNRCTL="$(ps -ef                | egrep -i -v "grep|egrep|zabbix|webmin"    | egrep -i "tnslsnr" | wc -l)"
+  GRID_PROC="$(ps -ef              | egrep -i -v "grep|egrep|zabbix|webmin"    | egrep -i "asm_"    | wc -l)"
+  T_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                         | awk '{ print $2 }')
+  U_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                         | awk '{ print $3 }')
+  F_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                         | awk '{ print $4 }')
   T_SWAP="NO"
   U_SWAP="NO"
   F_SWAP="NO"
@@ -183,19 +185,20 @@ elif [[ $(uname) == "Linux" ]]; then
   HOST=$(hostname)
   UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
   PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                  | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"     | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"     | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"     | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"   | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"   | cut -f1 -d ':'               | uniq               | sort           | wc -l)
-  LSNRCTL="$(ps -ef                | egrep -i -v "grep|egrepzabbix|webmin"  | egrep -i "tnslsnr" | wc -l)"
-  T_MEM=$(free -g -h               | egrep -i "Mem"                         | awk '{ print $2 }')
-  U_MEM=$(free -g -h               | egrep -i "Mem"                         | awk '{ print $3 }')
-  F_MEM=$(free -g -h               | egrep -i "Mem"                         | awk '{ print $4 }')
-  T_SWAP=$(free -g -h              | egrep -i "Swap"                        | awk '{ print $2 }')
-  U_SWAP=$(free -g -h              | egrep -i "Swap"                        | awk '{ print $3 }')
-  F_SWAP=$(free -g -h              | egrep -i "Swap"                        | awk '{ print $4 }')
+  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                    | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"     | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"     | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"     | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
+  DBLIST=$(cat ${ORATAB}           | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"   | cut -f1 -d ':'               | uniq               | sort)
+  ASM=$(cat ${ORATAB}              | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"   | cut -f1 -d ':'               | uniq               | sort           | wc -l)
+  LSNRCTL="$(ps -ef                | egrep -i -v "grep|egrepzabbix|webmin"     | egrep -i "tnslsnr" | wc -l)"
+  GRID="$(ps -ef                   | egrep -i -v "grep|egrep|zabbix|webmin"    | egrep -i "asm_"    | wc -l)"
+  T_MEM=$(free -g -h               | egrep -i "Mem"                            | awk '{ print $2 }')
+  U_MEM=$(free -g -h               | egrep -i "Mem"                            | awk '{ print $3 }')
+  F_MEM=$(free -g -h               | egrep -i "Mem"                            | awk '{ print $4 }')
+  T_SWAP=$(free -g -h              | egrep -i "Swap"                           | awk '{ print $2 }')
+  U_SWAP=$(free -g -h              | egrep -i "Swap"                           | awk '{ print $3 }')
+  F_SWAP=$(free -g -h              | egrep -i "Swap"                           | awk '{ print $4 }')
   RED="\e[1;31;40m"
   RED2="\033[0;41m"
   YEL="\e[1;33;40m"
@@ -254,10 +257,36 @@ ListenerService() {
 if [[ "${LSNRCTL}" != 0 ]]; then 
   for LISTENER_SERVICE in $(ps -ef | egrep -i -v "grep|egrep|zabbix|webmin" | egrep -i "listener" | awk '{ print $9 }' | uniq | sort); do
     LISTENER_HOME="$(ps -ef | egrep -i -v "grep|egrep|zabbix|webmin" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort)"
-    printf "|%-22s|%-70s|\n" "                     LISTENER " " [ ONLINE ] [ ${LISTENER_SERVICE} ] ${LISTENER_HOME} "
+  printf "|%-22s|%-70s|\n" "                     LISTENER " " [ ONLINE ] [ ${LISTENER_SERVICE} ] ${LISTENER_HOME} "
   done
 else 
   printf "|%-22s|%-70s|\n" "                     LISTENER " " [ OFFLINE ] [ ${LISTENER_SERVICE} ] "
+fi
+}
+#
+# ------------------------------------------------------------------------
+# Grid Services
+#
+GridService() {
+if [[ "${GRID}" != 0 ]]; then 
+  CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq | sort | wc -l)"
+  CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | awk '{ print $8 }' | uniq | sort)"
+  if [[ "${CRSD}" != 0 ]]; then GI_CRSD="[ ONLINE ]"; else GI_CRSD="[ OFFLINE ]"; fi
+  #
+  OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq | sort | wc -l)"
+  OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
+  if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="[ ONLINE ]"; else GI_OCSSD="[ OFFLINE ]"; fi
+  #
+  OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq | sort | wc -l)"
+  OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
+  if [[ "${OHASD}" != 0 ]]; then GI_OHASD="[ ONLINE ]"; else GI_OHASD="[ OFFLINE ]"; fi
+  #
+  printf "|%-22s|%-70s|\n" "                 [ ASM/GRID ] " " [ ONLINE ]"
+  printf "|%-22s|%-70s|\n" "                     [ CRSD ] " " ${GI_CRSD} ${CRSD_HOME} "
+  printf "|%-22s|%-70s|\n" "                    [ OCSSD ] " " ${GI_OCSSD} ${OCSSD_HOME} "
+  printf "|%-22s|%-70s|\n" "                    [ OHASD ] " " ${GI_OHASD} ${OHASD_HOME} "
+else
+  printf "|%-22s|%-70s|\n" "                 [ ASM/GRID ] " " [ OFFLINE ] "
 fi
 }
 #
@@ -268,9 +297,9 @@ if [[ ${ASM} == 0 ]]; then
   ASM_EXISTS="NO"
 else
   ASM_EXISTS="YES"
-  G_SID=$(cat ${ORATAB}       | egrep -i -v "^#"   | egrep -i "+ASM*"   | cut -f1 -d ':')
-  G_HOME=$(cat ${ORATAB}      | egrep -i -v "^#"   | egrep -i "+ASM*"   | cut -f2 -d ':')
-  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)
+  G_SID=$(cat ${ORATAB}       | egrep -i -v "^#|^$"   | egrep -i "+ASM*"   | cut -f1 -d ':')
+  G_HOME=$(cat ${ORATAB}      | egrep -i -v "^#|^$"   | egrep -i "+ASM*"   | cut -f2 -d ':')
+  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }'    | egrep -i -v "root" | egrep -Ev "^$" | uniq)
   if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then
     ASM_USER="YES"
   else
@@ -698,10 +727,13 @@ printf "|%-22s|%-70s|\n" "                  ORACLE_HOME " " ${ORACLE_HOME} "
 printf "|%-22s|%-70s|\n" "                   OWNER_HOME " " ${OWNER} "
 printf "|%-22s|%-70s|\n" "               ORACLE_VERSION " " $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') "
 printf "|%-22s|%-70s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
+if [[ "${ASM_EXISTS}" == "YES" ]]; then GridService; fi
 ListenerService
 printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
 #
-export PS1=$'[ HOME ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+#
+export PS1=$'[ ${HOME_NAME} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
 #
@@ -809,12 +841,14 @@ printf "|%-22s|%-70s|\n" "                 GRID_VERSION " " $(sqlplus -v | egrep
 printf "|%-22s|%-70s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
 printf "|%-22s|%-70s|\n" "                   GRID_OWNER " " ${OWNER} "
 printf "|%-22s|%-70s|\n" "                     GRID_SID " " ${GRID_SID} "
-printf "|%-22s|%-70s|\n" "                   ASM_STATUS " " ${GRID_STATUS} "
-printf "|%-22s|%-70s|\n" "                         CRSD " " ${GI_CRSD} ${CRSD_HOME} "
-printf "|%-22s|%-70s|\n" "                        OCSSD " " ${GI_OCSSD} ${OCSSD_HOME} "
-printf "|%-22s|%-70s|\n" "                        OHASD " " ${GI_OHASD} ${OHASD_HOME} "
+printf "|%-22s|%-70s|\n" "                 [ ASM/GRID ] " " ${GRID_STATUS} "
+printf "|%-22s|%-70s|\n" "                     [ CRSD ] " " ${GI_CRSD} ${CRSD_HOME} "
+printf "|%-22s|%-70s|\n" "                    [ OCSSD ] " " ${GI_OCSSD} ${OCSSD_HOME} "
+printf "|%-22s|%-70s|\n" "                    [ OHASD ] " " ${GI_OHASD} ${OHASD_HOME} "
 ListenerService
 printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
+#
+HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${GRID_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
 #
 export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
@@ -1053,7 +1087,9 @@ printf "|%-22s|%-70s|\n" "                    OMS_OWNER " " ${OWNER} "
 printf "|%-22s|%-70s|\n" "                   OMS_STATUS " " ${OMS} "
 printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
 #
-export PS1=$'[ OMS ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+#
+export PS1=$'[ ${HOME_NAME} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
 #
@@ -1094,7 +1130,9 @@ printf "|%-22s|%-70s|\n" "                  AGENT_OWNER " " ${OWNER} "
 printf "|%-22s|%-70s|\n" "                 AGENT_STATUS " " ${AGENT} "
 printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
 #
-export PS1=$'[ AGENT ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+#
+export PS1=$'[ ${HOME_NAME} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
 umask 0022
 }
 #
