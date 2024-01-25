@@ -256,8 +256,8 @@ done
 #
 ListenerService() {
 if [[ "${LSNRCTL}" != 0 ]]; then 
-  for LISTENER_SERVICE in $(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i "listener" | awk '{ print $9 }' | uniq | sort); do
-    LISTENER_HOME="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort)"
+  for LISTENER_SERVICE in $(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i "listener"               | awk '{ print $9 }' | uniq | sort); do
+           LISTENER_HOME="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort)"
   printf "|%-22s|%-70s|\n" "                     LISTENER " " [ ONLINE ] [ ${LISTENER_SERVICE} ] ${LISTENER_HOME} "
   done
 else 
@@ -270,15 +270,15 @@ fi
 #
 GridService() {
 if [[ "${GRID}" != 0 ]]; then 
-  CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq | sort | wc -l)"
+       CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq               | sort | wc -l)"
   CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | awk '{ print $8 }' | uniq | sort)"
   if [[ "${CRSD}" != 0 ]]; then GI_CRSD="[ ONLINE ]"; else GI_CRSD="[ OFFLINE ]"; fi
   #
-  OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq | sort | wc -l)"
+       OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq               | sort | wc -l)"
   OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
   if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="[ ONLINE ]"; else GI_OCSSD="[ OFFLINE ]"; fi
   #
-  OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq | sort | wc -l)"
+       OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq               | sort | wc -l)"
   OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
   if [[ "${OHASD}" != 0 ]]; then GI_OHASD="[ ONLINE ]"; else GI_OHASD="[ OFFLINE ]"; fi
   #
