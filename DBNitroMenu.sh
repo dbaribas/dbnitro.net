@@ -3,7 +3,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.9"
 DateCreation="22/06/2022"
-DateModification="29/09/2023"
+DateModification="12/01/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -70,7 +70,7 @@ DBNITRO="${FOLDER}/dbnitro"
 RemoveFolder() {
 echo "Removing DBNITRO Folder"
 if [[ -d ${DBNITRO}/ ]]; then
-  rm -rf ${DBNITRO}/
+  mv ${DBNITRO}/ /tmp/${DBNITRO}_$(date +%Y%m%d)
 fi
 }
 #
