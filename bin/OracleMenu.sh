@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.93"
+SoftwareVersion="1.0.97"
 DateCreation="07/01/2021"
-DateModification="25/01/2024"
+DateModification="05/02/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -66,24 +66,24 @@ fi
 # Help Function
 #
 HELP() {
-SetClear
-SepLine
-echo -e "\
-|#| HOMES........: YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)
-|#| OMS..........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS
-|#| AGENT........: YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (AGENT) HOME AND TOOLS
-|#| GRID.........: YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS
-|#| DATABASE.....: YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS
-|#| CDB/PDB......: YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb
-|#| GOLDENGATE...: YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg
-|#| LIST.........: YOU CAN SEE THE ORACLE PRODUCTS RUNNING AND/OR INSTALLED
-|#| INFO.........: YOU CAN SEE THE ORACLE DATABASE INFO
-|#| DASH.........: YOU CAN SEE THE ORACLE DATABASE DASHBOARD
-|#| DASH_INSTALL.: YOU CAN INSTALL THE ORACLE DATABASE DASHBOARD
-|#| REPORT.......: YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})
-|#| OPTIONS......: YOU CAN SEE THE ORACLE DATABASE OPTIONS
-|#| HUGEPAGES....: YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
-SepLine
+printf "+%-30s+%-120s+\n" "------------------------------" "------------------------------------------------------------------------------------------------------------------------"
+printf "|%-16s|%-120s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
+printf "+%-30s+%-120s+\n" "------------------------------" "------------------------------------------------------------------------------------------------------------------------"
+printf "|%-16s|%-120s|\n" "                        HOMES " " YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)"
+printf "|%-16s|%-120s|\n" "                     GRID/ASM " " YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS"
+printf "|%-16s|%-120s|\n" "                     DATABASE " " YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS"
+printf "|%-16s|%-120s|\n" "                      CDB/PDB " " YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
+printf "|%-16s|%-120s|\n" "                          OMS " " YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS"
+printf "|%-16s|%-120s|\n" "                        AGENT " " YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (AGENT) HOME AND TOOLS"
+printf "|%-16s|%-120s|\n" "                   GOLDENGATE " " YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg"
+printf "|%-16s|%-120s|\n" "                         LIST " " YOU CAN SEE THE ORACLE PRODUCTS RUNNING AND/OR INSTALLED"
+printf "|%-16s|%-120s|\n" "                         INFO " " YOU CAN SEE THE ORACLE DATABASE INFO"
+printf "|%-16s|%-120s|\n" "                         DASH " " YOU CAN SEE THE ORACLE DATABASE DASHBOARD"
+printf "|%-16s|%-120s|\n" "                 DASH_INSTALL " " YOU CAN INSTALL THE ORACLE DATABASE DASHBOARD"
+printf "|%-16s|%-120s|\n" "                       REPORT " " YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})"
+printf "|%-16s|%-120s|\n" "                      OPTIONS " " YOU CAN SEE THE ORACLE DATABASE OPTIONS"
+printf "|%-16s|%-120s|\n" "                    HUGEPAGES " " YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
+printf "+%-30s+%-120s+\n" "------------------------------" "------------------------------------------------------------------------------------------------------------------------"
 }
 #
 # ------------------------------------------------------------------------
@@ -106,30 +106,31 @@ if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
   ORATAB="/var/opt/oracle/oratab"
   ORA_INST="/var/opt/oracle/oraInst.loc"
+  ORA_OCR="/var/opt/oracle/ocr.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
-  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
-  ALIASES=$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
+  VARIABLES="$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})"
+  ALIASES="$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})"
   TMP="/tmp"
   TMPDIR="${TMP}"
-  HOST=$(hostname)
-  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)
-  LSNRCTL="$(ps -ef                | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
-  GRID_PROC="$(ps -ef              | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "asm_"     | wc -l)"
-  T_MEM=$(free -g -h               | egrep -i "Mem"                      | awk '{ print $2 }')
-  U_MEM=$(free -g -h               | egrep -i "Mem"                      | awk '{ print $3 }')
-  F_MEM=$(free -g -h               | egrep -i "Mem"                      | awk '{ print $4 }')
-  T_SWAP=$(free -g -h              | egrep -i "Swap"                     | awk '{ print $2 }')
-  U_SWAP=$(free -g -h              | egrep -i "Swap"                     | awk '{ print $3 }')
-  F_SWAP=$(free -g -h              | egrep -i "Swap"                     | awk '{ print $4 }')
+  HOST="$(hostname)"
+  UPTIME="$(uptime | sed 's/.*up \([^,]*\), .*/\1/')"
+  PS="$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')"
+  ORA_HOMES="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
+  ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
+  LSNRCTL="$(ps -ef                 | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
+  GRID_PROC="$(ps -ef               | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "asm_"     | wc -l)"
+  T_MEM="$(free -g -h               | egrep -i "Mem"                      | awk '{ print $2 }')"
+  U_MEM="$(free -g -h               | egrep -i "Mem"                      | awk '{ print $3 }')"
+  F_MEM="$(free -g -h               | egrep -i "Mem"                      | awk '{ print $4 }')"
+  T_SWAP="$(free -g -h              | egrep -i "Swap"                     | awk '{ print $2 }')"
+  U_SWAP="$(free -g -h              | egrep -i "Swap"                     | awk '{ print $3 }')"
+  F_SWAP="$(free -g -h              | egrep -i "Swap"                     | awk '{ print $4 }')"
   RED="\033[1;31m"
   RED2="\033[0;41m"
   YEL="\033[1;33m"
@@ -141,27 +142,28 @@ elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
   ORATAB="/etc/oratab"
   ORA_INST="/opt/oracle/etc/oraInst.loc"
+  ORA_OCR="/etc/oracle/ocr.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="AUTHSTATE|DSM_LOG|EDITOR|ENV|EXTENDED_HISTORY|FCEDIT|HISTDATEFMT|HISTFILE|HISTSIZE|HOME|HOST|LANG|LC__FASTMSG|LOCPATH|LOGIN|LOGONNAME|MAIL|MAILMSG|MANPATH|MISSINGPV_VARYON|NLSPATH|NMON|ODMDIR|RES_RETRY|RES_TIMEOUT|SHELL|SSH_CLIENT|SSH_CONNECTION|SSH_TTY|TERM|TZ|USER|XAUTHORITY"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which|autoload|command|history|integer|local"
-  VARIABLES=$(export | awk '{ print $1 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
-  ALIASES=$(alias    | awk '{ print $1 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
+  VARIABLES="$(export | awk '{ print $1 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})"
+  ALIASES="$(alias    | awk '{ print $1 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})"
   TMP="/tmp"
   TMPDIR="${TMP}"
-  HOST=$(hostname -s)
-  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS=$(PS1=$'[ ${USER}@{HOST}:${PED}: ]$ ')
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*".   | cut -f1 -d ':'               | uniq               | sort           | wc -l)
-  LSNRCTL="$(ps -ef                | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
-  GRID_PROC="$(ps -ef              | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "asm_"     | wc -l)"
-  T_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                   | awk '{ print $2 }')
-  U_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                   | awk '{ print $3 }')
-  F_MEM=$(svmon -G -O unit=GB      | egrep -i "memory"                   | awk '{ print $4 }')
+  HOST="$(hostname -s)"
+  UPTIME="$(uptime | sed 's/.*up \([^,]*\), .*/\1/')"
+  PS="$(PS1=$'[ ${USER}@{HOST}:${PED}: ]$ ')"
+  ORA_HOMES="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
+  ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
+  LSNRCTL="$(ps -ef                 | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
+  GRID_PROC="$(ps -ef               | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "asm_"     | wc -l)"
+  T_MEM="$(svmon -G -O unit=GB      | egrep -i "memory"                   | awk '{ print $2 }')"
+  U_MEM="$(svmon -G -O unit=GB      | egrep -i "memory"                   | awk '{ print $3 }')"
+  F_MEM="$(svmon -G -O unit=GB      | egrep -i "memory"                   | awk '{ print $4 }')"
   T_SWAP="NO"
   U_SWAP="NO"
   F_SWAP="NO"
@@ -176,30 +178,31 @@ elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
   ORATAB="/etc/oratab"
   ORA_INST="/etc/oraInst.loc"
+  ORA_OCR="/etc/oracle/ocr.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
-  VARIABLES=$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})
-  ALIASES=$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})
+  VARIABLES="$(export | awk '{ print $3 }' | cut -f1 -d '=' | egrep -i -v ${VARIABLES_IGNORE})"
+  ALIASES="$(alias    | awk '{ print $2 }' | cut -f1 -d '=' | egrep -i -v ${ALIASES_IGNORE})"
   TMP="/tmp"
   TMPDIR="${TMP}"
-  HOST=$(hostname)
-  UPTIME=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-  PS=$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')
-  ORA_HOMES=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_AGENT=$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  OGG_HOME=$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  ORA_OMS=$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)
-  DBLIST=$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)
-  ASM=$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)
-  LSNRCTL="$(ps -ef                | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
-  GRID="$(ps -ef                   | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "asm_"     | wc -l)"
-  T_MEM=$(free -g -h               | egrep -i "Mem"                      | awk '{ print $2 }')
-  U_MEM=$(free -g -h               | egrep -i "Mem"                      | awk '{ print $3 }')
-  F_MEM=$(free -g -h               | egrep -i "Mem"                      | awk '{ print $4 }')
-  T_SWAP=$(free -g -h              | egrep -i "Swap"                     | awk '{ print $2 }')
-  U_SWAP=$(free -g -h              | egrep -i "Swap"                     | awk '{ print $3 }')
-  F_SWAP=$(free -g -h              | egrep -i "Swap"                     | awk '{ print $4 }')
+  HOST="$(hostname)"
+  UPTIME="$(uptime | sed 's/.*up \([^,]*\), .*/\1/')"
+  PS="$(PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ ')"
+  ORA_HOMES="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
+  ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
+  LSNRCTL="$(ps -ef                 | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
+  GRID="$(ps -ef                    | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "asm_"     | wc -l)"
+  T_MEM="$(free -g -h               | egrep -i "Mem"                      | awk '{ print $2 }')"
+  U_MEM="$(free -g -h               | egrep -i "Mem"                      | awk '{ print $3 }')"
+  F_MEM="$(free -g -h               | egrep -i "Mem"                      | awk '{ print $4 }')"
+  T_SWAP="$(free -g -h              | egrep -i "Swap"                     | awk '{ print $2 }')"
+  U_SWAP="$(free -g -h              | egrep -i "Swap"                     | awk '{ print $3 }')"
+  F_SWAP="$(free -g -h              | egrep -i "Swap"                     | awk '{ print $4 }')"
   RED="\e[1;31;40m"
   RED2="\033[0;41m"
   YEL="\e[1;33;40m"
@@ -288,6 +291,9 @@ if [[ "${GRID}" != 0 ]]; then
   printf "|%-22s|%-70s|\n" "                    [ OHASD ] " " ${GI_OHASD} ${OHASD_HOME} "
 else
   printf "|%-22s|%-70s|\n" "                 [ ASM/GRID ] " " [ OFFLINE ] "
+  printf "|%-22s|%-70s|\n" "                     [ CRSD ] " " [ OFFLINE ] "
+  printf "|%-22s|%-70s|\n" "                    [ OCSSD ] " " [ OFFLINE ] "
+  printf "|%-22s|%-70s|\n" "                    [ OHASD ] " " [ OFFLINE ] "
 fi
 }
 #
@@ -648,8 +654,9 @@ set_HOME() {
 unset_var
 unalias_var
 alias_var
-local OPT=$1
+local OPT="$1"
 export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_TERM="xterm"
 export ORACLE_HOME="${OPT}"
 export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
@@ -664,16 +671,16 @@ export ORATOP="${ORACLE_HOME}/suptools/oratop"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
-  export GRID_HOME=${G_HOME}
+  export GRID_HOME="${OPT}"
   export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
-  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
-  export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "+ASM*")
-  export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "crs")
-  export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+  export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+  export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
+  export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
+  if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
+  export HOME_ADR_ASM="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/asm/" | egrep -i "${ASM_LOG}" | egrep -v "host_")"
+  export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -v "crs_")"
+  export ALERTASM="${GRID_BASE}/${HOME_ADR_ASM}/trace/alert_${ASM_LOG}.log"
   export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
-  alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
   alias asmlog='tail -f -n 100 ${ALERTASM} | egrep -i -v ${IGNORE_ERRORS}'
   alias asmlogv='vi ${ALERTASM}'
   alias crslog='tail -f -n 100 ${ALERTCRS} | egrep -i -v ${IGNORE_ERRORS}'
@@ -687,10 +694,11 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias rac-monitor='while true; do clear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 else
-  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
+  export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+  export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
+  export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 fi
+export HOME_ADR="$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -i "${OPT}")"
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
 alias lsnlog='tail -f -n 100 ${ALERTLST} | egrep -i -v ${IGNORE_ERRORS}'
@@ -706,8 +714,8 @@ alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep "pmon" | egrep -v egrep'
-alias pb='ps -ef | egrep "d.bin" | egrep -v egrep'
+alias p='ps -ef | egrep -v "grep|egrep" | egrep "pmon|d.bin" | sort'
+alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
 alias list='${DBNITRO}/bin/OracleList.sh'
@@ -726,9 +734,9 @@ printf "|%-16s|%-70s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTIO
 printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
 printf "|%-22s|%-70s|\n" "                  ORACLE_BASE " " ${ORACLE_BASE} "
 printf "|%-22s|%-70s|\n" "                  ORACLE_HOME " " ${ORACLE_HOME} "
-printf "|%-22s|%-70s|\n" "                   OWNER_HOME " " ${OWNER} "
 printf "|%-22s|%-70s|\n" "               ORACLE_VERSION " " $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') "
 printf "|%-22s|%-70s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
+printf "|%-22s|%-70s|\n" "                   OWNER_HOME " " ${OWNER} "
 if [[ "${ASM_EXISTS}" == "YES" ]]; then GridService; fi
 ListenerService
 printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
@@ -747,9 +755,9 @@ unset_var
 unalias_var
 alias_var
 set_GLOGIN
-local OPT=$1
+local OPT="$1"
 export ORACLE_HOSTNAME="${HOST}"
-export ORACLE_TERM=xterm
+export ORACLE_TERM="xterm"
 export ORACLE_SID="${OPT}"
 export ORACLE_HOME="${G_HOME}"
 export GRID_HOME="${ORACLE_HOME}"
@@ -766,19 +774,17 @@ export TFA="${TFA_HOME}"
 export OCK="${OCK_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
-export HOME_ADR=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -w "+ASM*")
-export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "crs")
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
+if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
+export HOME_ADR_ASM=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/asm/" | egrep -i "${ASM_LOG}" | egrep -v "host_")
+export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -v "crs_")
 export GRID_ADR=$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-export ALERTASM="${GRID_BASE}/${HOME_ADR}/trace/alert_+ASM*.log"
+export ALERTASM="${GRID_BASE}/${HOME_ADR_ASM}/trace/alert_${OPT}.log"
 export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
-alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
-alias gilsnlog='tail -f -n 100 ${GRID_BASE}/${GRID_ADR}/trace/listener.log | egrep -i -v ${IGNORE_ERRORS}'
-alias gilsnlogv='vi ${GRID_BASE}/${GRID_ADR}/trace/listener.log'
 alias trc='cd ${GRID_BASE}/${HOME_ADR}/trace'
 alias asmlog='tail -f -n 100 ${ALERTASM} | egrep -i -v ${IGNORE_ERRORS}'
 alias asmlogv='vi ${ALERTASM}'
@@ -805,8 +811,8 @@ alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep pmon | egrep -v egrep'
-alias pb='ps -ef | egrep "d.bin" | egrep -v egrep'
+alias p='ps -ef | egrep -v "grep|egrep" | egrep "pmon|d.bin" | sort'
+alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
 alias list='${DBNITRO}/bin/OracleList.sh'
@@ -865,9 +871,9 @@ unset_var
 unalias_var
 alias_var
 set_GLOGIN
-local OPT=$1
+local OPT="$1"
 export ORACLE_HOSTNAME="${HOST}"
-export ORACLE_TERM=xterm
+export ORACLE_TERM="xterm"
 export ORACLE_SID="${OPT}"
 export ORACLE_HOME="$(cat ${ORATAB} | egrep -i ":N|:Y" | egrep -w "${ORACLE_SID}" | cut -f2 -d ':')"
 export ORACLE_BASE="$(${ORACLE_HOME}/bin/orabase)"
@@ -886,11 +892,18 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 #
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${G_HOME}"
-  export GRID_BASE=$(locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g')
-  export GRID_ADR=$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")
-  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
+  export GRID_BASE="$(locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g')"
+  export GRID_ADR="$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")"
+  export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+  export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib"
+  export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
+  if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
+  export HOME_ADR_ASM="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/asm/" | egrep -i "${ASM_LOG}" | egrep -v "host_")"
+  export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -v "crs_")"
+  export GRID_ADR="$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")"
+  export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+  export ALERTASM="${GRID_BASE}/${HOME_ADR_ASM}/trace/alert_${OPT}.log"
+  export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
   alias gilsnlog='tail -f -n 100 ${GRID_BASE}/${GRID_ADR}/trace/listener.log | egrep -i -v ${IGNORE_ERRORS}'
   alias gilsnlogv='vi ${GRID_BASE}/${GRID_ADR}/trace/listener.log'
@@ -902,19 +915,21 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
+  alias asmlog='tail -f -n 100 ${ALERTASM} | egrep -i -v ${IGNORE_ERRORS}'
+  alias asmlogv='vi ${ALERTASM}'
+  alias crslog='tail -f -n 100 ${ALERTCRS} | egrep -i -v ${IGNORE_ERRORS}'
+  alias crslogv='vi ${ALERTCRS}'
 else
-  export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib
-  export CLASSPATH=${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib
-  export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin
+  export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+  export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
+  export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 fi
-#
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-export HOME_ADR=$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -w "${OPT}")
-export ORACLE_UNQNAME=$(echo ${HOME_ADR} | cut -f4 -d '/')
+export HOME_ADR="$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -w "${OPT}")"
+export ORACLE_UNQNAME="$(echo ${HOME_ADR} | cut -f4 -d '/')"
 export ALERTDB="${ORACLE_BASE}/${HOME_ADR}/trace/alert_${ORACLE_SID}.log"
 export ALERTDG="${ORACLE_BASE}/${HOME_ADR}/trace/drc*.log"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
-alias dbtrc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
 alias lsnlog='tail -f -n 100 ${ALERTLST} | egrep -i -v ${IGNORE_ERRORS}'
 alias lsnlogv='vi ${ALERTLST}'
 alias dblog='tail -f -n 100 ${ALERTDB} | egrep -i -v ${IGNORE_ERRORS}'
@@ -923,6 +938,7 @@ alias dglog='tail -f -n 100 ${ALERTDG} | egrep -i -v ${IGNORE_ERRORS}'
 alias dglogv='vi ${ALERTDG}'
 alias ob='cd ${ORACLE_BASE}'
 alias oh='cd ${ORACLE_HOME}'
+alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
 alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
@@ -936,8 +952,8 @@ alias dgmgrl='rlwrap dgmgrl'
 alias d='rlwrap dgmgrl /'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep pmon | egrep -v egrep'
-alias pb='ps -ef | egrep "d.bin" | egrep -v egrep'
+alias p='ps -ef | egrep -v "grep|egrep" | egrep "pmon|d.bin" | sort'
+alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
 alias orat='${ORATOP}/oratop -f -i 3 / as sysdba'
@@ -1066,12 +1082,11 @@ export OMS_GC="$(locate -b gc_inst | uniq)"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
 export CLASSPATH=${ORACLE_HOME}/jlib
-export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
-export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
 alias oh='cd ${ORACLE_HOME}'
 alias opl='${OPATCH}/opatch lspatches | sort'
-alias p='ps -ef | egrep "wlserver" | egrep -v "grep|egrep"'
-alias pb='ps -ef | egrep "d.bin" | egrep -v egrep'
+alias p='ps -ef | egrep -v "grep|egrep" | egrep "wlserver"'
 alias emlog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias emlogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias omslog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
@@ -1104,21 +1119,20 @@ set_AGENT() {
 unset_var
 unalias_var
 alias_var
-local OPT=$1
+local OPT="$1"
 export ORACLE_HOSTNAME="${HOST}"
 export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"')"
 export OH="${ORACLE_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export CLASSPATH=${ORACLE_HOME}/jlib
-export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient
-export PATH=${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin
+export CLASSPATH="${ORACLE_HOME}/jlib"
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
 alias oh='cd ${ORACLE_HOME}'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep "agent" | egrep -v egrep'
-alias pb='ps -ef | egrep "d.bin" | egrep -v egrep'
+alias p='ps -ef | egrep -v "grep|egrep" | egrep "agent"'
 alias list='${DBNITRO}/bin/OracleList.sh'
 #
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
@@ -1146,11 +1160,18 @@ umask 0022
 #
 MainMenu() {
 SetClear
+printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
+printf "|%-16s|%-70s|\n" " DBNITRO.net                  " " ORACLE :: Select an Option "
+printf "+%-30s+%-70s+\n" "------------------------------" "----------------------------------------------------------------------"
 PS3="Select the Option: "
-select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} QUIT; do
+select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} HELP QUIT; do
 if [[ "${OPT}" == "QUIT" ]]; then
   echo " -- Exit Menu --"
   return 1
+elif [[ "${OPT}" == "HELP" ]]; then
+  SELECTION="HELP"
+  SetClear
+  HELP
 elif [[ "${OPT}" == "+ASM"* ]]; then
   if [[ "${ASM_USER}" == "YES" ]]; then
     SELECTION="ASM"
