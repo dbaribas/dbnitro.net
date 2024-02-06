@@ -3,7 +3,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.9"
 DateCreation="22/06/2022"
-DateModification="12/01/2024"
+DateModification="26/01/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -12,7 +12,9 @@ WEBSITE="http://dbnitro.net"
 # Verify if you are ROOT or not
 #
 if [[ "$(whoami)" != "root" ]]; then
+  echo "#############################################"
   echo " -- YOU ARE NOT ROOT, YOU MUST BE ROOT TO EXECUTE THIS SCRIPT --"
+  echo ""
   exit 1
 fi
 #
@@ -40,12 +42,16 @@ EOF
 # Verify if all pre-reqs Softwares are installed
 #
 if [[ $(which wget | wc -l | awk '{ print $1 }') == 0 ]]; then
+  echo "#############################################"
   echo " -- You need to install wget app --"
+  echo ""
   exit 1
 fi
 #
 if [[ $(which unzip | wc -l | awk '{ print $1 }') == 0 ]]; then
+  echo "#############################################"
   echo " -- You need to install unzip app --"
+  echo ""
   exit 1
 fi
 #
@@ -68,14 +74,18 @@ echo -e "\
 DBNITRO="${FOLDER}/dbnitro"
 #
 RemoveFolder() {
-echo "Removing DBNITRO Folder"
+echo "#############################################"
+echo " -- Removing DBNITRO Folder --"
+echo ""
 if [[ -d ${DBNITRO}/ ]]; then
   mv ${DBNITRO}/ /tmp/${DBNITRO}_$(date +%Y%m%d)
 fi
 }
 #
 SetUpDBNITRO() {
-echo "Downloading DBNITRO Files"
+echo "#############################################"
+echo " -- Downloading DBNITRO Files --"
+echo ""
 cd ${FOLDER}/
 wget -O /opt/DBNitro.zip https://github.com/dbaribas/dbnitro.net/archive/refs/heads/main.zip
 unzip /opt/DBNitro.zip
@@ -99,52 +109,12 @@ chown -R oracle.oinstall ${DBNITRO}/
 }
 #
 # ------------------------------------------------------------------------
-# Setup PurgLogs from Oracle Products (ONLY WITH GRID INFRASTRUCTURE)
-#
-SetUpPURGELOGS() {
-echo "Installing PURGE LOGS Scripts"
-cd ${DBNITRO}/
-mv ${DBNITRO}/bin/purgeLogs.sh /etc/cron.daily/purgeLogs.sh
-#
-chmod a+x ${DBNITRO}/bin/purgeLogs
-chmod a+x /etc/cron.daily/purgeLogs.sh
-#
-chmod -R 775 ${DBNITRO}/bin/purgeLogs
-chmod -R 775 /etc/cron.daily/purgeLogs.sh
-#
-chown -R oracle.oinstall ${DBNITRO}/bin/purgeLogs
-chown -R oracle.oinstall /etc/cron.daily/purgeLogs.sh
-#
-# ROOT Crontab
-# Purge Logs GI
-# 00 20 * * * /opt/purgelogs/purgelogs.bin cleanup --orcl 30 --aud --lsnr --automigrate
-
-# Purge Logs DB
-# 00 21 * * * /opt/purgelogs/purgelogs.bin cleanup --days 30 --aud --lsnr --automigrate
-}
-#
-#
-# ------------------------------------------------------------------------
-# Setup PurgLogs from Oracle Products (ONLY WITH GRID INFRASTRUCTURE)
-#
-SetUpPURGETFA() {
-echo "Installing PURGE TFA Scripts"
-cd ${DBNITRO}/
-mv ${DBNITRO}/bin/purgeTFA.sh /etc/cron.daily/purgeTFA.sh
-#
-chmod a+x /etc/cron.daily/purgeTFA.sh
-#
-chmod -R 775 /etc/cron.daily/purgeTFA.sh
-#
-chown -R oracle.oinstall /etc/cron.daily/purgeTFA.sh
-#
-}
-#
-# ------------------------------------------------------------------------
 # Add the Content on Grid Profile
 #
 SetUpGrid() {
-echo "Seting UP GRID User"
+echo "#############################################"
+echo " -- Seting UP GRID User --"
+echo ""
 if [[ $(cat /etc/passwd | grep grid | wc -l) != 0 ]]; then
 cat > /home/grid/.bash_profile <<EOF
 # .bash_profile
@@ -172,7 +142,9 @@ fi
 # Add the Content on Oracle Profile
 #
 SetUpOracle() {
-echo "Seting UP ORACLE User"
+echo "#############################################"
+echo " -- Seting UP ORACLE User --"
+echo ""
 if [[ $(cat /etc/passwd | grep oracle | wc -l) != 0 ]]; then
 cat > /home/oracle/.bash_profile <<EOF
 # .bash_profile
@@ -200,7 +172,9 @@ fi
 # Setup Old Oracle Enviromnets
 #
 SetUpOldOracle() {
-echo "Seting UP ORACLE User on old environment"
+echo "#############################################"
+echo " -- Seting UP ORACLE User on old environment --"
+echo ""
 cat >> /home/oracle/.bash_profile <<EOF
 alias db='. ${DBNITRO}/bin/OracleMenu.sh'
 alias list'${DBNITRO}/bin/OracleList.sh'
@@ -212,62 +186,82 @@ EOF
 # Main Menu
 #
 MainMenu() {
+echo "#############################################"
 echo " -- Your Last Option Was: ${LastOption}"
+echo ""
 PS3="Select the Option: "
 select OPT in INSTALL UPDATE OLD_ENV REMOVE HELP QUIT; do
 if [[ "${OPT}" == "QUIT" ]]; then
+  echo "#############################################"
   echo " -- Exit Menu --"
+  echo ""
 elif [[ "${OPT}" == "INSTALL" ]]; then
+  echo "#############################################"
   echo " -- Install DBNITRO Environment --"
+  echo ""
   SetUpGrid
   SetUpOracle
   SetUpDBNITRO
-  ### SetUpPURGELOGS
-  ### SetUpPURGETFA
   SetupLogonBanner
+  echo "#############################################"
   echo " -- Press ENTER to continue --"
+  echo ""
   read
   LastOption="${OPT}"
   continue
 elif [[ "${OPT}" == "UPDATE" ]]; then
+  echo "#############################################"
   echo " -- Update DBNITRO Environment --"
+  echo ""
   RemoveFolder
   SetUpGrid
   SetUpOracle
   SetUpDBNITRO
-  ### SetUpPURGELOGS
-  ### SetUpPURGETFA
   SetupLogonBanner
+  echo "#############################################"
   echo " -- Press ENTER to continue --"
+  echo ""
   read
   LastOption="${OPT}"
   continue
 elif [[ "${OPT}" == "OLD_ENV" ]]; then
+  echo "#############################################"
   echo " -- Install DBNITRO Environment for OLD Servers --"
+  echo ""
   SetUpDBNITRO
-  ### SetUpPURGELOGS
-  ### SetUpPURGETFA
   SetUpOldOracle
   SetupLogonBanner
+  echo "#############################################"
   echo " -- Press ENTER to continue --"
+  echo ""
   read
   LastOption="${OPT}"
   continue
 elif [[ "${OPT}" == "REMOVE" ]]; then
+  echo "#############################################"
   echo " -- Remove DBNITRO Environment --"
+  echo ""
   RemoveFolder
+  echo "#############################################"
   echo " -- Press ENTER to continue --"
+  echo ""
   read
   LastOption="${OPT}"
   continue
 elif [[ "${OPT}" == "HELP" ]]; then
+  echo "#############################################"
   echo " -- DBNITRO SETUP HELP --"
+  echo ""
   HELP
+  echo "#############################################"
   echo " -- Press ENTER to continue --"
+  echo ""
   read
   continue
 else
+  echo "#############################################"
   echo " -- Invalid Option --"
+  echo ""
   continue
 fi
 break
