@@ -1211,13 +1211,3 @@ MainMenu
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
-
-
-
-
-
-### locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g'
-### ps -ef | grep lsnr | grep -v grep | awk ' { print $9 } ' | tr '[A-Z]' '[a-z]' | sort
-### srvctl status listener | awk ' { print $2 } ' | tr '[A-Z]' '[a-z]' | uniq | sort
-### PDBS="$(echo "select name || case when open_mode = 'READ WRITE' then '(RW),' when open_mode = 'READ ONLY' then '(RO),' when open_mode = 'MOUNTED' then '(MO),' when open_mode = 'MIGRATE' then '(MI),' else '(XX),' end as info from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba  | sed s/INFO//g | sed s/-//g)"
-### select name || ' ' || case when OPEN_MODE = 'READ WRITE' then '(RW)' when OPEN_MODE = 'READ ONLY' then '(RO)' when OPEN_MODE = 'MOUNTED' then '(MO)' when OPEN_MODE = 'MIGRATE' then '(MI)' end as PDBS from v\$containers where con_id not in (0,1,2) order by 1;
