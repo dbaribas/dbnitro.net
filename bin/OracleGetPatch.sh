@@ -1,0 +1,178 @@
+#!/bin/sh
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.3"
+DateCreation="19/02/2024"
+DateModification="20/02/2024"
+EMAIL_1="dba.ribas@gmail.com"
+EMAIL_2="andre.ribas@icloud.com"
+WEBSITE="http://dbnitro.net"
+#
+# ------------------------------------------------------------------------
+# Using WGET to download My Oracle Support Patches (Doc ID 980924.1)
+#
+# ------------------------------------------------------------------------
+# Variables
+export PLATFORM="$(uname -i)"
+#
+if [[ "${PLATFORM}" == "x86_64" ]]; then 
+  ARCHITECTURE="x86_64"
+elif [[ "${PLATFORM}" == "aarch64" ]]; then
+  ARCHITECTURE="ARM-64"
+else
+  echo "###############################################################"
+  echo " -- Your platform architecture ${PLATFORM} is not supported!!!"
+  exit 1
+fi
+#
+# ------------------------------------------------------------------------
+# Clear Screen Function
+#
+SetClear() {
+  printf "\033c"
+}
+# ------------------------------------------------------------------------
+#
+SetClear
+echo "###############################################################"
+echo " -- Insert your MOS Account to download the patches --"
+read -p    'Username: ' USERNAME
+read -s -p 'Password: ' PASSWORD
+echo ""
+#
+# ------------------------------------------------------------------------
+#
+if [[ "${USERNAME}" == "" ]]; then
+  echo "###############################################################"
+  echo " -- Username can not be empty, please insert the information!!!"
+  exit 1
+fi
+if [[ "${PASSWORD}" == "" ]]; then
+  echo "###############################################################"
+  echo " -- Password can not be empty, please insert the information!!!"
+  exit 1
+fi
+#
+# ------------------------------------------------------------------------
+# Help to use this script
+#
+HELP() {
+echo -e "\
+|#| Oracle19cApr2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM APRIL 2023
+|#| Oracle19cJul2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM JULY 2023
+|#| Oracle19cOct2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM OCTOBER 2023
+|#| Oracle19cJan2024.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM JANUARY 2024
+|#| HELP.............: YOU CAN CHECK THE OPTIONS"
+}
+#
+# ------------------------------------------------------------------------
+#
+Oracle19cApr2023() {
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p6880880_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p6880880_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p29511771_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p29511771_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p30432118_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p30432118_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p33912872_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p33912872_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p34777391_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p34777391_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35037840_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35037840_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35042068_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35042068_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35050341_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35050341_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p30971231_196000OCWRU_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p30971231_196000OCWRU_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35068505_1919000ACFSRU_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35068505_1919000ACFSRU_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+}
+#
+# ------------------------------------------------------------------------
+#
+Oracle19cJul2023() {
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p6880880_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p6880880_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35319490_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35319490_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35320081_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35320081_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35336174_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35336174_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35354406_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35354406_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+}
+#
+# ------------------------------------------------------------------------
+#
+Oracle19cOct2023() {
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p6880880_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p6880880_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35638318_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35638318_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35642822_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35642822_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35643107_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35643107_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35648110_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35648110_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35988503_1921000ACFSRU_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35988503_1921000ACFSRU_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+}
+#
+# ------------------------------------------------------------------------
+#
+Oracle19cJan2024() {
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p6880880_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p6880880_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35926646_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35926646_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35940989_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35940989_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35943157_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35943157_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35949090_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35949090_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p35988503_1922000ACFSRU_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p35988503_1922000ACFSRU_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+}
+#
+# ------------------------------------------------------------------------
+# Main Menu
+#
+MainMenu() {
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: Select an Option "
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+PS3="Select the Option: "
+select OPT in 19cApr2023 19cJul2023 19cOct2023 19cJan2024 HELP QUIT; do
+if [[ "${OPT}" == "19cApr2023" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Patch: ${OPT} Started --"
+  echo ""
+  Oracle19cApr2023
+  echo " -- Downloading Oracle Patch: ${OPT} Finished --"
+  echo ""
+  MainMenu
+elif [[ "${OPT}" == "19cJul2023" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Patch: ${OPT} Started --"
+  echo ""
+  Oracle19cJul2023
+  echo " -- Downloading Oracle Patch: ${OPT} Finished --"
+  echo ""
+  MainMenu
+elif [[ "${OPT}" == "19cOct2023" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Patch: ${OPT} Started --"
+  echo ""
+  Oracle19cOct2023
+  echo " -- Downloading Oracle Patch: ${OPT} Finished --"
+  echo ""
+  MainMenu
+elif [[ "${OPT}" == "19cJan2024" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Patch: ${OPT} Started --"
+  echo ""
+  Oracle19cJan2024
+  echo " -- Downloading Oracle Patch: ${OPT} Finished --"
+  echo ""
+  MainMenu
+elif [[ "${OPT}" == "QUIT" ]]; then
+  echo "###############################################################"
+  echo " -- Exit Menu --"
+  echo ""
+  return 1
+elif [[ "${OPT}" == "HELP" ]]; then
+  HELP
+else
+  echo "###############################################################"
+  echo " -- Invalid Option --"
+  echo ""
+  MainMenu
+fi
+break
+done
+}
+#
+MainMenu
+#
+# --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
+# THE SCRIPT FINISHES HERE
+# --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
+#

@@ -679,38 +679,35 @@ progress_hpux_bar 100
 # Load Bar Progress MAC
 #########################################################################################################
 #
-function func_mac_load()
+function func_mac_load() {
 {
- {
- for ((i = 0 ; i <= 100; i+=10))
- do
-   sleep 0.10
-   echo $i
- done
- } | whiptail --gauge "LOADING..." 6 50 0
+  for ((i = 0 ; i <= 100; i+=10))
+  do
+    sleep 0.10
+    echo $i
+  done
+  } | whiptail --gauge "LOADING..." 6 50 0
 }
 #
 #########################################################################################################
 # Load Bar Progress GENERIC
 #########################################################################################################
 #
-function func_gen_load()
-{
- {
- for ((i = 0 ; i <= 100; i+=10))
- do
-   sleep 0.10
-   echo $i
- done
- } | whiptail --gauge "LOADING..." 6 50 0
+function func_gen_load() {
+  {
+  for ((i = 0 ; i <= 100; i+=10))
+  do
+    sleep 0.10
+    echo $i
+  done
+  } | whiptail --gauge "LOADING..." 6 50 0
 }
 #
 #########################################################################################################
 # LOAD BAR
 #########################################################################################################
 #
-function func_load()
-{
+function func_load() {
 if [ `uname` = "SunOS" ]
 then
   func_sun_load
@@ -735,20 +732,17 @@ fi
 # Verify Solaris Disk Space
 #########################################################################################################
 #
-function func_sun_disk_space()
-{
-WARNING=80
+function func_sun_disk_space() {
+ WARNING=80
 CRITICAL=90
 df -h | grep -v '^Filesystem|tmpfs|cdrom' | awk '{ print $5 " " $1 }' | while read OUTPUT
 do
   USEP=$(echo ${OUTPUT} | awk '{ print $1 }' | cut -d '%' -f1 )
   PARTITION=$(echo ${OUTPUT} | awk '{ print $2 }')
-  if [[ "${USEP}" -ge "${CRITICAL}" ]]
-  then
+  if [[ "${USEP}" -ge "${CRITICAL}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Critical: ${RED} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
-  elif [[ "${USEP}" -ge "${WARNING}" ]]
-  then
+  elif [[ "${USEP}" -ge "${WARNING}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Warning: ${YEL} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
   else
@@ -762,20 +756,17 @@ done
 # Verify AIX Disk Space
 #########################################################################################################
 #
-function func_aix_disk_space()
-{
-WARNING="80"
+function func_aix_disk_space() {
+ WARNING="80"
 CRITICAL="90"
 df -g | grep -v '^Filesystem|tmpfs|cdrom' | awk '{ print $4 " " $1 }' | while read OUTPUT
 do
   USEP=$(echo ${OUTPUT} | awk '{ print $1 }' | cut -d '%' -f1 )
   PARTITION=$(echo ${OUTPUT} | awk '{ print $2 }')
-  if [ "${USEP}" -ge "${CRITICAL}" ]
-  then
+  if [ "${USEP}" -ge "${CRITICAL}" ]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Critical: ${RED} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
-  elif [ "${USEP}" -ge "${WARNING}" ]
-  then
+  elif [ "${USEP}" -ge "${WARNING}" ]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Warning: ${YEL} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
   else
@@ -789,20 +780,17 @@ done
 # Verify HP-UX Disk Space
 #########################################################################################################
 #
-function func_hpux_disk_space()
-{
-WARNING=80
+function func_hpux_disk_space() {
+ WARNING=80
 CRITICAL=90
 df -g | grep -v '^Filesystem|tmpfs|cdrom' | awk '{ print $4 " " $1 }' | while read OUTPUT
 do
   USEP=$(echo ${OUTPUT} | awk '{ print $1 }' | cut -d '%' -f1 )
   PARTITION=$(echo ${OUTPUT} | awk '{ print $2 }')
-  if [[ "${USEP}" -ge "${CRITICAL}" ]]
-  then
+  if [[ "${USEP}" -ge "${CRITICAL}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Critical: ${RED} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
-  elif [[ "${USEP}" -ge "${WARNING}" ]]
-  then
+  elif [[ "${USEP}" -ge "${WARNING}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Warning: ${YEL} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
   else
@@ -816,20 +804,17 @@ done
 # Verify LINUX Disk Space
 #########################################################################################################
 #
-function func_linx_disk_space()
-{
-WARNING=80
+function func_linx_disk_space() {
+ WARNING=80
 CRITICAL=90
 df -h | grep -v '^Filesystem|tmpfs|cdrom' | awk '{ print $5 " " $1 " " $6 }' | while read OUTPUT
 do
   USEP=$(echo ${OUTPUT} | awk '{ print $1 }' | cut -d '%' -f1 )
   PARTITION=$(echo ${OUTPUT} | awk '{ print $2 }')
-  if [[ "${USEP}" -ge "${CRITICAL}" ]]
-  then
+  if [[ "${USEP}" -ge "${CRITICAL}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Critical: ${RED} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
-  elif [[ "${USEP}" -ge "${WARNING}" ]]
-  then
+  elif [[ "${USEP}" -ge "${WARNING}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Warning: ${YEL} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
   else
@@ -846,20 +831,17 @@ done
 # Verify MAC Disk Space
 #########################################################################################################
 #
-function func_mac_disk_space()
-{
-WARNING=80
+function func_mac_disk_space() {
+ WARNING=80
 CRITICAL=90
 df -g | grep -v '^Filesystem|tmpfs|cdrom' | awk '{ print $4 " " $1 }' | while read OUTPUT
 do
   USEP=$(echo ${OUTPUT} | awk '{ print $1 }' | cut -d '%' -f1 )
   PARTITION=$(echo ${OUTPUT} | awk '{ print $2 }')
-  if [[ "${USEP}" -ge "${CRITICAL}" ]]
-  then
+  if [[ "${USEP}" -ge "${CRITICAL}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Critical: ${RED} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
-  elif [[ "${USEP}" -ge "${WARNING}" ]]
-  then
+  elif [[ "${USEP}" -ge "${WARNING}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Warning: ${YEL} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
   else
@@ -873,20 +855,17 @@ done
 # Verify GENERIC Disk Space
 #########################################################################################################
 #
-function func_gen_disk_space()
-{
-WARNING=80
+function func_gen_disk_space() {
+ WARNING=80
 CRITICAL=90
 df -g | grep -v '^Filesystem|tmpfs|cdrom' | awk '{ print $4 " " $1 }' | while read OUTPUT
 do
   USEP=$(echo ${OUTPUT} | awk '{ print $1 }' | cut -d '%' -f1 )
   PARTITION=$(echo ${OUTPUT} | awk '{ print $2 }')
-  if [[ "${USEP}" -ge "${CRITICAL}" ]]
-  then
+  if [[ "${USEP}" -ge "${CRITICAL}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Critical: ${RED} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
-  elif [[ "${USEP}" -ge "${WARNING}" ]]
-  then
+  elif [[ "${USEP}" -ge "${WARNING}" ]]; then
     echo ${ECHO} ">--------------------------------------------------------------------------------------------------"
     echo ${ECHO} " -- Disk Space Warning: ${YEL} \"${PARTITION} [ ${USEP}% ]\" ${BLACK}"
   else
@@ -900,22 +879,16 @@ done
 # Disk Space by OS
 #########################################################################################################
 #
-function disk_space()
-{
-if [ `uname` = "SunOS" ]
-then
+function disk_space() {
+if [ `uname` = "SunOS" ]; then
   func_sun_disk_space
-elif [ `uname` = "AIX" ]
-then
+elif [ `uname` = "AIX" ]; then
   func_aix_disk_space
-elif [ `uname` = "HP-UX" ]
-then
+elif [ `uname` = "HP-UX" ]; then
   func_hpux_disk_space
-elif [ `uname` = "Linux" ]
-then
+elif [ `uname` = "Linux" ]; then
   func_linx_disk_space
-elif [ `uname` = "Darwin" ]
-then
+elif [ `uname` = "Darwin" ]; then
   func_mac_disk_space
 else
   func_gen_disk_space
@@ -931,8 +904,7 @@ disk_space
 # Exadata ASMDU
 #########################################################################################################
 #
-function func_exa_asmdu()
-{
+function func_exa_asmdu() {
 # Fred Denis -- Jun 2016 -- http://unknowndba.blogspot.com -- fred.denis3@gmail.com
 #
 # This scripts shows a clear and colored status of the ASM used and free space
@@ -977,8 +949,8 @@ DEFAULT_NOCOLOR="No"    # Print with colors
 #
 # Colored thresholds (Red, Yellow, Green)
 #
+ WARNING=80
 CRITICAL=90
-WARNING=80
 #
 # A color for a nice header
 #
@@ -987,8 +959,7 @@ END_COLOR="\033[m"
 #
 # An usage function
 #
-usage()
-{
+usage() {
 printf "\n\033[1;37m%-8s\033[m\n" "NAME";
 cat << END
 asmdu.sh - Shows a nice summary of the ASM DiskGroups Sizes
@@ -1080,10 +1051,9 @@ ps -ef | grep pmon | grep -v grep | awk '{print $NF}' | cut -d_ -f3,4 | sort | a
 #
 # Manage parameters
 #
-if [[ -z $D ]]
-then                          # No directory provided, will check all the DG
+if [[ -z $D ]]; then                                                     # No directory provided, will check all the DG
   DG=`asmcmd lsdg | grep -v State | awk '{print $NF}' | sed s'/\///'`
-  SUBDIR="No"                 # Do not show the subdirectories details if no directory is specified
+  SUBDIR="No"                                                            # Do not show the subdirectories details if no directory is specified
 else
   DG=`echo $D | sed s'/\/.*$//g'`
 fi
@@ -1092,14 +1062,12 @@ fi
 # A header
 #
 printf "\n%25s%16s${WHITE}%16s${END_COLOR}" "DiskGroup" "Redundancy" "Total ${UNIT}"  # "Raw Free ${UNIT}" "Reserved ${UNIT}"  "Usable ${UNIT}" "% Free"
-if [[ ${VERBOSE} == "Yes" ]]
-then
+if [[ ${VERBOSE} == "Yes" ]]; then
   printf "%16s%16s%16s" "Raw Total ${UNIT}" "Raw Free ${UNIT}" "Reserved ${UNIT}"
 fi
 printf "${WHITE}%16s%14s${END_COLOR}\n" "Usable ${UNIT}" "% Free"
 printf "%25s%16s${WHITE}%16s${END_COLOR}"   "---------"     "-----------" "--------"
-if [[ ${VERBOSE} == "Yes" ]]
-then
+if [[ ${VERBOSE} == "Yes" ]]; then
   printf "%16s%16s%16s"           "------------"  "-----------" "-----------"
 fi
 printf "${WHITE}%16s${END_COLOR}%14s\n"     "---------"     "------"
@@ -4556,8 +4524,7 @@ done
 # Exadata Redefine Table ONLINE 
 #########################################################################################################
 #
-function func_exa_redef_online_table()
-{
+function func_exa_redef_online_table() {
 # Fred DENIS -- January 2013
 # Redef online of a table (the objective to compress the table online)
 #
@@ -4751,10 +4718,8 @@ echo $TMP
 # Show Contents of The Patches (BP/PSU)
 #########################################################################################################
 #
-function func_autoup_001()
-{
-if [ ${DBVERSION} -ge "12" ]
-then
+function func_autoup_001() {
+if [ ${DBVERSION} -ge "12" ]; then
 sqlplus -S /nolog <<EOF
 conn / as sysdba
 set pagesize 0 linesize 32767 feedback off verify off heading off echo off timing off
@@ -4789,10 +4754,8 @@ fi
 # 
 #########################################################################################################
 #
-function func_autoup_002()
-{
-if [ ${DBVERSION} -ge "12" ]
-then
+function func_autoup_002() {
+if [ ${DBVERSION} -ge "12" ]; then
 sqlplus -S /nolog <<EOF
 conn / as sysdba
 set pages 700 lines 700 timing on feedback on echo on heading on verify on colsep '|'
@@ -4874,33 +4837,27 @@ fi
 #########################################################################################################
 #
 # 11g
-function func_rac_11_001()
-{
+function func_rac_11_001() {
   func_rac_001
 }
 # 12c
-function func_rac_12_001()
-{
+function func_rac_12_001() {
   func_rac_001
 }
 # 18c
-function func_rac_18_001()
-{
+function func_rac_18_001() {
   func_rac_001
 }
 # 19c
-function func_rac_19_001()
-{
+function func_rac_19_001() {
   func_rac_001
 }
 # 20c
-function func_rac_20_001()
-{
+function func_rac_20_001() {
   func_rac_001
 }
 # ####
-function func_rac_001()
-{
+function func_rac_001() {
 #!/bin/bash
 # Fred Denis -- Jan 2016 -- http://unknowndba.blogspot.com -- fred.denis3@gmail.com
 #
@@ -6393,14 +6350,12 @@ function func_dba_20_cross_platform()
 #
 function func_dba_cross_platform()
 {
-if [ ${DBVERSION} -ge "12" ] && [ ${ISCONTAINERDB} = "TRUE" ]
-then
+if [ ${DBVERSION} -ge "12" ] && [ ${ISCONTAINERDB} = "TRUE" ]; then
 # echo -e "\n${PDB}" | tail +2
 echo ${ECHO} ">--------------------------------------------------------------------------------------------------${RED} ${OPTION} ${BLACK}"
 echo ${ECHO} "`date +%Y%m%d_%H\:%M\:%S`: ${RED} -- select YOUR DATABASE [ CDB$ROOT / PDB ] ${BLACK} --"
 echo ${ECHO} ">--------------------------------------------------------------------------------------------------${RED} ${OPTION} ${BLACK}"
-select SET_PDB in ${PDB}
-do
+select SET_PDB in ${PDB}; do
   PPDB=${SET_PDB}
   break 1
 done
@@ -6549,8 +6504,7 @@ function func_dba_20_cross_platform_b()
 #
 function func_dba_cross_platform_b()
 {
-if [ ${DBVERSION} -ge "12" ] && [ ${ISCONTAINERDB} = "TRUE" ]
-then
+if [ ${DBVERSION} -ge "12" ] && [ ${ISCONTAINERDB} = "TRUE" ]; then
 sqlplus -S /nolog <<EOF
 conn / as sysdba
 set pages 700 lines 700 timing on feedback on echo on heading on verify on colsep '|'
@@ -7327,14 +7281,12 @@ function func_dba_20_clone_user()
 #
 function func_dba_clone_user()
 {
-if [ ${DBVERSION} -ge "12" ] && [ ${ISCONTAINERDB} = "TRUE" ]
-then
+if [ ${DBVERSION} -ge "12" ] && [ ${ISCONTAINERDB} = "TRUE" ]; then
 # echo -e "\n${PDB}" | tail +2
 echo ${ECHO} ">--------------------------------------------------------------------------------------------------${RED} ${OPTION} ${BLACK}"
 echo ${ECHO} "`date +%Y%m%d_%H\:%M\:%S`: ${RED} -- select YOUR DATABASE [ CDB$ROOT / PDB ] ${BLACK} --"
 echo ${ECHO} ">--------------------------------------------------------------------------------------------------${RED} ${OPTION} ${BLACK}"
-select SET_PDB in ${PDB}
-do
+select SET_PDB in ${PDB}; do
   PPDB=${SET_PDB}
   break 1
 done

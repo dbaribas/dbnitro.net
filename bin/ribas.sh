@@ -14,13 +14,16 @@ WEBSITE="http://dbnitro.net"
 #########################################################################################################
 # Standard Folders
 #
-FOLDER="/opt"
-DBNITRO="${FOLDER}/dbnitro"
-REPORTS="${DBNITRO}/reports"
-BINARIES="${DBNITRO}/bin"
-VARIABLES="${DBNITRO}/var"
-FUNCTIONS="${DBNITRO}/functions"
+    FOLDER="/opt"
+   DBNITRO="${FOLDER}/dbnitro"
+      LOGS="${DBNITRO}/logs"
+    BACKUP="${DBNITRO}/backup"
+   REPORTS="${DBNITRO}/reports"
+  BINARIES="${DBNITRO}/bin"
+ VARIABLES="${DBNITRO}/var"
+ FUNCTIONS="${DBNITRO}/functions"
 STATEMENTS="${DBNITRO}/sql"
+#
 #
 #########################################################################################################
 # Source Functions

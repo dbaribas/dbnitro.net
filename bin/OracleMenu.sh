@@ -715,7 +715,7 @@ alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep" | egrep "pmon|d.bin" | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
 alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
@@ -813,7 +813,7 @@ alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep" | egrep "pmon|d.bin" | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
 alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
@@ -955,7 +955,7 @@ alias dgmgrl='rlwrap dgmgrl'
 alias d='rlwrap dgmgrl /'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep" | egrep "pmon|d.bin" | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
 alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
@@ -1090,7 +1090,7 @@ export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA
 alias oh='cd ${ORACLE_HOME}'
 alias opv='${OPATCH}/opatch version'
 alias opl='${OPATCH}/opatch lspatches | sort'
-alias p='ps -ef | egrep -v "grep|egrep" | egrep "wlserver"'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "wlserver"'
 alias emlog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias emlogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias omslog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
@@ -1137,7 +1137,7 @@ alias opv='${OPATCH}/opatch version'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep" | egrep "agent"'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "agent"'
 alias list='${DBNITRO}/bin/OracleList.sh'
 #
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
@@ -1211,3 +1211,13 @@ MainMenu
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
+
+
+
+
+
+### locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g'
+### ps -ef | grep lsnr | grep -v grep | awk ' { print $9 } ' | tr '[A-Z]' '[a-z]' | sort
+### srvctl status listener | awk ' { print $2 } ' | tr '[A-Z]' '[a-z]' | uniq | sort
+### PDBS="$(echo "select name || case when open_mode = 'READ WRITE' then '(RW),' when open_mode = 'READ ONLY' then '(RO),' when open_mode = 'MOUNTED' then '(MO),' when open_mode = 'MIGRATE' then '(MI),' else '(XX),' end as info from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba  | sed s/INFO//g | sed s/-//g)"
+### select name || ' ' || case when OPEN_MODE = 'READ WRITE' then '(RW)' when OPEN_MODE = 'READ ONLY' then '(RO)' when OPEN_MODE = 'MOUNTED' then '(MO)' when OPEN_MODE = 'MIGRATE' then '(MI)' end as PDBS from v\$containers where con_id not in (0,1,2) order by 1;

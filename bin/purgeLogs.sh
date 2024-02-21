@@ -1,46 +1,56 @@
 #!/bin/sh
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.5"
+SoftwareVersion="1.0.6"
 DateCreation="28/09/2021"
-DateModification="04/08/2022"
+DateModification="05/10/2023"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
 #
-# ------------------------------------------------------------------------
-# Creating and Installing the DBNITRO Components
+# Usage:
+# purgelogs.bin cleanup [--days <days> [--aud] [--lsnr]] |
+#                       [--orcl <days> [--aud] [--lsnr]] |
+#                       [--tfa <days>] |
+#                       [--osw <days>] |
+#                       [--oda <days>] |
+#                       [--extra '<folder>':<days> | [, '<folder>':<days>]]
+#                       [--automigrate]
+#                       [--dryrun]
+# 
+# purgeLogs cleanup OPTIONS
+# --days   <days>           Purge orcl,tfa,osw,oda components logs & traces older then # days
+# --orcl   <days>           Purge only GI/RDBMS logs & traces (Default 30 days)
+# --tfa    <days>           Purge only TFA repository older then # days (Default 30 days)
+# --osw    <days>           Purge only OSW archives older then # days (Default 30 days)
+# --oda    <days>           Purge only ODA logs and trace older then # days (Default 30 days)
+# --extra '<folder>':<days> Purge only files in user specified folders (Default 30 days)
+# --aud                     Purge Audit logs based on '-orcl <days>' option
+# --lsnr                    It will force the cleanup of listeners log independently by the age
+# --automigrate             It will run the adrci schema migrate commands in case of DIA-49803
+# --dryrun                  It will show the purge commands w/o execute them
+# --help                    Display this help and exit
 #
-FOLDER="/opt"
-DBNITRO="${FOLDER}/dbnitro"
+# Execution of purgeLogs
 #
-# ------------------------------------------------------------------------
-# Check the Log
-#
-LOG=/var/log/oracle_purgelogs.log
-if [[ ! -f ${LOG} ]]; then
-  touch ${LOG}
-fi
-#
-# ------------------------------------------------------------------------
-# Starting Execution of purgeLogs
-#
-DATE=$(date +%Y\/%m\/%d_%H\:%M)
-echo "${DATE}: Start Purging Logs" > ${LOG}
-#
-${DBNITRO}/bin/purgeLogs -automigrate
-${DBNITRO}/bin/purgeLogs -days 30
-${DBNITRO}/bin/purgeLogs -orcl 30
-${DBNITRO}/bin/purgeLogs -days 30 -aud -lsnr
-${DBNITRO}/bin/purgeLogs -orcl 30 -aud -lsnr
-#
-# ------------------------------------------------------------------------
-# Finishing Execution of purgeLogs
-#
-DATE=$(date +%Y\/%m\/%d_%H\:%M)
-echo "${DATE}: Stop Purging Logs" >> ${LOG}
+/usr/local/sbin/purgelogs.bin cleanup -automigrate
+/usr/local/sbin/purgelogs.bin cleanup -days 30
+/usr/local/sbin/purgelogs.bin cleanup -orcl 30
+/usr/local/sbin/purgelogs.bin cleanup -days 30 -aud -lsnr
+/usr/local/sbin/purgelogs.bin cleanup -orcl 30 -aud -lsnr
+/usr/local/sbin/purgelogs.bin cleanup --tfa 30
+/usr/local/sbin/purgelogs.bin cleanup --dryrun
 #
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
+# cp -r /u00/Scripts/purgeLogs.sh /etc/cron.daily/
+# cat /var/log/oracle_purge_logs.log
+# su - grid -c 'mkdir -p /u01/app/grid/admin/_mgmtdb/adump'
+# su - grid -c 'mkdir -p /u01/app/grid/admin/+ASM/adump'
+#
+# su - oracle -c 'mkdir -p /u01/app/oracle/admin/_mgmtdb/adump'
+# su - oracle -c 'mkdir -p /u01/app/oracle/admin/+ASM/adump'
+# purgeLogs: Cleanup traces, logs in one command (Doc ID 2081655.1)
+
