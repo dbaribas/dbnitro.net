@@ -47,6 +47,7 @@ if [[ "${USERNAME}" == "" ]]; then
   echo " -- Username can not be empty, please insert the information!!!"
   exit 1
 fi
+#
 if [[ "${PASSWORD}" == "" ]]; then
   echo "###############################################################"
   echo " -- Password can not be empty, please insert the information!!!"
@@ -58,12 +59,69 @@ fi
 #
 HELP() {
 echo -e "\
+|#| OracleFree.......: YOU WILL DOWNLOAD THE ORACLE 23c Free Version
+|#| Oracle19c........: YOU WILL DOWNLOAD THE ORACLE 19c Enterprise Version
+|#| Oracle21c........: YOU WILL DOWNLOAD THE ORACLE 21c Enterprise Version
+|#| Oracle23c........: YOU WILL DOWNLOAD THE ORACLE 23c Enterprise Version
 |#| Oracle19cApr2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM APRIL 2023
 |#| Oracle19cJul2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM JULY 2023
 |#| Oracle19cOct2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM OCTOBER 2023
 |#| Oracle19cJan2024.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM JANUARY 2024
 |#| HELP.............: YOU CAN CHECK THE OPTIONS"
 }
+#
+# ------------------------------------------------------------------------
+# Oracle Free 23c
+#
+OracleFree() {
+if [[ "${ARCHITECTURE}" == "x86_64" ]]; then 
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="oracle-database-free-23c-1.0-1.el8.x86_64.rpm" "https://download.oracle.com/otn-pub/otn_software/db-free/oracle-database-free-23c-1.0-1.el8.x86_64.rpm?patch_password=patch_password"
+else
+  echo "###############################################################"
+  echo " -- Your platform architecture ${PLATFORM} is not supported!!!"
+  return 1
+fi
+}
+#
+# ------------------------------------------------------------------------
+#
+Oracle19c() {
+if [[ "${ARCHITECTURE}" == "x86_64" ]]; then 
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.X64_193000_grid_home.zip" "https://download.oracle.com/otn/linux/oracle19c/190000/LINUX.X64_193000_grid_home.zip?patch_password=patch_password"
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.X64_193000_db_home.zip" "https://download.oracle.com/otn/linux/oracle19c/190000/LINUX.X64_193000_db_home.zip?patch_password=patch_password"
+elif
+ [[ "${ARCHITECTURE}" == "ARM-64" ]]; then
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.ARM64_1919000_grid_home.zip" "https://download.oracle.com/otn/linux/oracle19c/1919000/LINUX.ARM64_1919000_grid_home.zip?patch_password=patch_password"
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.ARM64_1919000_db_home.zip" "https://download.oracle.com/otn/linux/oracle19c/1919000/LINUX.ARM64_1919000_db_home.zip?patch_password=patch_password"
+else
+  echo "###############################################################"
+  echo " -- Your platform architecture ${PLATFORM} is not supported!!!"
+  return 1
+fi
+}
+#
+# ------------------------------------------------------------------------
+# Oracle 21c
+#
+Oracle21c() {
+if [[ "${ARCHITECTURE}" == "x86_64" ]]; then 
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.X64_213000_grid_home.zip" "https://download.oracle.com/otn/linux/oracle21c/LINUX.X64_213000_grid_home.zip?patch_password=patch_password"
+  wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.X64_213000_db_home.zip" "https://download.oracle.com/otn/linux/oracle21c/LINUX.X64_213000_db_home.zip?patch_password=patch_password"
+else
+  echo "###############################################################"
+  echo " -- Your platform architecture ${PLATFORM} is not supported!!!"
+  return 1
+fi
+}
+#
+#
+# ------------------------------------------------------------------------
+#
+Oracle23c() {
+  # wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p6880880_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p6880880_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+  echo "Oracle 23c Is Not Available Yet."
+}
+#
 #
 # ------------------------------------------------------------------------
 #
@@ -120,51 +178,88 @@ printf "+%-30s+%-100s+\n" "------------------------------" "--------------------
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: Select an Option "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 PS3="Select the Option: "
-select OPT in 19cApr2023 19cJul2023 19cOct2023 19cJan2024 HELP QUIT; do
-if [[ "${OPT}" == "19cApr2023" ]]; then
+select OPT in OracleFree Oracle19c Oracle21c Oracle23c 19cApr2023 19cJul2023 19cOct2023 19cJan2024 HELP QUIT; do
+if [[ "${OPT}" == "OracleFree" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Product: ${OPT} Started --"
+  echo ""
+  OracleFree
+  echo " -- Downloading Oracle Product: ${OPT} Finished --"
+  echo ""
+  return 1
+elif [[ "${OPT}" == "Oracle19c" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Product: ${OPT} Started --"
+  echo ""
+  Oracle19c
+  echo " -- Downloading Oracle Product: ${OPT} Finished --"
+  echo ""
+  return 1
+elif [[ "${OPT}" == "Oracle21c" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Product: ${OPT} Started --"
+  echo ""
+  Oracle21c
+  echo " -- Downloading Oracle Product: ${OPT} Finished --"
+  echo ""
+  return 1
+elif [[ "${OPT}" == "Oracle23c" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Product: ${OPT} Started --"
+  echo ""
+  Oracle23c
+  echo "###############################################################"
+  echo " -- Downloading Oracle Product: ${OPT} Finished --"
+  echo ""
+  return 1
+elif [[ "${OPT}" == "19cApr2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
   echo ""
   Oracle19cApr2023
+  echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  MainMenu
+  return 1
 elif [[ "${OPT}" == "19cJul2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
   echo ""
   Oracle19cJul2023
+  echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  MainMenu
+  return 1
 elif [[ "${OPT}" == "19cOct2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
   echo ""
   Oracle19cOct2023
+  echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  MainMenu
+  return 1
 elif [[ "${OPT}" == "19cJan2024" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
   echo ""
   Oracle19cJan2024
+  echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  MainMenu
+  return 1
 elif [[ "${OPT}" == "QUIT" ]]; then
   echo "###############################################################"
   echo " -- Exit Menu --"
   echo ""
-  return 1
+  exit 1
 elif [[ "${OPT}" == "HELP" ]]; then
   HELP
 else
   echo "###############################################################"
   echo " -- Invalid Option --"
   echo ""
-  MainMenu
+  return 1
 fi
 break
 done
