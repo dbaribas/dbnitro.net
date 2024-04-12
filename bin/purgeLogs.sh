@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.6"
+SoftwareVersion="1.0.7"
 DateCreation="28/09/2021"
-DateModification="05/10/2023"
+DateModification="12/04/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -33,24 +33,15 @@ WEBSITE="http://dbnitro.net"
 #
 # Execution of purgeLogs
 #
-/usr/local/sbin/purgelogs.bin cleanup -automigrate
-/usr/local/sbin/purgelogs.bin cleanup -days 30
-/usr/local/sbin/purgelogs.bin cleanup -orcl 30
-/usr/local/sbin/purgelogs.bin cleanup -days 30 -aud -lsnr
-/usr/local/sbin/purgelogs.bin cleanup -orcl 30 -aud -lsnr
-/usr/local/sbin/purgelogs.bin cleanup --tfa 30
-/usr/local/sbin/purgelogs.bin cleanup --dryrun
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup -automigrate; else /usr/local/sbin/purgeLogs -automigrate; fi
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup -days 30; else /usr/local/sbin/purgeLogs -days 30; fi
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup -orcl 30; else /usr/local/sbin/purgeLogs -orcl 30; fi
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup -days 30 -aud -lsnr; else /usr/local/sbin/purgeLogs -days 30 -aud -lsnr; fi
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup -orcl 30 -aud -lsnr; else /usr/local/sbin/purgeLogs -orcl 30 -aud -lsnr; fi
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup --tfa 30; else /usr/local/sbin/purgeLogs --tfa 30; fi
+if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin cleanup --dryrun; else /usr/local/sbin/purgeLogs --dryrun; fi
 #
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
-# cp -r /u00/Scripts/purgeLogs.sh /etc/cron.daily/
-# cat /var/log/oracle_purge_logs.log
-# su - grid -c 'mkdir -p /u01/app/grid/admin/_mgmtdb/adump'
-# su - grid -c 'mkdir -p /u01/app/grid/admin/+ASM/adump'
-#
-# su - oracle -c 'mkdir -p /u01/app/oracle/admin/_mgmtdb/adump'
-# su - oracle -c 'mkdir -p /u01/app/oracle/admin/+ASM/adump'
-# purgeLogs: Cleanup traces, logs in one command (Doc ID 2081655.1)
-
