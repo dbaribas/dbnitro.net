@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.9"
+SoftwareVersion="1.0.11"
 DateCreation="13/04/2021"
-DateModification="29/11/2023"
+DateModification="15/04/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -42,10 +42,13 @@ fi
 #
 if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
+  SERVER=$(hostname)
 elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
+  SERVER=$(hostname)
 elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
+  SERVER=$(hostname)
 fi
 #
 #--------------------------------------------------------------------------------------------
@@ -79,7 +82,7 @@ GeraInfo2() {
 #
 while true; clear; do
 SepLine
-echo "INSTANCE: ${ORACLE_SID} | DATE: $(date)"
+echo "OS: ${OS} | SERVER: ${SERVER} | INSTANCE: ${ORACLE_SID} | DATE: $(date)"
 #
 DATABKP=$(date +%H:%M)
 #
@@ -117,17 +120,17 @@ awk ' {
 }' ${LOGS}/GeraInfoOGG.txt
 #
 if [[ $(uname) == "SunOS" ]]; then
-  DISK_TOTAL=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $3, $5 }')
-  DISK_FREE=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $4 }')
+  DISK_TOTAL=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $2 }')
+  DISK_USED=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3, $5 }')
+  DISK_FREE=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
 elif [[ $(uname) == "AIX" ]]; then
-  DISK_TOTAL=$(df -g ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -g ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $4 }')
-  DISK_FREE=$(df -g ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $3 }')
+  DISK_TOTAL=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $2 }')
+  DISK_USED=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
+  DISK_FREE=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3 }')
 elif [[ $(uname) == "Linux" ]]; then
-  DISK_TOTAL=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $3, " - ", $5 }')
-  DISK_FREE=$(df -h ${OGG_HOME} | grep -v -i "filesystem" | awk '{ print $4 }')
+  DISK_TOTAL=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $2 }')
+  DISK_USED=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3, " - ", $5 }')
+  DISK_FREE=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
 fi
 SepLine
 #
@@ -139,7 +142,18 @@ echo "STAGE: ${OGG_HOME} | TOTAL: ${DISK_TOTAL} | USED: ${DISK_USED} | FREE: ${D
 #
 SepLine
 #
-sleep 15
+countdown() {
+  local secs=${1}
+  while [[ ${secs} -gt 0 ]]; do
+    printf "\r%d " ${secs}
+    secs=$((secs-1))
+    sleep 1
+  done
+  printf "\r%d " 0
+#  echo "Countdown complete!"
+}
+countdown 15
+# sleep 15
 #
 done
 #
