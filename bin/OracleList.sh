@@ -174,7 +174,7 @@ if [[ "${LISTENER_PROC}" != "0" ]]; then
            LISTENER_HOME="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort)"
             LISTENER_PID="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $2 }' | uniq | sort)"
         LISTENER_STARTED="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
-           LISTENER_PORT="$(sudo lsof -i -P -n | egrep -i "(LISTEN)" | egrep -i "${LISTENER_PID}" | cut -f2 -d ':' | cut -f1 -d ' ' | uniq)"
+           LISTENER_PORT="$(lsof -i -P -n | egrep -i "(LISTEN)" | egrep -i "${LISTENER_PID}" | cut -f2 -d ':' | cut -f1 -d ' ' | uniq)"
     printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${LISTENER_SERVICE} [${LISTENER_PORT}]" " RUNNING " " UP SINCE: ${LISTENER_STARTED} " " ${LISTENER_HOME}"
     printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
   done
