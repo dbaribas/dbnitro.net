@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.97"
+SoftwareVersion="1.0.99"
 DateCreation="07/01/2021"
-DateModification="05/02/2024"
+DateModification="10/04/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -625,9 +625,18 @@ EOF
 fi
 #
 # ------------------------------------------------------------------------
+# List PDBs
+#
+list_PDBS() {
+  echo "@${DBNITRO}/sql/DBA_LIST_PDBS.sql;" | sqlplus -S / as sysdba
+}
+#
+# ------------------------------------------------------------------------
 # Select the CDB and PDB
 #
-echo "Options: "
+list_PDBS
+SepLine
+PS3="Select the PDB: "
 select PDBS in "CDB\$ROOT" $(cat ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var) QUIT; do # CHECK $ROOT if will work
 if [[ "${PDBS}" == "BACK TO CDB" ]]; then
   export ORACLE_PDB_SID=""
@@ -693,11 +702,10 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
   alias rac-monitor='while true; do clear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
-else
-  export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
-  export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
-  export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 fi
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 export HOME_ADR="$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -i "${OPT}")"
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export ALERTLST="$(lsnrctl status | egrep -i "Listener Log File" | awk '{ print $4 }' | awk '{ print $1 }' | awk '{gsub("/alert/log.xml", "");print}')/trace/listener.log"
@@ -710,6 +718,7 @@ alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
 alias opv='${OPATCH}/opatch version'
+alias opi='${OPATCH}/opatch lsinventory'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
@@ -808,6 +817,7 @@ alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
 alias opv='${OPATCH}/opatch version'
+alias opi='${OPATCH}/opatch lsinventory'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/sql/glogin.sql'
@@ -921,11 +931,10 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias asmlogv='vi ${ALERTASM}'
   alias crslog='tail -f -n 100 ${ALERTCRS} | egrep -i -v ${IGNORE_ERRORS}'
   alias crslogv='vi ${ALERTCRS}'
-else
-  export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
-  export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
-  export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 fi
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
+export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export HOME_ADR="$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -w "${OPT}")"
 export ORACLE_UNQNAME="$(echo ${HOME_ADR} | cut -f4 -d '/')"
@@ -946,6 +955,7 @@ alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
 alias opv='${OPATCH}/opatch version'
+alias opi='${OPATCH}/opatch lsinventory'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
@@ -1089,6 +1099,7 @@ export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOM
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
 alias oh='cd ${ORACLE_HOME}'
 alias opv='${OPATCH}/opatch version'
+alias opi='${OPATCH}/opatch lsinventory'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "wlserver"'
 alias emlog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
@@ -1134,6 +1145,7 @@ export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOM
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
 alias oh='cd ${ORACLE_HOME}'
 alias opv='${OPATCH}/opatch version'
+alias opi='${OPATCH}/opatch lsinventory'
 alias opl='${OPATCH}/opatch lspatches | sort'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
@@ -1170,14 +1182,7 @@ printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: Select an
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 PS3="Select the Option: "
 select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} HELP QUIT; do
-if [[ "${OPT}" == "QUIT" ]]; then
-  echo " -- Exit Menu --"
-  return 1
-elif [[ "${OPT}" == "HELP" ]]; then
-  SELECTION="HELP"
-  SetClear
-  HELP
-elif [[ "${OPT}" == "+ASM"* ]]; then
+if [[ "${OPT}" == "+ASM"* ]]; then
   if [[ "${ASM_USER}" == "YES" ]]; then
     SELECTION="ASM"
     set_ASM ${OPT}
@@ -1198,6 +1203,13 @@ elif [[ "${ORA_AGENT[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
 elif [[ "${DBLIST[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   SELECTION="DATABASE"
   set_DB ${OPT}
+elif [[ "${OPT}" == "HELP" ]]; then
+  SELECTION="HELP"
+  SetClear
+  HELP
+elif [[ "${OPT}" == "QUIT" ]]; then
+  echo " -- Exit Menu --"
+  return 1
 else
   echo " -- Invalid Option --"
   continue
