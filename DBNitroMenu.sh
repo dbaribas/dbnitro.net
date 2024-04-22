@@ -195,6 +195,7 @@ if [[ "${OPT}" == "QUIT" ]]; then
   echo "#############################################"
   echo " -- Exit Menu --"
   echo ""
+  exit 1
 elif [[ "${OPT}" == "INSTALL" ]]; then
   echo "#############################################"
   echo " -- Install DBNITRO Environment --"
