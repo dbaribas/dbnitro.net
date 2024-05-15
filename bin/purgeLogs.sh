@@ -45,3 +45,12 @@ if [[ -f "/usr/local/sbin/purgelogs.bin" ]]; then /usr/local/sbin/purgelogs.bin 
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
+# cp -r /u00/Scripts/purgeLogs.sh /etc/cron.daily/
+# cat /var/log/oracle_purge_logs.log
+# su - grid -c 'mkdir -p /u01/app/grid/admin/_mgmtdb/adump'
+# su - grid -c 'mkdir -p /u01/app/grid/admin/+ASM/adump'
+#
+# su - oracle -c 'mkdir -p /u01/app/oracle/admin/_mgmtdb/adump'
+# su - oracle -c 'mkdir -p /u01/app/oracle/admin/+ASM/adump'
+# purgeLogs: Cleanup traces, logs in one command (Doc ID 2081655.1)
+

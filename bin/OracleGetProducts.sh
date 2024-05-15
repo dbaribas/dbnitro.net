@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.3"
+SoftwareVersion="1.0.5"
 DateCreation="19/02/2024"
-DateModification="20/02/2024"
+DateModification="17/04/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -13,7 +13,8 @@ WEBSITE="http://dbnitro.net"
 #
 # ------------------------------------------------------------------------
 # Variables
-export PLATFORM="$(uname -i)"
+#
+PLATFORM="$(uname -i)"
 #
 if [[ "${PLATFORM}" == "x86_64" ]]; then 
   ARCHITECTURE="x86_64"
@@ -67,6 +68,7 @@ echo -e "\
 |#| Oracle19cJul2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM JULY 2023
 |#| Oracle19cOct2023.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM OCTOBER 2023
 |#| Oracle19cJan2024.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM JANUARY 2024
+|#| Oracle19cJan2024.: YOU WILL DOWNLOAD THE ORACLE PATCHES FROM APRIL 2024
 |#| HELP.............: YOU CAN CHECK THE OPTIONS"
 }
 #
@@ -89,8 +91,7 @@ Oracle19c() {
 if [[ "${ARCHITECTURE}" == "x86_64" ]]; then 
   wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.X64_193000_grid_home.zip" "https://download.oracle.com/otn/linux/oracle19c/190000/LINUX.X64_193000_grid_home.zip?patch_password=patch_password"
   wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.X64_193000_db_home.zip" "https://download.oracle.com/otn/linux/oracle19c/190000/LINUX.X64_193000_db_home.zip?patch_password=patch_password"
-elif
- [[ "${ARCHITECTURE}" == "ARM-64" ]]; then
+elif [[ "${ARCHITECTURE}" == "ARM-64" ]]; then
   wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.ARM64_1919000_grid_home.zip" "https://download.oracle.com/otn/linux/oracle19c/1919000/LINUX.ARM64_1919000_grid_home.zip?patch_password=patch_password"
   wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="LINUX.ARM64_1919000_db_home.zip" "https://download.oracle.com/otn/linux/oracle19c/1919000/LINUX.ARM64_1919000_db_home.zip?patch_password=patch_password"
 else
@@ -171,6 +172,17 @@ wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certific
 }
 #
 # ------------------------------------------------------------------------
+#
+Oracle19cApr2024() {
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p6880880_190000_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p6880880_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p36233263_190000_Linux-${ARCHITECTURE}_DB.zip" "https://updates.oracle.com/Orion/Download/download_patch/p36233263_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p36233126_190000_Linux-${ARCHITECTURE}_GI.zip" "https://updates.oracle.com/Orion/Download/download_patch/p36233126_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p36199232_190000_Linux-${ARCHITECTURE}_OJVM.zip" "https://updates.oracle.com/Orion/Download/download_patch/p36199232_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p36195566_190000_Linux-${ARCHITECTURE}_JDK.zip" "https://updates.oracle.com/Orion/Download/download_patch/p36195566_190000_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+# wget --http-user="${USERNAME}" --http-password="${PASSWORD}" --no-check-certificate --output-document="p???_19??000ACFSRU_Linux-${ARCHITECTURE}.zip" "https://updates.oracle.com/Orion/Download/download_patch/p???_19??000ACFSRU_Linux-${ARCHITECTURE}.zip?patch_password=patch_password"
+}
+#
+# ------------------------------------------------------------------------
 # Main Menu
 #
 MainMenu() {
@@ -178,7 +190,7 @@ printf "+%-30s+%-100s+\n" "------------------------------" "--------------------
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: Select an Option "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 PS3="Select the Option: "
-select OPT in OracleFree Oracle19c Oracle21c Oracle23c 19cApr2023 19cJul2023 19cOct2023 19cJan2024 HELP QUIT; do
+select OPT in OracleFree Oracle19c Oracle21c Oracle23c 19cApr2023 19cJul2023 19cOct2023 19cJan2024 19cApr2024 HELP QUIT; do
 if [[ "${OPT}" == "OracleFree" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Product: ${OPT} Started --"
@@ -186,7 +198,7 @@ if [[ "${OPT}" == "OracleFree" ]]; then
   OracleFree
   echo " -- Downloading Oracle Product: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "Oracle19c" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Product: ${OPT} Started --"
@@ -194,7 +206,7 @@ elif [[ "${OPT}" == "Oracle19c" ]]; then
   Oracle19c
   echo " -- Downloading Oracle Product: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "Oracle21c" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Product: ${OPT} Started --"
@@ -202,7 +214,7 @@ elif [[ "${OPT}" == "Oracle21c" ]]; then
   Oracle21c
   echo " -- Downloading Oracle Product: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "Oracle23c" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Product: ${OPT} Started --"
@@ -211,7 +223,7 @@ elif [[ "${OPT}" == "Oracle23c" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Product: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "19cApr2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
@@ -220,7 +232,7 @@ elif [[ "${OPT}" == "19cApr2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "19cJul2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
@@ -229,7 +241,7 @@ elif [[ "${OPT}" == "19cJul2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "19cOct2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
@@ -238,7 +250,7 @@ elif [[ "${OPT}" == "19cOct2023" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
 elif [[ "${OPT}" == "19cJan2024" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Started --"
@@ -247,7 +259,16 @@ elif [[ "${OPT}" == "19cJan2024" ]]; then
   echo "###############################################################"
   echo " -- Downloading Oracle Patch: ${OPT} Finished --"
   echo ""
-  return 1
+  MainMenu
+elif [[ "${OPT}" == "19cApr2024" ]]; then
+  echo "###############################################################"
+  echo " -- Downloading Oracle Patch: ${OPT} Started --"
+  echo ""
+  Oracle19cApr2024
+  echo "###############################################################"
+  echo " -- Downloading Oracle Patch: ${OPT} Finished --"
+  echo ""
+  MainMenu
 elif [[ "${OPT}" == "QUIT" ]]; then
   echo "###############################################################"
   echo " -- Exit Menu --"
@@ -255,6 +276,7 @@ elif [[ "${OPT}" == "QUIT" ]]; then
   exit 1
 elif [[ "${OPT}" == "HELP" ]]; then
   HELP
+  MainMenu
 else
   echo "###############################################################"
   echo " -- Invalid Option --"

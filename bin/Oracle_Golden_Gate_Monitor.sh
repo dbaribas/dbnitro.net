@@ -121,16 +121,16 @@ awk ' {
 #
 if [[ $(uname) == "SunOS" ]]; then
   DISK_TOTAL=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3, $5 }')
-  DISK_FREE=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
+   DISK_USED=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3, $5 }')
+   DISK_FREE=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
 elif [[ $(uname) == "AIX" ]]; then
   DISK_TOTAL=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
-  DISK_FREE=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3 }')
+   DISK_USED=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
+   DISK_FREE=$(df -g ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3 }')
 elif [[ $(uname) == "Linux" ]]; then
   DISK_TOTAL=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $2 }')
-  DISK_USED=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3, " - ", $5 }')
-  DISK_FREE=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
+   DISK_USED=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $3, " - ", $5 }')
+   DISK_FREE=$(df -h ${OGG_HOME} | egrep -v -i "filesystem" | awk '{ print $4 }')
 fi
 SepLine
 #
@@ -143,17 +143,15 @@ echo "STAGE: ${OGG_HOME} | TOTAL: ${DISK_TOTAL} | USED: ${DISK_USED} | FREE: ${D
 SepLine
 #
 countdown() {
-  local secs=${1}
-  while [[ ${secs} -gt 0 ]]; do
-    printf "\r%d " ${secs}
-    secs=$((secs-1))
-    sleep 1
-  done
-  printf "\r%d " 0
-#  echo "Countdown complete!"
+local secs=${1}
+while [[ ${secs} -gt 0 ]]; do
+  printf "\rRefreshing in: %d " ${secs}
+  secs=$((secs-1))
+  sleep 1
+done
+printf "\rRefreshing in: %d " 0
 }
 countdown 15
-# sleep 15
 #
 done
 #

@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.99"
+SoftwareVersion="1.0.101"
 DateCreation="07/01/2021"
-DateModification="10/04/2024"
+DateModification="13/05/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -24,17 +24,18 @@ SetClear() {
 # ------------------------------------------------------------------------
 # DBNITRO Script Folder
 #
-    FOLDER="/opt"
-   DBNITRO="${FOLDER}/dbnitro"
-      LOGS="${DBNITRO}/logs"
-    BACKUP="${DBNITRO}/backup"
-   REPORTS="${DBNITRO}/reports"
-  BINARIES="${DBNITRO}/bin"
- VARIABLES="${DBNITRO}/var"
- FUNCTIONS="${DBNITRO}/functions"
-STATEMENTS="${DBNITRO}/sql"
+       FOLDER=/opt                   # ===> HERE YOU HAVE TO CONFIGURE THE PATH OF DBNITRO, WHERE IT WILL BE INSTALLED
+     DBNITRO=${FOLDER}/dbnitro
+        LOGS=${DBNITRO}/logs
+      BACKUP=${DBNITRO}/backup
+     REPORTS=${DBNITRO}/reports
+    BINARIES=${DBNITRO}/bin
+   VARIABLES=${DBNITRO}/var
+   FUNCTIONS=${DBNITRO}/functions
+ ENVIRONMENT=${DBNITRO}/environments
+  STATEMENTS=${DBNITRO}/sql
 #
-if [[ ! -d ${FOLDER}/ ]]; then
+if [[ ! -d ${DBNITRO} ]]; then
   SetClear
   SepLine
   echo " -- YOUR SCRIPT FOLDER DOES NOT EXISTS, YOU HAVE TO CREATE THAT BEFORE YOU CONTINUE --"
@@ -67,7 +68,7 @@ fi
 #
 HELP() {
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
+printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: HELP "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" "                        HOMES " " YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)"
 printf "|%-16s|%-100s|\n" "                     GRID/ASM " " YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS"
@@ -700,7 +701,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
   alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
-  alias rac-monitor='while true; do clear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
+  alias rac-monitor='while true; do SetClear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 fi
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
@@ -717,9 +718,9 @@ alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
-alias opv='${OPATCH}/opatch version'
-alias opi='${OPATCH}/opatch lsinventory'
-alias opl='${OPATCH}/opatch lspatches | sort'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
@@ -806,7 +807,7 @@ alias res='crsctl stat res -t'
 alias rest='crsctl stat res -t -init'
 alias resp='crsctl stat res -p -init'
 alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
-alias rac-monitor='while true; do clear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
+alias rac-monitor='while true; do SetClear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
 alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 alias asmcmd='rlwrap asmcmd'
 alias a='rlwrap asmcmd -p'
@@ -816,9 +817,9 @@ alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
-alias opv='${OPATCH}/opatch version'
-alias opi='${OPATCH}/opatch lsinventory'
-alias opl='${OPATCH}/opatch lspatches | sort'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
@@ -923,7 +924,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias rest='crsctl stat res -t -init'
   alias resp='crsctl stat res -p -init'
   alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
-  alias rac-monitor='while true; do clear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
+  alias rac-monitor='while true; do SetClear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
@@ -954,9 +955,9 @@ alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
 alias ock='${OCK_HOME}/orachk'
-alias opv='${OPATCH}/opatch version'
-alias opi='${OPATCH}/opatch lsinventory'
-alias opl='${OPATCH}/opatch lspatches | sort'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
 alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
 alias rman='rlwrap rman'
@@ -1098,9 +1099,9 @@ export CLASSPATH=${ORACLE_HOME}/jlib
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
 alias oh='cd ${ORACLE_HOME}'
-alias opv='${OPATCH}/opatch version'
-alias opi='${OPATCH}/opatch lsinventory'
-alias opl='${OPATCH}/opatch lspatches | sort'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
 alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "wlserver"'
 alias emlog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias emlogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
@@ -1144,9 +1145,9 @@ export CLASSPATH="${ORACLE_HOME}/jlib"
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
 alias oh='cd ${ORACLE_HOME}'
-alias opv='${OPATCH}/opatch version'
-alias opi='${OPATCH}/opatch lsinventory'
-alias opl='${OPATCH}/opatch lspatches | sort'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
 alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "agent"'
@@ -1223,3 +1224,10 @@ MainMenu
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
+
+
+### locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g'
+### ps -ef | grep lsnr | grep -v grep | awk ' { print $9 } ' | tr '[A-Z]' '[a-z]' | sort
+### srvctl status listener | awk ' { print $2 } ' | tr '[A-Z]' '[a-z]' | uniq | sort
+### PDBS="$(echo "select name || case when open_mode = 'READ WRITE' then '(RW),' when open_mode = 'READ ONLY' then '(RO),' when open_mode = 'MOUNTED' then '(MO),' when open_mode = 'MIGRATE' then '(MI),' else '(XX),' end as info from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba  | sed s/INFO//g | sed s/-//g)"
+### select name || ' ' || case when OPEN_MODE = 'READ WRITE' then '(RW)' when OPEN_MODE = 'READ ONLY' then '(RO)' when OPEN_MODE = 'MOUNTED' then '(MO)' when OPEN_MODE = 'MIGRATE' then '(MI)' end as PDBS from v\$containers where con_id not in (0,1,2) order by 1;
