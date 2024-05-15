@@ -1,0 +1,18 @@
+# User specific environment and startup programs
+export GRID_VERSION=19.3.0.1
+export ORACLE_BASE=/u01/app/grid
+export GRID_HOME=/u01/app/${GRID_VERSION}/grid
+export ORACLE_HOME=${GRID_HOME}
+export LD_LIBRARY_PATH=${ORACLE_HOME}/lib
+export OPATCH=${ORACLE_HOME}/OPatch
+export JAVA_HOME=${ORACLE_HOME}/jdk
+export PATH=${PATH}:${HOME}/bin:${GRID_HOME}/bin:${OPATCH}:${JAVA_HOME}/bin
+export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
+alias res='crsctl stat res -t'
+alias rest='crsctl stat res -t -init'
+alias resp='crsctl stat res -p -init'
+alias rac-status='/opt/dbnitro/bin/rac-status.sh -a'
+alias rac-monitor='while true; do clear; /opt/dbnitro/bin/rac-status.sh -a; sleep 5; done'
+alias list='/opt/dbnitro/bin/OracleList.sh'
+umask 0022

@@ -1,0 +1,6 @@
+# User specific environment and startup programs
+export PATH=/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/grid/.local/bin:/home/grid/bin
+export PS1=$'[ ${LOGNAME}@\h:$(pwd): ]$ '
+alias db='. /opt/dbnitro/bin/OracleMenu.sh'
+alias list='/opt/dbnitro/bin/OracleList.sh'
+umask 0022
