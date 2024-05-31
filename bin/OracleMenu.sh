@@ -2,7 +2,7 @@
 Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.101"
 DateCreation="07/01/2021"
-DateModification="13/05/2024"
+DateModification="16/05/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -23,13 +23,14 @@ SetClear() {
 #
 # ------------------------------------------------------------------------
 # DBNITRO Script Folder
-#
-       FOLDER=/opt                   # ===> HERE YOU HAVE TO CONFIGURE THE PATH OF DBNITRO, WHERE IT WILL BE INSTALLED
+#           # ===> HERE YOU HAVE TO CONFIGURE THE PATH OF DBNITRO, WHERE IT WILL BE INSTALLED
+      FOLDER=/opt                   
      DBNITRO=${FOLDER}/dbnitro
         LOGS=${DBNITRO}/logs
       BACKUP=${DBNITRO}/backup
      REPORTS=${DBNITRO}/reports
     BINARIES=${DBNITRO}/bin
+    SERVICES=${DBNITRO}/services
    VARIABLES=${DBNITRO}/var
    FUNCTIONS=${DBNITRO}/functions
  ENVIRONMENT=${DBNITRO}/environments
@@ -67,24 +68,24 @@ fi
 # Help Function
 #
 HELP() {
-printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: HELP "
-printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-16s|%-100s|\n" "                        HOMES " " YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)"
-printf "|%-16s|%-100s|\n" "                     GRID/ASM " " YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS"
-printf "|%-16s|%-100s|\n" "                     DATABASE " " YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS"
-printf "|%-16s|%-100s|\n" "                      CDB/PDB " " YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
-printf "|%-16s|%-100s|\n" "                          OMS " " YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS"
-printf "|%-16s|%-100s|\n" "                        AGENT " " YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (AGENT) HOME AND TOOLS"
-printf "|%-16s|%-100s|\n" "                   GOLDENGATE " " YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg"
-printf "|%-16s|%-100s|\n" "                         LIST " " YOU CAN SEE THE ORACLE PRODUCTS RUNNING AND/OR INSTALLED"
-printf "|%-16s|%-100s|\n" "                         INFO " " YOU CAN SEE THE ORACLE DATABASE INFO"
-printf "|%-16s|%-100s|\n" "                         DASH " " YOU CAN SEE THE ORACLE DATABASE DASHBOARD"
-printf "|%-16s|%-100s|\n" "                 DASH_INSTALL " " YOU CAN INSTALL THE ORACLE DATABASE DASHBOARD"
-printf "|%-16s|%-100s|\n" "                       REPORT " " YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})"
-printf "|%-16s|%-100s|\n" "                      OPTIONS " " YOU CAN SEE THE ORACLE DATABASE OPTIONS"
-printf "|%-16s|%-100s|\n" "                    HUGEPAGES " " YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
-printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+  printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+  printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: HELP "
+  printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+  printf "|%-16s|%-100s|\n" "                        HOMES " " YOU CAN SELECT THE ORACLE HOME WITHOUT ANY INSTANCE (ASM/SID)"
+  printf "|%-16s|%-100s|\n" "                     GRID/ASM " " YOU CAN SELECT THE GRID OPTION AND WORK WITH GRID INSTANCE (ASM) AND TOOLS"
+  printf "|%-16s|%-100s|\n" "                     DATABASE " " YOU CAN SELECT THE DATABASE INSTANCE (SID) AND TOOLS"
+  printf "|%-16s|%-100s|\n" "                      CDB/PDB " " YOU CAN SELECT THE ORACLE CONTAINER/PLUGGABLE DATABASE (ONLY AFTER SELECT THE ORACLE SID) ---> pdb"
+  printf "|%-16s|%-100s|\n" "                          OMS " " YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (OMS) HOME AND TOOLS"
+  printf "|%-16s|%-100s|\n" "                        AGENT " " YOU CAN SELECT THE ORACLE ENTERPRISE MANAGER (AGENT) HOME AND TOOLS"
+  printf "|%-16s|%-100s|\n" "                   GOLDENGATE " " YOU CAN SELECT THE ORACLE GOLDENGATE HOME AND TOOLS (ONLY AFTER SELECT THE ORACLE SID) ---> ogg"
+  printf "|%-16s|%-100s|\n" "                         LIST " " YOU CAN SEE THE ORACLE PRODUCTS RUNNING AND/OR INSTALLED"
+  printf "|%-16s|%-100s|\n" "                         INFO " " YOU CAN SEE THE ORACLE DATABASE INFO"
+  printf "|%-16s|%-100s|\n" "                         DASH " " YOU CAN SEE THE ORACLE DATABASE DASHBOARD"
+  printf "|%-16s|%-100s|\n" "                 DASH_INSTALL " " YOU CAN INSTALL THE ORACLE DATABASE DASHBOARD"
+  printf "|%-16s|%-100s|\n" "                       REPORT " " YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})"
+  printf "|%-16s|%-100s|\n" "                      OPTIONS " " YOU CAN SEE THE ORACLE DATABASE OPTIONS"
+  printf "|%-16s|%-100s|\n" "                    HUGEPAGES " " YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
+  printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 }
 #
 # ------------------------------------------------------------------------
@@ -680,6 +681,7 @@ export OCK="${OCK_HOME}"
 export ORATOP="${ORACLE_HOME}/suptools/oratop"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
+export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${OPT}"
   export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
@@ -688,7 +690,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
   if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
   export HOME_ADR_ASM="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/asm/" | egrep -i "${ASM_LOG}" | egrep -v "host_")"
-  export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -v "crs_")"
+  export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -i -v "crs_|_root")"
   export ALERTASM="${GRID_BASE}/${HOME_ADR_ASM}/trace/alert_${ASM_LOG}.log"
   export ALERTCRS="${GRID_BASE}/${HOME_ADR_CRS}/trace/alert.log"
   alias asmlog='tail -f -n 100 ${ALERTASM} | egrep -i -v ${IGNORE_ERRORS}'
@@ -702,6 +704,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias a='rlwrap asmcmd -p'
   alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
   alias rac-monitor='while true; do SetClear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
+  alias list-monitor='while true; do SetClear; ${DBNITRO}/bin/OracleList.sh; sleep 5; done'
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 fi
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
@@ -725,7 +728,7 @@ alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysdba @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|ohasd|d.bin" | sort'
 alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
@@ -785,12 +788,13 @@ export TFA="${TFA_HOME}"
 export OCK="${OCK_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
+export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
 export HOME_ADR_ASM=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/asm/" | egrep -i "${ASM_LOG}" | egrep -v "host_")
-export HOME_ADR_CRS=$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -v "crs_")
+export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -i -v "crs_|_root")"
 export GRID_ADR=$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export ALERTASM="${GRID_BASE}/${HOME_ADR_ASM}/trace/alert_${OPT}.log"
@@ -808,6 +812,7 @@ alias rest='crsctl stat res -t -init'
 alias resp='crsctl stat res -p -init'
 alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
 alias rac-monitor='while true; do SetClear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
+alias list-monitor='while true; do SetClear; ${DBNITRO}/bin/OracleList.sh; sleep 5; done'
 alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
 alias asmcmd='rlwrap asmcmd'
 alias a='rlwrap asmcmd -p'
@@ -824,7 +829,7 @@ alias sqlplus='rlwrap sqlplus'
 alias s='rlwrap sqlplus / as sysasm @${DBNITRO}/sql/glogin.sql'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|ohasd|d.bin" | sort'
 alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
@@ -902,6 +907,7 @@ export OCK="${OCK_HOME}"
 export ORATOP="${ORACLE_HOME}/suptools/oratop"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
+export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 #
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${G_HOME}"
@@ -912,7 +918,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
   if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
   export HOME_ADR_ASM="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/asm/" | egrep -i "${ASM_LOG}" | egrep -v "host_")"
-  export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -v "crs_")"
+  export HOME_ADR_CRS="$(echo 'set base ${GRID_BASE}; show homes' | adrci | egrep -i "/crs/" | egrep -i -v "crs_|_root")"
   export GRID_ADR="$(echo 'set base ${GRID_BASE}; show homes' | ${GRID_HOME}/bin/adrci | egrep -i -w "listener")"
   export TNS_ADMIN="${ORACLE_HOME}/network/admin"
   export ALERTASM="${GRID_BASE}/${HOME_ADR_ASM}/trace/alert_${OPT}.log"
@@ -925,6 +931,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias resp='crsctl stat res -p -init'
   alias rac-status='${DBNITRO}/bin/rac-status.sh -a'
   alias rac-monitor='while true; do SetClear; ${DBNITRO}/bin/rac-status.sh -a; sleep 5; done'
+  alias list-monitor='while true; do SetClear; ${DBNITRO}/bin/OracleList.sh; sleep 5; done'
   alias asmdu='${DBNITRO}/bin/asmdu.sh -g'
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
@@ -966,7 +973,7 @@ alias dgmgrl='rlwrap dgmgrl'
 alias d='rlwrap dgmgrl /'
 alias adrci='rlwrap adrci'
 alias ad='rlwrap adrci'
-alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|d.bin" | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "pmon|ohasd|d.bin" | sort'
 alias lsnrctl='rlwrap lsnrctl'
 alias t='rlwrap lsnrctl'
 alias l='lsnrctl status'
@@ -1008,7 +1015,7 @@ if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print 
     printf "|%-22s|%-100s|\n" "                         DBID " " $(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " $(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "                DATABASE_ROLE " " $(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              DATABASE_UPTIME " " $(echo "select to_char(startup_time, 'dd/mm/yyyy hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
+    printf "|%-22s|%-100s|\n" "              DATABASE_UPTIME " " $(echo "select to_char(startup_time, 'yyyy-mm-dd hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "              INSTANCE_STATUS " " $(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "                    OPEN_MODE " " $(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "              ARCHIVELOG_MODE " " $(echo "select case when log_mode = 'ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | sqlplus -S / as sysdba | tail -2) "
@@ -1040,7 +1047,7 @@ if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print 
     printf "|%-22s|%-100s|\n" "                         DBID " " $(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " $(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "                DATABASE_ROLE " " $(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              DATABASE_UPTIME " " $(echo "select to_char(startup_time, 'dd/mm/yyyy hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
+    printf "|%-22s|%-100s|\n" "              DATABASE_UPTIME " " $(echo "select to_char(startup_time, 'yyyy-mm-dd hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "              INSTANCE_STATUS " " $(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "                    OPEN_MODE " " $(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
     printf "|%-22s|%-100s|\n" "              ARCHIVELOG_MODE " " $(echo "select case when log_mode = 'ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | sqlplus -S / as sysdba | tail -2) "
@@ -1095,6 +1102,7 @@ export OH="${ORACLE_HOME}"
 export OMS_GC="$(locate -b gc_inst | uniq)"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
+export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 export CLASSPATH=${ORACLE_HOME}/jlib
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
@@ -1141,6 +1149,7 @@ export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3
 export OH="${ORACLE_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
+export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 export CLASSPATH="${ORACLE_HOME}/jlib"
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
@@ -1224,10 +1233,3 @@ MainMenu
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
-
-
-### locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g'
-### ps -ef | grep lsnr | grep -v grep | awk ' { print $9 } ' | tr '[A-Z]' '[a-z]' | sort
-### srvctl status listener | awk ' { print $2 } ' | tr '[A-Z]' '[a-z]' | uniq | sort
-### PDBS="$(echo "select name || case when open_mode = 'READ WRITE' then '(RW),' when open_mode = 'READ ONLY' then '(RO),' when open_mode = 'MOUNTED' then '(MO),' when open_mode = 'MIGRATE' then '(MI),' else '(XX),' end as info from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba  | sed s/INFO//g | sed s/-//g)"
-### select name || ' ' || case when OPEN_MODE = 'READ WRITE' then '(RW)' when OPEN_MODE = 'READ ONLY' then '(RO)' when OPEN_MODE = 'MOUNTED' then '(MO)' when OPEN_MODE = 'MIGRATE' then '(MI)' end as PDBS from v\$containers where con_id not in (0,1,2) order by 1;
