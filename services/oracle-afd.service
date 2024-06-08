@@ -1,0 +1,13 @@
+[Unit]
+Description=ASM Filter Driver
+Before=oracle-ohasd.service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/u01/app/19.3.0.1/grid/bin/afdload start
+ExecStop=/u01/app/19.3.0.1/grid/bin/afdload stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

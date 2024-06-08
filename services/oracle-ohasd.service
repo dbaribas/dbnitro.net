@@ -1,0 +1,29 @@
+# Copyright (c) 2016, 2022, Oracle and/or its affiliates.
+#
+# Oracle OHASD startup
+
+[Unit]
+Description=Oracle High Availability Services
+After=network-online.target autofs.service afd.service exadata-scsid.service oracle-afd.service
+Wants=network-online.target afd.service exadata-scsid.service oracle-afd.service
+
+[Service]
+ExecStart=/etc/init.d/init.ohasd run >/dev/null 2>&1 </dev/null
+ExecStop=/etc/init.d/init.ohasd stop >/dev/null 2>&1 </dev/null
+TimeoutStopSec=60min
+Type=simple
+Restart=always
+
+# Do not kill any processes except init.ohasd after ExecStop, unless the
+# stop command times out.
+KillMode=process
+SendSIGKILL=yes
+
+# Allow continuous restarts
+StartLimitBurst=0
+
+# As otherwise we may have realtime settings overridden
+Delegate=yes
+
+[Install]
+WantedBy=multi-user.target graphical.target
