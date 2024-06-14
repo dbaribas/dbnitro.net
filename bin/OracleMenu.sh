@@ -274,9 +274,9 @@ fi
 # Select Listener LOG
 #
 SelectListenerLog() {
-select LISTENER_LOG in $(echo 'show homes' | adrci | egrep -i "listener" | sort); do
+select LISTENER_LOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i "listener" | sort); do
 if [[ -n "${LISTENER_LOG}" ]]; then
-  LSNRCTL_LOG="$(adrci exec="set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
+  LSNRCTL_LOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
   tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${LSNRCTL_LOG}
   break
 else
@@ -289,9 +289,9 @@ done
 # Edit Listener LOG
 #
 SelectListenerLogV() {
-select LISTENER_LOG in $(echo 'show homes' | adrci | egrep -i "listener" | sort); do
+select LISTENER_LOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i "listener" | sort); do
 if [[ -n "${LISTENER_LOG}" ]]; then
-  LSNRCTL_LOG="$(adrci exec="set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
+  LSNRCTL_LOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
   vim $(${ORACLE_HOME}/bin/orabase)/${LSNRCTL_LOG}
   break
 else
@@ -304,9 +304,9 @@ done
 # Select ASM LOG
 #
 SelectASMLog() {
-select ASMLOG in $(echo 'show homes' | adrci | egrep -v "host_" | egrep -w "+asm"); do
+select ASMLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -v "host_" | egrep -w "+asm"); do
 if [[ -n "${ASMLOG}" ]]; then
-  ALERTASM="$(adrci exec="set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
+  ALERTASM="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
   tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTASM}
   break
 else
@@ -319,9 +319,9 @@ done
 # Edit ASM LOG
 #
 SelectASMLogV() {
-select ASMLOG in $(echo 'show homes' | adrci | egrep -v "host_" | egrep -w "+asm"); do
+select ASMLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -v "host_" | egrep -w "+asm"); do
 if [[ -n "${ASMLOG}" ]]; then
-  ALERTASM="$(adrci exec="set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
+  ALERTASM="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
   vim $(${ORACLE_HOME}/bin/orabase)/${ALERTASM}
   break
 else
@@ -334,9 +334,9 @@ done
 # Select CRS LOG
 #
 SelectCRSLog() {
-select CRSLOG in $(echo 'show homes' | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
+select CRSLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
 if [[ -n "${CRSLOG}" ]]; then
-  ALERTCRS="$(adrci exec="set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
+  ALERTCRS="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
   tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTCRS}
   break
 else
@@ -349,9 +349,9 @@ done
 # EDIT CRS LOG
 #
 SelectCRSLogV() {
-select CRSLOG in $(echo 'show homes' | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
+select CRSLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
 if [[ -n "${CRSLOG}" ]]; then
-  ALERTCRS="$(adrci exec="set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
+  ALERTCRS="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
   vim $(${ORACLE_HOME}/bin/orabase)/${ALERTCRS}
   break
 else
@@ -364,9 +364,9 @@ done
 # Select DB LOG
 #
 SelectDBLog() {
-select DBLOG in $(echo 'show homes' | adrci | egrep -w "${SID}"); do
+select DBLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
 if [[ -n "${DBLOG}" ]]; then
-  ALERTDBLOG="$(adrci exec="set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  ALERTDBLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTDBLOG}
   break
 else
@@ -379,9 +379,9 @@ done
 # EDIT DB LOG
 #
 SelectDBLogV() {
-select DBLOG in $(echo 'show homes' | adrci | egrep -w "${SID}"); do
+select DBLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
 if [[ -n "${DBLOG}" ]]; then
-  ALERTDBLOG="$(adrci exec="set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  ALERTDBLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   vim $(${ORACLE_HOME}/bin/orabase)/${ALERTDBLOG}
   break
 else
@@ -394,9 +394,9 @@ done
 # Select DG LOG
 #
 SelectDGLog() {
-select DGLOG in $(echo 'show homes' | adrci | egrep -w "${SID}"); do
+select DGLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
 if [[ -n "${DGLOG}" ]]; then
-  ALERTDGLOG="$(adrci exec="set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  ALERTDGLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTDGLOG}
   break
 else
@@ -409,9 +409,9 @@ done
 # EDIT DG LOG
 #
 SelectDGLogV() {
-select DGLOG in $(echo 'show homes' | adrci | egrep -w "${SID}"); do
+select DGLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
 if [[ -n "${DGLOG}" ]]; then
-  ALERTDGLOG="$(adrci exec="set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  ALERTDGLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   vim $(${ORACLE_HOME}/bin/orabase)/${ALERTDGLOG}
   break
 else
