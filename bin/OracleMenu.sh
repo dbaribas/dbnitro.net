@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.103"
+SoftwareVersion="1.0.105"
 DateCreation="07/01/2021"
-DateModification="11/06/2024"
+DateModification="14/06/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -274,10 +274,11 @@ fi
 # Select Listener LOG
 #
 SelectListenerLog() {
-select LISTENER_LOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i "listener" | sort); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select LISTENER_LOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -i "listener" | sort); do
 if [[ -n "${LISTENER_LOG}" ]]; then
-  LSNRCTL_LOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
-  tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${LSNRCTL_LOG}
+  LSNRCTL_LOG="$(adrci exec="set base ${BASE}; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
+  tail -f -n 100 ${BASE}/${LSNRCTL_LOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -289,10 +290,11 @@ done
 # Edit Listener LOG
 #
 SelectListenerLogV() {
-select LISTENER_LOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i "listener" | sort); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select LISTENER_LOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -i "listener" | sort); do
 if [[ -n "${LISTENER_LOG}" ]]; then
-  LSNRCTL_LOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
-  vim $(${ORACLE_HOME}/bin/orabase)/${LSNRCTL_LOG}
+  LSNRCTL_LOG="$(adrci exec="set base ${BASE}; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
+  vim ${BASE}/${LSNRCTL_LOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -304,10 +306,11 @@ done
 # Select ASM LOG
 #
 SelectASMLog() {
-select ASMLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -v "host_" | egrep -w "+asm"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select ASMLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm"); do
 if [[ -n "${ASMLOG}" ]]; then
-  ALERTASM="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
-  tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTASM}
+  ALERTASM="$(adrci exec="set base ${BASE}; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
+  tail -f -n 100 ${BASE}/${ALERTASM}
   break
 else
   echo "Invalid selection. Please try again."
@@ -319,10 +322,11 @@ done
 # Edit ASM LOG
 #
 SelectASMLogV() {
-select ASMLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -v "host_" | egrep -w "+asm"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select ASMLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm"); do
 if [[ -n "${ASMLOG}" ]]; then
-  ALERTASM="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
-  vim $(${ORACLE_HOME}/bin/orabase)/${ALERTASM}
+  ALERTASM="$(adrci exec="set base ${BASE}; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
+  vim ${BASE}/${ALERTASM}
   break
 else
   echo "Invalid selection. Please try again."
@@ -334,10 +338,11 @@ done
 # Select CRS LOG
 #
 SelectCRSLog() {
-select CRSLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select CRSLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
 if [[ -n "${CRSLOG}" ]]; then
-  ALERTCRS="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
-  tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTCRS}
+  ALERTCRS="$(adrci exec="set base ${BASE}; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
+  tail -f -n 100 ${BASE}/${ALERTCRS}
   break
 else
   echo "Invalid selection. Please try again."
@@ -349,10 +354,11 @@ done
 # EDIT CRS LOG
 #
 SelectCRSLogV() {
-select CRSLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select CRSLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/"); do
 if [[ -n "${CRSLOG}" ]]; then
-  ALERTCRS="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
-  vim $(${ORACLE_HOME}/bin/orabase)/${ALERTCRS}
+  ALERTCRS="$(adrci exec="set base ${BASE}; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
+  vim ${BASE}/${ALERTCRS}
   break
 else
   echo "Invalid selection. Please try again."
@@ -364,10 +370,11 @@ done
 # Select DB LOG
 #
 SelectDBLog() {
-select DBLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select DBLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}"); do
 if [[ -n "${DBLOG}" ]]; then
-  ALERTDBLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
-  tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTDBLOG}
+  ALERTDBLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  tail -f -n 100 ${BASE}/${ALERTDBLOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -379,10 +386,11 @@ done
 # EDIT DB LOG
 #
 SelectDBLogV() {
-select DBLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select DBLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}"); do
 if [[ -n "${DBLOG}" ]]; then
-  ALERTDBLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
-  vim $(${ORACLE_HOME}/bin/orabase)/${ALERTDBLOG}
+  ALERTDBLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  vim ${BASE}/${ALERTDBLOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -394,10 +402,11 @@ done
 # Select DG LOG
 #
 SelectDGLog() {
-select DGLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select DGLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}"); do
 if [[ -n "${DGLOG}" ]]; then
-  ALERTDGLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
-  tail -f -n 100 $(${ORACLE_HOME}/bin/orabase)/${ALERTDGLOG}
+  ALERTDGLOG="$(adrci exec="set base ${BASE}; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  tail -f -n 100 ${BASE}/${ALERTDGLOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -409,10 +418,11 @@ done
 # EDIT DG LOG
 #
 SelectDGLogV() {
-select DGLOG in $(echo 'set base ${ORACLE_HOME}/bin/orabase; show homes' | adrci | egrep -w "${SID}"); do
+BASE="$(${ORACLE_HOME}/bin/orabase)"
+select DGLOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}"); do
 if [[ -n "${DGLOG}" ]]; then
-  ALERTDGLOG="$(adrci exec="set base ${ORACLE_HOME}/bin/orabase; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
-  vim $(${ORACLE_HOME}/bin/orabase)/${ALERTDGLOG}
+  ALERTDGLOG="$(adrci exec="set base ${BASE}; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  vim ${BASE}/${ALERTDGLOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -856,7 +866,7 @@ fi
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
-export HOME_ADR="$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -i "${OPT}")"
+export HOME_ADR="$(echo "set base ${ORACLE_BASE}; show homes" | adrci | egrep -i "${OPT}")"
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
@@ -938,8 +948,9 @@ export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOM
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
-export GRID_ADR=$(echo 'show homes' | adrci | egrep -i -w "listener")
+export GRID_ADR=$(echo "show homes" | adrci | egrep -i -w "listener")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
 alias asmlog='SelectASMLog'
@@ -1056,6 +1067,7 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib"
   export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
   if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
+  export GRID_ADR=$(echo "show homes" | adrci | egrep -i -w "listener")
   export TNS_ADMIN="${ORACLE_HOME}/network/admin"
   alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
   alias res='crsctl stat res -t'
@@ -1076,7 +1088,7 @@ export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOM
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
-export HOME_ADR="$(echo 'set base ${ORACLE_BASE}; show homes' | adrci | egrep -w "${OPT}")"
+export HOME_ADR="$(echo "set base ${ORACLE_BASE}; show homes" | adrci | egrep -w "${OPT}")"
 export ORACLE_UNQNAME="$(echo ${HOME_ADR} | cut -f4 -d '/')"
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
