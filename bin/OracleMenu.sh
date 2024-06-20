@@ -798,7 +798,7 @@ list_PDBS() {
 #
 list_PDBS
 SepLine
-PS3="Select the PDB: "
+PS3="Select the Option: "
 select PDBS in "CDB\$ROOT" $(cat ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var) QUIT; do # CHECK $ROOT if will work
 if [[ "${PDBS}" == "BACK TO CDB" ]]; then
   export ORACLE_PDB_SID=""
@@ -841,7 +841,6 @@ export OCK="${OCK_HOME}"
 export ORATOP="${ORACLE_HOME}/suptools/oratop"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${OPT}"
   export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
@@ -943,7 +942,6 @@ export TFA="${TFA_HOME}"
 export OCK="${OCK_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
@@ -951,13 +949,13 @@ if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]];
 export GRID_ADR=$(echo "show homes" | adrci | egrep -i -w "listener")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 alias gitrc='cd ${GRID_BASE}/${GRID_ADR}/trace'
+alias trc='cd ${GRID_BASE}/${HOME_ADR}/trace'
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
 alias asmlog='SelectASMLog'
 alias asmlogv='SelectASMLogV'
 alias crslog='SelectCRSLog'
 alias crslogv='SelectCRSLogV'
-alias trc='cd ${GRID_BASE}/${HOME_ADR}/trace'
 alias res='crsctl stat res -t'
 alias rest='crsctl stat res -t -init'
 alias resp='crsctl stat res -p -init'
@@ -1058,7 +1056,6 @@ export OCK="${OCK_HOME}"
 export ORATOP="${ORACLE_HOME}/suptools/oratop"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 #
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${G_HOME}"
@@ -1090,6 +1087,7 @@ export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export HOME_ADR="$(echo "set base ${ORACLE_BASE}; show homes" | adrci | egrep -w "${OPT}")"
 export ORACLE_UNQNAME="$(echo ${HOME_ADR} | cut -f4 -d '/')"
+alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
 alias dblog='SelectDBLog'
@@ -1098,7 +1096,6 @@ alias dglog='SelectDGLog'
 alias dglogv='SelectDGLogV'
 alias ob='cd ${ORACLE_BASE}'
 alias oh='cd ${ORACLE_HOME}'
-alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
 alias dbs='cd ${ORACLE_HOME}/dbs'
 alias tns='cd ${ORACLE_HOME}/network/admin'
 alias tfa='cd ${ORACLE_HOME}/suptools/tfa/release/tfa_home'
@@ -1243,7 +1240,6 @@ export OH="${ORACLE_HOME}"
 export OMS_GC="$(locate -b gc_inst | uniq)"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 export CLASSPATH=${ORACLE_HOME}/jlib
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
@@ -1290,7 +1286,6 @@ export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3
 export OH="${ORACLE_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export _JAVA_OPTIONS='-Dsun.java2d.xrender=false'
 export CLASSPATH="${ORACLE_HOME}/jlib"
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
