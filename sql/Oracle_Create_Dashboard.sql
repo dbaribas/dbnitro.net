@@ -268,7 +268,7 @@ vt_exFC        int := 0;
 begin
 pv_only_gc.delete;
 fv_ta_obj.extend;
-fv_ta_obj(fv_ta_obj.count) := ty_obj( '+Inst-------+CPUIDL%--IO%-USR%--SYS%+--Tprse/s--+Hprse/s+--PhyWIO/s-+-PhyWMB/s-+--PhyRIO/s--+-PhyRMB/s-+-SessLIO/s--+---Exec/s-+RedoMB/s+Commit/s+-ExSSMB/s-+-ExSIMB/s+-ExFCRh/s+') ;
+fv_ta_obj(fv_ta_obj.count) := ty_obj( '+-Inst------+-CPUIDL%-IO%-USR%-SYS%-+-Tprse/s---+Hprse/s+-PhyWIO/s--+-PhyWMB/s-+-PhyRIO/s---+-PhyRMB/s-+-SessLIO/s--+-Exec/s---+RedoMB/s+Commit/s+-ExSSMB/s-+-ExSIMB/s+-ExFCRh/s+') ;
     --- updating CPU info -- updating with every sample in case new node join/leave the cluser
         select sum(first.value) into pv_num_cpus from table (fv_firstsample) first where first.statname = 'NUM_CPU_CORES';
     --- Initializing package variables with sample time for later use.
@@ -355,7 +355,9 @@ fv_ta_obj(fv_ta_obj.count) := ty_obj( '+Inst-------+CPUIDL%--IO%-USR%--SYS%+--Tp
      fv_ta_obj.extend;
      fv_ta_obj(fv_ta_obj.count) := ty_obj( '+-----------+-----------------------+-----------+-------+-----------+----------+------------+----------+------------+----------+--------+--------+----------+---------+---------+'  )  ;
      fv_ta_obj.extend;
-     fv_ta_obj(fv_ta_obj.count) := ty_obj( '                              TOTAL :' || lpad(vt_tprse,11,' ')||','||lpad(vt_hprse,7,' ')||','||lpad(vt_phwio,11,' ')||','||lpad(vt_phwmb,10,' ')||','||lpad(vt_phrio,12,' ')||','||lpad(vt_phrmb,10,' ')||','||lpad(vt_slio,12,' ')||','||lpad(vt_exec,10,' ')||','||lpad(vt_redo,8,' ')||','||lpad(vt_comt,8,' ')||','||lpad(vt_ExSS,10,' ')||','||lpad(vt_ExSI,9,' ')||','||lpad(vt_ExFC,9,' ')||',' );
+     fv_ta_obj(fv_ta_obj.count) := ty_obj( '                              TOTAL |' || lpad(vt_tprse,11,' ') || '|' || lpad(vt_hprse,7,' ') || '|' || lpad(vt_phwio,11,' ') || '|' || lpad(vt_phwmb,10,' ') || '|' || lpad(vt_phrio,12,' ') || '|' || lpad(vt_phrmb,10,' ') || '|' || lpad(vt_slio,12,' ') || '|' || lpad(vt_exec,10,' ') || '|' || lpad(vt_redo,8,' ') || '|' || lpad(vt_comt,8,' ') || '|' || lpad(vt_ExSS,10,' ') || '|' || lpad(vt_ExSI,9,' ') || '|' || lpad(vt_ExFC,9,' ') || '|' );
+     fv_ta_obj.extend;
+     fv_ta_obj(fv_ta_obj.count) := ty_obj( '                                    +-----------+-------+-----------+----------+------------+----------+------------+----------+--------+--------+----------+---------+---------+'  )  ;
 return fv_ta_obj;
 exception
 when others then
@@ -449,7 +451,7 @@ v_tmpmb := fbyt(ii.tmpmb);
            pv_top_sql.extend; pv_top_sql(pv_Top_sql.count) := ty_obj(substr(ii.sql_id,1,13));
  end loop;
   FV_TA_OBJ.EXTEND;
-  fv_ta_obj(fv_ta_obj.count) := ty_obj('+IMPACT%-+--TOP WAIT EVENTS-------------------+-WAIT CLASS----+    +IMPACT%-+ TOP SQLs (child)-+--PLAN#----+-OFFLOAD-+--PGA--+--TEMP-+-PLANC-+------TOP SESSIONS----INST:SID----+' ) ;
+  fv_ta_obj(fv_ta_obj.count) := ty_obj('+-IMPACT%+-TOP WAIT EVENTS--------------------+-WAIT CLASS----+    +-IMPACT%+-TOP SQLs (child)-+-PLAN#-----+-OFFLOAD-+-PGA---+-TEMP--+-PLANC-+------TOP SESSIONS----INST:SID----+' ) ;
 --- printing top wait events and top sqls
   for iii in 1..greatest(fv_wait_obj.count,fv_sql_obj.count) loop
     IF FV_WAIT_OBJ.EXISTS(III)
@@ -567,7 +569,7 @@ end loop;
             end loop;
 --
 -- building header for Global Cache info
-fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj( '    |  Global  |  Global  | Estd.     |                            ');
+fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj( '    |  Global  |  Global  | Estd.     |  |                         |');
 fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj( '    |  Cache   |  Cache   | Intercnt  |  | TOP Segments by GC*     |');
 FV_TA_OBJ.EXTEND;FV_TA_OBJ(FV_TA_OBJ.COUNT) := TY_OBJ( 'Inst|  Blocks  |  Blocks  | Traffic   |  | Waits                   |');
 FV_TA_OBJ.EXTEND;FV_TA_OBJ(FV_TA_OBJ.COUNT) := TY_OBJ( '  ID|  Sent/s  |  Rcvd/s  | MB/s      |  | IMPACT% [Type:Segment]  |');
@@ -1028,7 +1030,7 @@ end;
 begin
 execute immediate fv_sql bulk collect into pv_only_gsqlm;
 fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj( ' ');
-fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj( '+--SqlID--------+--SqlText---' || lpad('-',73,'-') || '+-LongstDur-+-InstCnt-+-Cnt-+--CPU%--+--CONC%--+--CLUS%--+-IO%-+-PhyReadMb+');
+fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj( '+--SqlID--------+--SqlText---' || lpad('-',73,'-') || '+-LongstDur-+-InstCnt--+-Cnt-+-CPU%---+-CONC%--+-CLUS%--+-IO%--+-PhyReadMb--+');
 for i in (select (select round(max(elapsed_time)/1000000) from table(pv_only_gsqlm) gsq1 where gsq1.sql_id = gsm.sql_id) maxduration,
                  (select count(distinct inst_id) from table(pv_only_gash)  sq1 where sq1.sql_id = gsm.sql_id) acrossins, sql_id,
                  (select SUBSTR(SQL_TEXT,1,87) FROM TABLE(PV_ONLY_GASH) SQ2 WHERE SQ2.SQL_ID = GSM.SQL_ID AND ROWNUM = 1) SQL_TEXT,
@@ -1038,11 +1040,11 @@ for i in (select (select round(max(elapsed_time)/1000000) from table(pv_only_gsq
  v_rcnt := 1;
  fv_ta_obj.extend;
 fv_ta_obj(fv_ta_obj.count) := ty_obj('| ' || i.sql_id || ' | ' || rpad(nvl(i.sql_text,' '),83,' ') || ' | ' || lpad(nvl(f_convert_datetime(i.maxduration),' '),9,' ') || ' |    ' || rpad(i.acrossins,4,'  ') || '  |  ' || lpad(i.exccount,2,'  ') || ' | ' || i.db_time );
-fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj('+---------------+' || lpad('-',85,'-') || '+-----------+---------+-----+--------+---------+---------+-----+----------+');
+fv_ta_obj.extend;fv_ta_obj(fv_ta_obj.count) := ty_obj('+---------------+' || lpad('-',85,'-') || '+-----------+----------+-----+--------+--------+--------+------+------------+');
         end loop;
            if v_rcnt = 0 then
             fv_ta_obj.extend;
-      fv_ta_obj(fv_ta_obj.count) := ty_obj( '+---------------+' || lpad('-',85,'-') || '+-----------+---------+-----+--------+---------+---------+-----+----------+');
+      fv_ta_obj(fv_ta_obj.count) := ty_obj( '+---------------+' || lpad('-',85,'-') || '+-----------+----------+-----+--------+--------+--------+------+------------+');
            end if;
 return  fv_ta_obj;
 exception
