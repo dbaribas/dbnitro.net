@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.105"
+SoftwareVersion="1.0.107"
 DateCreation="07/01/2021"
-DateModification="14/06/2024"
+DateModification="28/06/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -664,7 +664,7 @@ fi
 # Setting GLOGIN Functions
 #
 set_GLOGIN() {
-if [[ ! -f ${DBNITRO}/sql/glogin.sql ]]; then
+### if [[ ! -f ${DBNITRO}/sql/glogin.sql ]]; then
 cat > ${DBNITRO}/sql/glogin.sql <<EOF
 set pages 700 lines 700 timing on time on colsep '|' trim on trims on numformat 999999999999999 heading on feedback on
 COLUMN NAME FORMAT A20
@@ -676,7 +676,7 @@ COLUMN FILE_NAME FORMAT A80
 SET SQLPROMPT '&_user@&_connect_identifier> '
 DEFINE _EDITOR=vi
 EOF
-fi
+### fi
 }
 #
 # ------------------------------------------------------------------------
@@ -930,6 +930,7 @@ export ORACLE_SID="${OPT}"
 export ORACLE_HOME="${G_HOME}"
 export GRID_HOME="${ORACLE_HOME}"
 export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
+export ORACLE_BASE="${GRID_BASE}"
 export GRID_SID="${OPT}"
 export TFA_HOME="${ORACLE_HOME}/suptools/tfa/release/tfa_home"
 export OCK_HOME="${ORACLE_HOME}/suptools/orachk"
@@ -1059,7 +1060,7 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 #
 if [[ "${ASM_EXISTS}" == "YES" ]]; then
   export GRID_HOME="${G_HOME}"
-  export GRID_BASE="$(locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g')"
+  export GRID_BASE="$(${GRID_HOME}/bin/orabase)"
   export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${GRID_HOME}/lib:${ORACLE_HOME}/perl/lib:${GRID_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
   export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib:${GRID_HOME}/jlib:${GRID_HOME}/rdbms/jlib"
   export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${GRID_HOME}/bin:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
