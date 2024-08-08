@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.13"
+SoftwareVersion="1.0.15"
 DateCreation="18/09/2023"
-DateModification="10/04/2024"
+DateModification="02/08/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -171,12 +171,10 @@ fi
 #
 if [[ "${LISTENER_PROC}" != "0" ]]; then
   for LISTENER_SERVICE in $(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i "listener"               | awk '{ print $9 }' | uniq | sort); do
-           LISTENER_HOME="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort)"
-            LISTENER_PID="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $2 }' | uniq | sort)"
+           LISTENER_HOME="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort | sed 's/\/bin\/tnslsnr.*//')"
         LISTENER_STARTED="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
-  #        LISTENER_PORT="$(lsof -i -P -n | egrep -i "(LISTEN)" | egrep -i "${LISTENER_PID}" | cut -f2 -d ':' | cut -f1 -d ' ' | uniq)"
-  # printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${LISTENER_SERVICE} [${LISTENER_PORT}]" " RUNNING " " UP SINCE: ${LISTENER_STARTED} " " ${LISTENER_HOME}"
-    printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${LISTENER_SERVICE}  " " RUNNING " " UP SINCE: ${LISTENER_STARTED} " " ${LISTENER_HOME}"
+           LISTENER_PORT="$(${LISTENER_HOME}/bin/lsnrctl status ${LISTENER_SERVICE} | egrep -i "PORT=" | sed -n 's/.*(PORT=\([0-9]*\)).*/\1/p' | uniq)"
+    printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${LISTENER_SERVICE} [${LISTENER_PORT}]" " RUNNING " " UP SINCE: ${LISTENER_STARTED} " " ${LISTENER_HOME}"
     printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
   done
 fi
@@ -255,11 +253,11 @@ else
       DATABASE_STARTED="$(ps -ef | egrep -i "ora_pmon" | egrep -i "${DATABASE_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
          DATABASE_TYPE="$(ps -ef | egrep -i "ora_mrp" | egrep -i "${DATABASE_SERVICE}" | sort | wc -l | xargs | uniq)"
       if [[ "$(cat ${ORATAB} | awk '{ print $1 }' | cut -f1 -d ':' | egrep -w "${DATABASE_SERVICE}" | wc -l | xargs | uniq)" == "0" ]]; then
-        printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${DATABASE_SERVICE} " " RUNNING " " UP SINCE: ${DATABASE_STARTED}" " $(if [[ "${DATABASE_TYPE}" == "0" ]]; then echo "PRIMARY"; else echo "STANDBY"; fi) "
+        printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${DATABASE_SERVICE} " " RUNNING " " UP SINCE: ${DATABASE_STARTED}" " $(if [[ "${DATABASE_TYPE}" == "0" ]]; then echo "[ PRIMARY ]"; else echo "[ STANDBY ]"; fi) "
         printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
       else
         DATABASE_HOMES="$(cat ${ORATAB} | egrep -w "${DATABASE_SERVICE}" | cut -f2 -d ':')"
-        printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${DATABASE_SERVICE} " " RUNNING " " UP SINCE: ${DATABASE_STARTED}" " ${DATABASE_HOMES}: $(if [[ "${DATABASE_TYPE}" == "0" ]]; then echo "PRIMARY"; else echo "STANDBY"; fi) "
+        printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${DATABASE_SERVICE} " " RUNNING " " UP SINCE: ${DATABASE_STARTED}" " ${DATABASE_HOMES} $(if [[ "${DATABASE_TYPE}" == "0" ]]; then echo "[ PRIMARY ]"; else echo "[ STANDBY ]"; fi) "
         printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
       fi
     done
@@ -367,6 +365,3 @@ OracleProducts
 # THE SCRIPT FINISHES HERE
 # --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
 #
-
-
-# ls | nc -l -p 4000
