@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.109"
+SoftwareVersion="1.0.111"
 DateCreation="07/01/2021"
-DateModification="02/08/2024"
+DateModification="09/08/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -264,10 +264,10 @@ if [[ "${LSNRCTL}" != 0 ]]; then
   for LISTENER_SERVICE in $(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i "listener"               | awk '{ print $9 }' | uniq | sort); do
            LISTENER_HOME="$(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i -w "${LISTENER_SERVICE}" | awk '{ print $8 }' | uniq | sort | sed 's/\/bin\/tnslsnr.*//')"
            LISTENER_PORT="$(${LISTENER_HOME}/bin/lsnrctl status ${LISTENER_SERVICE} | egrep -i "PORT=" | sed -n 's/.*(PORT=\([0-9]*\)).*/\1/p' | uniq)"
-  printf "|%-22s|%-100s|\n" "                     LISTENER " " [ ONLINE ] [ ${LISTENER_SERVICE} ] [ ${LISTENER_PORT} ] [ ${LISTENER_HOME} ]"
+  printf "|%-22s|%-100s|\n" "                 [ LISTENER ] " " [ ONLINE ] [ ${LISTENER_SERVICE} ] [ ${LISTENER_PORT} ] [ ${LISTENER_HOME} ]"
   done
 else 
-  printf "|%-22s|%-100s|\n" "                     LISTENER " " [ OFFLINE ] "
+  printf "|%-22s|%-100s|\n" "                 [ LISTENER ] " " [ OFFLINE ] "
 fi
 }
 #
@@ -390,20 +390,20 @@ GridService() {
 if [[ "${GRID}" != 0 ]]; then 
        CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq               | sort | wc -l)"
   CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | awk '{ print $8 }' | uniq | sort)"
-  if [[ "${CRSD}" != 0 ]]; then GI_CRSD="[ ONLINE ]"; else GI_CRSD="[ OFFLINE ]"; fi
+  if [[ "${CRSD}" != 0 ]]; then GI_CRSD="ONLINE"; else GI_CRSD="OFFLINE"; fi
   #
        OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq               | sort | wc -l)"
   OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
-  if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="[ ONLINE ]"; else GI_OCSSD="[ OFFLINE ]"; fi
+  if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="ONLINE"; else GI_OCSSD="OFFLINE"; fi
   #
        OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq               | sort | wc -l)"
   OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
-  if [[ "${OHASD}" != 0 ]]; then GI_OHASD="[ ONLINE ]"; else GI_OHASD="[ OFFLINE ]"; fi
+  if [[ "${OHASD}" != 0 ]]; then GI_OHASD="ONLINE"; else GI_OHASD="OFFLINE"; fi
   #
   printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ ONLINE ]"
-  printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " ${GI_CRSD} ${CRSD_HOME} "
-  printf "|%-22s|%-100s|\n" "                    [ OCSSD ] " " ${GI_OCSSD} ${OCSSD_HOME} "
-  printf "|%-22s|%-100s|\n" "                    [ OHASD ] " " ${GI_OHASD} ${OHASD_HOME} "
+  printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " [ ${GI_CRSD} ] [ ${CRSD_HOME} ]"
+  printf "|%-22s|%-100s|\n" "                    [ OCSSD ] " " [ ${GI_OCSSD} ] [ ${OCSSD_HOME} ]"
+  printf "|%-22s|%-100s|\n" "                    [ OHASD ] " " [ ${GI_OHASD} ] [ ${OHASD_HOME} ]"
 else
   printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ OFFLINE ] "
   printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " [ OFFLINE ] "
@@ -845,17 +845,17 @@ if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
   HOME_RW="RW"
 else
   HOME_STATUS="$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)"
-  if [[ ${HOME_STATUS} == "Y" ]]; then HOME_RW="[ RO ]"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="[ RW ]"; fi
+  if [[ ${HOME_STATUS} == "Y" ]]; then HOME_RW="RO"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="RW"; fi
 fi
 #
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-22s|%-100s|\n" "                  ORACLE_BASE " " ${ORACLE_BASE} "
-printf "|%-22s|%-100s|\n" "                  ORACLE_HOME " " ${ORACLE_HOME} "
-printf "|%-22s|%-100s|\n" "               ORACLE_VERSION " " $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') "
-printf "|%-22s|%-100s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
-printf "|%-22s|%-100s|\n" "                   OWNER_HOME " " ${OWNER} "
+printf "|%-22s|%-100s|\n" "              [ ORACLE_BASE ] " " [ ${ORACLE_BASE} ]"
+printf "|%-22s|%-100s|\n" "              [ ORACLE_HOME ] " " [ ${ORACLE_HOME} ]"
+printf "|%-22s|%-100s|\n" "           [ ORACLE_VERSION ] " " [ $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') ]"
+printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
+printf "|%-22s|%-100s|\n" "               [ OWNER_HOME ] " " [ ${OWNER} ]"
 if [[ "${ASM_EXISTS}" == "YES" ]]; then GridService; fi
 ListenerService
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
@@ -942,39 +942,39 @@ if [[ ! -f ${ORACLE_HOME}/install/orabasetab ]]; then
   HOME_RW="RW"
 else
   HOME_STATUS="$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)"
-  if [[ "${HOME_STATUS}" == "Y" ]]; then HOME_RW="[ RO ]"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="[ RW ]"; fi
+  if [[ "${HOME_STATUS}" == "Y" ]]; then HOME_RW="RO"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="RW"; fi
 fi
 #
 OWNER="$(ls -l ${GRID_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
 PROC="$(ps -ef | egrep -i "asm_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)"
-if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then GRID_STATUS="[ ONLINE ]"; else GRID_STATUS="[ OFFLINE ]"; fi
+if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then GRID_STATUS="ONLINE"; else GRID_STATUS="OFFLINE"; fi
 #
 CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq | sort | wc -l)"
 CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | awk '{ print $8 }' | uniq | sort)"
-if [[ "${CRSD}" != 0 ]]; then GI_CRSD="[ ONLINE ]"; else GI_CRSD="[ OFFLINE ]"; fi
+if [[ "${CRSD}" != 0 ]]; then GI_CRSD="ONLINE"; else GI_CRSD="OFFLINE"; fi
 #
 OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq | sort | wc -l)"
 OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
-if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="[ ONLINE ]"; else GI_OCSSD="[ OFFLINE ]"; fi
+if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="ONLINE"; else GI_OCSSD="OFFLINE"; fi
 #
 OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq | sort | wc -l)"
 OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
-if [[ "${OHASD}" != 0 ]]; then GI_OHASD="[ ONLINE ]"; else GI_OHASD="[ OFFLINE ]"; fi
+if [[ "${OHASD}" != 0 ]]; then GI_OHASD="ONLINE"; else GI_OHASD="OFFLINE"; fi
 #
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-22s|%-100s|\n" "                    GRID_BASE " " ${GRID_BASE} "
-printf "|%-22s|%-100s|\n" "                    GRID_HOME " " ${GRID_HOME} "
-printf "|%-22s|%-100s|\n" "                 GRID_VERSION " " $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') "
-printf "|%-22s|%-100s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
-printf "|%-22s|%-100s|\n" "                   GRID_OWNER " " ${OWNER} "
-printf "|%-22s|%-100s|\n" "                     GRID_SID " " ${GRID_SID} "
-printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " ${GRID_STATUS} "
-printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " ${GI_CRSD} ${CRSD_HOME} "
-printf "|%-22s|%-100s|\n" "                    [ OCSSD ] " " ${GI_OCSSD} ${OCSSD_HOME} "
-printf "|%-22s|%-100s|\n" "                    [ OHASD ] " " ${GI_OHASD} ${OHASD_HOME} "
+printf "|%-22s|%-100s|\n" "                [ GRID_BASE ] " " [ ${GRID_BASE} ]"
+printf "|%-22s|%-100s|\n" "                [ GRID_HOME ] " " [ ${GRID_HOME} ]"
+printf "|%-22s|%-100s|\n" "             [ GRID_VERSION ] " " [ $(sqlplus -v | egrep -i "Version" | awk '{ print $2 }') ]"
+printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
+printf "|%-22s|%-100s|\n" "               [ GRID_OWNER ] " " [ ${OWNER} ]"
+printf "|%-22s|%-100s|\n" "                 [ GRID_SID ] " " [ ${GRID_SID} ]"
+printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ ${GRID_STATUS} ]"
+printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " [ ${GI_CRSD} ] [ ${CRSD_HOME} ]"
+printf "|%-22s|%-100s|\n" "                    [ OCSSD ] " " [ ${GI_OCSSD} ] [ ${OCSSD_HOME} ]"
+printf "|%-22s|%-100s|\n" "                    [ OHASD ] " " [ ${GI_OHASD} ] [ ${OHASD_HOME} ]"
 ListenerService
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 #
@@ -1089,14 +1089,14 @@ if [[ ! -f "${ORACLE_HOME}/install/orabasetab" ]]; then
   HOME_RW="RW"
 else
   HOME_STATUS="$(cat ${ORACLE_HOME}/install/orabasetab | egrep -i ":N|:Y" | cut -f4 -d ':' | uniq)"
-  if [[ "${HOME_STATUS}" == "Y" ]]; then HOME_RW="[ RO ]"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="[ RW ]"; fi
+  if [[ "${HOME_STATUS}" == "Y" ]]; then HOME_RW="RO"; elif [[ "${HOME_STATUS}" == "N" ]]; then HOME_RW="RW"; fi
 fi
 #
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
 PROC="$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)"
 #
-if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then DB_STATUS="[ ONLINE ]"; else DB_STATUS="[ OFFLINE ]"; fi
+if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then DB_STATUS="ONLINE"; else DB_STATUS="OFFLINE"; fi
 #
 if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l | xargs)" != "0" ]]; then
   V_INSTANCE_STATUS="$(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
@@ -1104,30 +1104,30 @@ if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print 
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
     printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-    printf "|%-22s|%-100s|\n" "                DATABASE_NAME " " $(echo "select to_char(name) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "         DATABASE_UNIQUE_NAME " " $(echo "select to_char(db_unique_name) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                         DBID " " $(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " $(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                DATABASE_ROLE " " $(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              DATABASE_UPTIME " " $(echo "select to_char(startup_time, 'yyyy-mm-dd hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              INSTANCE_STATUS " " $(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                    OPEN_MODE " " $(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              ARCHIVELOG_MODE " " $(echo "select case when log_mode = 'ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                    FORCE_LOG " " $(echo "select to_char(force_logging) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                    FLASHBACK " " $(echo "select to_char(flashback_on) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "            INSTANCE_SGA_SIZE " " $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'sga_max_size';" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "            INSTANCE_PGA_SIZE " " $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'pga_aggregate_target';" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                DATAFILE_SIZE " " $(echo "select trim(to_char(sum(bytes)/1024/1024/1024, '999,999.99')) || ' GB' from dba_data_files;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                     FRA_SIZE " " $(echo "select trim(to_char(sum(space_limit)/1024/1024/1024, '999,999.99')) || ' GB' from v\$recovery_file_dest;" | sqlplus -S / as sysdba| tail -2) "
-    printf "|%-22s|%-100s|\n" "               USERS/SESSIONS " " $(echo "select to_char(count(*)) from v\$session WHERE username is not null and username not in ('SYS', 'SYSTEM');" | sqlplus -S / as sysdba| tail -2) "
-    printf "|%-22s|%-100s|\n" "                 CHARACTERSET " " $(echo "select to_char(value) from nls_database_parameters where parameter = 'NLS_CHARACTERSET';" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                  ORACLE_BASE " " ${ORACLE_BASE} "
-    printf "|%-22s|%-100s|\n" "                  ORACLE_HOME " " ${ORACLE_HOME} "
-    printf "|%-22s|%-100s|\n" "               ORACLE_VERSION " " $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') "
-    printf "|%-22s|%-100s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
-    printf "|%-22s|%-100s|\n" "                 ORACLE_OWNER " " ${OWNER} "
-    printf "|%-22s|%-100s|\n" "                   ORACLE_SID " " ${ORACLE_SID} "
-    printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " ${DB_STATUS} "
+    printf "|%-22s|%-100s|\n" "            [ DATABASE_NAME ] " " [ $(echo "select to_char(name) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "     [ DATABASE_UNIQUE_NAME ] " " [ $(echo "select to_char(db_unique_name) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                     [ DBID ] " " [ $(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ DATABASE_STATUS ] " " [ $(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "            [ DATABASE_ROLE ] " " [ $(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ DATABASE_UPTIME ] " " [ $(echo "select to_char(startup_time, 'yyyy-mm-dd hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ INSTANCE_STATUS ] " " [ $(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                [ OPEN_MODE ] " " [ $(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ ARCHIVELOG_MODE ] " " [ $(echo "select case when log_mode = 'ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                [ FORCE_LOG ] " " [ $(echo "select to_char(force_logging) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                [ FLASHBACK ] " " [ $(echo "select to_char(flashback_on) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "        [ INSTANCE_SGA_SIZE ] " " [ $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'sga_max_size';" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "        [ INSTANCE_PGA_SIZE ] " " [ $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'pga_aggregate_target';" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "            [ DATAFILE_SIZE ] " " [ $(echo "select trim(to_char(sum(bytes)/1024/1024/1024, '999,999.99')) || ' GB' from dba_data_files;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                 [ FRA_SIZE ] " " [ $(echo "select trim(to_char(sum(space_limit)/1024/1024/1024, '999,999.99')) || ' GB' from v\$recovery_file_dest;" | sqlplus -S / as sysdba| tail -2) ]"
+    printf "|%-22s|%-100s|\n" "           [ USERS/SESSIONS ] " " [ $(echo "select to_char(count(*)) from v\$session WHERE username is not null and username not in ('SYS', 'SYSTEM');" | sqlplus -S / as sysdba| tail -2) ]"
+    printf "|%-22s|%-100s|\n" "             [ CHARACTERSET ] " " [ $(echo "select to_char(value) from nls_database_parameters where parameter = 'NLS_CHARACTERSET';" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "              [ ORACLE_BASE ] " " [ ${ORACLE_BASE} ]"
+    printf "|%-22s|%-100s|\n" "              [ ORACLE_HOME ] " " [ ${ORACLE_HOME} ]"
+    printf "|%-22s|%-100s|\n" "           [ ORACLE_VERSION ] " " [ $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') ]"
+    printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
+    printf "|%-22s|%-100s|\n" "             [ ORACLE_OWNER ] " " [ ${OWNER} ]"
+    printf "|%-22s|%-100s|\n" "               [ ORACLE_SID ] " " [ ${ORACLE_SID} ]"
+    printf "|%-22s|%-100s|\n" "          [ DATABASE_STATUS ] " " [ ${DB_STATUS} ]"
     ListenerService
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
   fi
@@ -1136,30 +1136,30 @@ if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print 
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
     printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-    printf "|%-22s|%-100s|\n" "                DATABASE_NAME " " $(echo "select to_char(name) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "         DATABASE_UNIQUE_NAME " " $(echo "select to_char(db_unique_name) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                         DBID " " $(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " $(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                DATABASE_ROLE " " $(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              DATABASE_UPTIME " " $(echo "select to_char(startup_time, 'yyyy-mm-dd hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              INSTANCE_STATUS " " $(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                    OPEN_MODE " " $(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "              ARCHIVELOG_MODE " " $(echo "select case when log_mode = 'ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                    FORCE_LOG " " $(echo "select to_char(force_logging) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                    FLASHBACK " " $(echo "select to_char(flashback_on) from v\$database;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "            INSTANCE_SGA_SIZE " " $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'sga_max_size';" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "            INSTANCE_PGA_SIZE " " $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'pga_aggregate_target';" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "                DATAFILE_SIZE " " DATABASE NOT OPENED  "
-    printf "|%-22s|%-100s|\n" "                     FRA_SIZE " " $(echo "select trim(to_char(sum(space_limit)/1024/1024/1024, '999,999.99')) || ' GB' from v\$recovery_file_dest;" | sqlplus -S / as sysdba | tail -2) "
-    printf "|%-22s|%-100s|\n" "               USERS/SESSIONS " " $(echo "select to_char(count(*)) from v\$session WHERE username is not null and username not in ('SYS', 'SYSTEM');" | sqlplus -S / as sysdba| tail -2) "
-    printf "|%-22s|%-100s|\n" "                 CHARACTERSET " " DATABASE NOT OPENED  "
-    printf "|%-22s|%-100s|\n" "                  ORACLE_BASE " " ${ORACLE_BASE} "
-    printf "|%-22s|%-100s|\n" "                  ORACLE_HOME " " ${ORACLE_HOME} "
-    printf "|%-22s|%-100s|\n" "               ORACLE_VERSION " " $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') "
-    printf "|%-22s|%-100s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
-    printf "|%-22s|%-100s|\n" "                 ORACLE_OWNER " " ${OWNER} "
-    printf "|%-22s|%-100s|\n" "                   ORACLE_SID " " ${ORACLE_SID} "
-    printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " ${DB_STATUS} "
+    printf "|%-22s|%-100s|\n" "            [ DATABASE_NAME ] " " [ $(echo "select to_char(name) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "     [ DATABASE_UNIQUE_NAME ] " " [ $(echo "select to_char(db_unique_name) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                     [ DBID ] " " [ $(echo "select to_char(dbid) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ DATABASE_STATUS ] " " [ $(echo "select to_char(database_status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "            [ DATABASE_ROLE ] " " [ $(echo "select to_char(database_role) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ DATABASE_UPTIME ] " " [ $(echo "select to_char(startup_time, 'yyyy-mm-dd hh24:mi') from v\$instance;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ INSTANCE_STATUS ] " " [ $(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                [ OPEN_MODE ] " " [ $(echo "select to_char(open_mode) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "          [ ARCHIVELOG_MODE ] " " [ $(echo "select case when log_mode = 'ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                [ FORCE_LOG ] " " [ $(echo "select to_char(force_logging) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "                [ FLASHBACK ] " " [ $(echo "select to_char(flashback_on) from v\$database;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "        [ INSTANCE_SGA_SIZE ] " " [ $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'sga_max_size';" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "        [ INSTANCE_PGA_SIZE ] " " [ $(echo "select trim(to_char(value/1024/1024/1024, '999,999.99')) || ' GB' from v\$parameter where name = 'pga_aggregate_target';" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "            [ DATAFILE_SIZE ] " " [ DATABASE NOT OPENED ]"
+    printf "|%-22s|%-100s|\n" "                 [ FRA_SIZE ] " " [ $(echo "select trim(to_char(sum(space_limit)/1024/1024/1024, '999,999.99')) || ' GB' from v\$recovery_file_dest;" | sqlplus -S / as sysdba | tail -2) ]"
+    printf "|%-22s|%-100s|\n" "           [ USERS/SESSIONS ] " " [ $(echo "select to_char(count(*)) from v\$session WHERE username is not null and username not in ('SYS', 'SYSTEM');" | sqlplus -S / as sysdba| tail -2) ]"
+    printf "|%-22s|%-100s|\n" "             [ CHARACTERSET ] " " [ DATABASE NOT OPENED ]"
+    printf "|%-22s|%-100s|\n" "              [ ORACLE_BASE ] " " [ ${ORACLE_BASE} ]"
+    printf "|%-22s|%-100s|\n" "              [ ORACLE_HOME ] " " [ ${ORACLE_HOME} ]"
+    printf "|%-22s|%-100s|\n" "           [ ORACLE_VERSION ] " " [ $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') ]"
+    printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
+    printf "|%-22s|%-100s|\n" "             [ ORACLE_OWNER ] " " [ ${OWNER} ]"
+    printf "|%-22s|%-100s|\n" "               [ ORACLE_SID ] " " [ ${ORACLE_SID} ]"
+    printf "|%-22s|%-100s|\n" "          [ DATABASE_STATUS ] " " [ ${DB_STATUS} ]"
     ListenerService
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
   fi
@@ -1168,13 +1168,13 @@ elif [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ prin
   printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
   printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
   printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-  printf "|%-22s|%-100s|\n" "                  ORACLE_BASE " " ${ORACLE_BASE} "
-  printf "|%-22s|%-100s|\n" "                  ORACLE_HOME " " ${ORACLE_HOME} "
-  printf "|%-22s|%-100s|\n" "               ORACLE_VERSION " " $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') "
-  printf "|%-22s|%-100s|\n" "              HOME_READ/WRITE " " ${HOME_RW} "
-  printf "|%-22s|%-100s|\n" "                 ORACLE_OWNER " " ${OWNER} "
-  printf "|%-22s|%-100s|\n" "                   ORACLE_SID " " ${ORACLE_SID} "
-  printf "|%-22s|%-100s|\n" "              DATABASE_STATUS " " ${DB_STATUS} "
+  printf "|%-22s|%-100s|\n" "              [ ORACLE_BASE ] " " [ ${ORACLE_BASE} ]"
+  printf "|%-22s|%-100s|\n" "              [ ORACLE_HOME ] " " [ ${ORACLE_HOME} ]"
+  printf "|%-22s|%-100s|\n" "           [ ORACLE_VERSION ] " " [ $(sqlplus -V | egrep -i "Version" | awk '{ print $2 }') ]"
+  printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
+  printf "|%-22s|%-100s|\n" "             [ ORACLE_OWNER ] " " [ ${OWNER} ]"
+  printf "|%-22s|%-100s|\n" "               [ ORACLE_SID ] " " [ ${ORACLE_SID} ]"
+  printf "|%-22s|%-100s|\n" "          [ DATABASE_STATUS ] " " [ ${DB_STATUS} ]"
   ListenerService
   printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 fi
@@ -1214,14 +1214,14 @@ alias list='${DBNITRO}/bin/OracleList.sh'
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
 OMS_STATUS="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "wlserver" | wc -l | xargs)"
-if [[ "${OMS_STATUS}" != 0 ]]; then OMS="[ ONLINE ]"; else OMS="[ OFFLINE ]"; fi
+if [[ "${OMS_STATUS}" != 0 ]]; then OMS="ONLINE"; else OMS="OFFLINE"; fi
 #
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-22s|%-100s|\n" "                     OMS_HOME " " ${ORACLE_HOME} "
-printf "|%-22s|%-100s|\n" "                    OMS_OWNER " " ${OWNER} "
-printf "|%-22s|%-100s|\n" "                   OMS_STATUS " " ${OMS} "
+printf "|%-22s|%-100s|\n" "                 [ OMS_HOME ] " " [ ${ORACLE_HOME} ]"
+printf "|%-22s|%-100s|\n" "                [ OMS_OWNER ] " " [ ${OWNER} ]"
+printf "|%-22s|%-100s|\n" "               [ OMS_STATUS ] " " [ ${OMS} ]"
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 #
 HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
@@ -1264,9 +1264,9 @@ if [[ "${AGENT_STATUS}" != 0 ]]; then AGENT="[ ONLINE ]"; else AGENT="[ OFFLINE 
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
-printf "|%-22s|%-100s|\n" "                   AGENT_HOME " " ${ORACLE_HOME} "
-printf "|%-22s|%-100s|\n" "                  AGENT_OWNER " " ${OWNER} "
-printf "|%-22s|%-100s|\n" "                 AGENT_STATUS " " ${AGENT} "
+printf "|%-22s|%-100s|\n" "               [ AGENT_HOME ] " " [ ${ORACLE_HOME} ]"
+printf "|%-22s|%-100s|\n" "              [ AGENT_OWNER ] " " [ ${OWNER} ]"
+printf "|%-22s|%-100s|\n" "             [ AGENT_STATUS ] " " [ ${AGENT} ]"
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 #
 HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
