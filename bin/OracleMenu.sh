@@ -422,14 +422,10 @@ if [[ ${ASM} == 0 ]]; then
   ASM_EXISTS="NO"
 else
   ASM_EXISTS="YES"
-  G_SID=$(cat ${ORATAB}       | egrep -i -v "^#|^$"   | egrep -i "+ASM*"   | cut -f1 -d ':')
-  G_HOME=$(cat ${ORATAB}      | egrep -i -v "^#|^$"   | egrep -i "+ASM*"   | cut -f2 -d ':')
-  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }'    | egrep -i -v "root" | egrep -Ev "^$" | uniq)
-  if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then
-    ASM_USER="YES"
-  else
-    ASM_USER="NO"
-  fi
+  G_SID=$(cat ${ORATAB}       | egrep -i -v "^#|^$" | egrep -i "+ASM*"   | cut -f1 -d ':')
+  G_HOME=$(cat ${ORATAB}      | egrep -i -v "^#|^$" | egrep -i "+ASM*"   | cut -f2 -d ':')
+  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }'  | egrep -i -v "root" | egrep -Ev "^$" | uniq)
+  if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then ASM_USER="YES"; else ASM_USER="NO"; fi
 fi
 #
 # ------------------------------------------------------------------------
@@ -962,7 +958,6 @@ printf "|%-22s|%-100s|\n" "             [ GRID_VERSION ] " " [ $(sqlplus -v | eg
 printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
 printf "|%-22s|%-100s|\n" "               [ GRID_OWNER ] " " [ ${OWNER} ]"
 printf "|%-22s|%-100s|\n" "                 [ GRID_SID ] " " [ ${GRID_SID} ]"
-printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ ${GRID_STATUS} ]"
 if [[ "${ASM_EXISTS}" == "YES" ]]; then GridService; fi
 ListenerService
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
@@ -1248,7 +1243,7 @@ alias list='${DBNITRO}/bin/OracleList.sh'
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
 AGENT_STATUS="$(ps -ef | egrep -i -v "grep|egrep|zabbix" | egrep -i "agent_|perl" | uniq | sort | wc -l | xargs)"
-if [[ "${AGENT_STATUS}" != 0 ]]; then AGENT="[ ONLINE ]"; else AGENT="[ OFFLINE ]"; fi
+if [[ "${AGENT_STATUS}" != 0 ]]; then AGENT="ONLINE"; else AGENT="OFFLINE"; fi
 #
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
