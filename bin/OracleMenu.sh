@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.111"
+SoftwareVersion="1.0.113"
 DateCreation="07/01/2021"
-DateModification="09/08/2024"
+DateModification="12/08/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -390,14 +390,17 @@ GridService() {
 if [[ "${GRID}" != 0 ]]; then 
        CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq               | sort | wc -l)"
   CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | awk '{ print $8 }' | uniq | sort)"
+  #
   if [[ "${CRSD}" != 0 ]]; then GI_CRSD="ONLINE"; else GI_CRSD="OFFLINE"; fi
   #
        OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq               | sort | wc -l)"
   OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
+  #
   if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="ONLINE"; else GI_OCSSD="OFFLINE"; fi
   #
        OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq               | sort | wc -l)"
   OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
+  #
   if [[ "${OHASD}" != 0 ]]; then GI_OHASD="ONLINE"; else GI_OHASD="OFFLINE"; fi
   #
   printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ ONLINE ]"
@@ -950,18 +953,6 @@ OWNER="$(ls -l ${GRID_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -E
 PROC="$(ps -ef | egrep -i "asm_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/asm_pmon_//g)"
 if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then GRID_STATUS="ONLINE"; else GRID_STATUS="OFFLINE"; fi
 #
-CRSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | uniq | sort | wc -l)"
-CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "crsd.bin" | awk '{ print $8 }' | uniq | sort)"
-if [[ "${CRSD}" != 0 ]]; then GI_CRSD="ONLINE"; else GI_CRSD="OFFLINE"; fi
-#
-OCSSD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | uniq | sort | wc -l)"
-OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
-if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="ONLINE"; else GI_OCSSD="OFFLINE"; fi
-#
-OHASD="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | uniq | sort | wc -l)"
-OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
-if [[ "${OHASD}" != 0 ]]; then GI_OHASD="ONLINE"; else GI_OHASD="OFFLINE"; fi
-#
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
@@ -972,9 +963,7 @@ printf "|%-22s|%-100s|\n" "          [ HOME_READ/WRITE ] " " [ ${HOME_RW} ]"
 printf "|%-22s|%-100s|\n" "               [ GRID_OWNER ] " " [ ${OWNER} ]"
 printf "|%-22s|%-100s|\n" "                 [ GRID_SID ] " " [ ${GRID_SID} ]"
 printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ ${GRID_STATUS} ]"
-printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " [ ${GI_CRSD} ] [ ${CRSD_HOME} ]"
-printf "|%-22s|%-100s|\n" "                    [ OCSSD ] " " [ ${GI_OCSSD} ] [ ${OCSSD_HOME} ]"
-printf "|%-22s|%-100s|\n" "                    [ OHASD ] " " [ ${GI_OHASD} ] [ ${OHASD_HOME} ]"
+if [[ "${ASM_EXISTS}" == "YES" ]]; then GridService; fi
 ListenerService
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 #
