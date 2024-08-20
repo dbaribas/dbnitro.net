@@ -738,7 +738,7 @@ fi
 # List PDBs
 #
 list_PDBS() {
-  echo "@${DBNITRO}/sql/DBA_LIST_PDBS.sql;" | sqlplus -S / as sysdba
+  echo "@${DBNITRO}/sql/DBA_SHOW_LIST_PDBS.sql;" | sqlplus -S / as sysdba
 }
 #
 # ------------------------------------------------------------------------
