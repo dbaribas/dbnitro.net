@@ -1,8 +1,8 @@
 #
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.7"
-DateCreation="18/08/2021"
-DateModification="19/08/2024"
+SoftwareVersion="1.0.1"
+DateCreation="22/01/2024"
+DateModification="22/01/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -15,23 +15,29 @@ SetClear() {
   printf "\033c"
 }
 #
-ASM_HELP() {
+EXA_HELP() {
 SetClear
 SepLine
-???
+echo -e "\
+|#[ ZDL_001 ] ZDL: VERIFY DATABASE VERSION                            |#|[ ZDL_002 ] EXA: VERIFY INSTALLED PATCHES - DETAILS      |#|"
 SepLine
 }
 #
 #########################################################################################################
 #
-# ODG Funtions
+# ZDL Funtions
 #
 #########################################################################################################
-ODG() {
-select ODG in $(ls ${DBNITRO/}sql/ODG_[0-9]*.sql); do
-  echo "@${ODG};" | sqlplus -S / as sysdba
-done
-}
+# 
+#########################################################################################################
+#
+
+
+
+
+
+
+#
 #########################################################################################################
 # Finish of the System
 #########################################################################################################
