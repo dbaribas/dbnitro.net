@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.15"
+SoftwareVersion="1.0.17"
 DateCreation="18/09/2023"
-DateModification="02/08/2024"
+DateModification="19/08/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -19,13 +19,14 @@ ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
 #
 if [[ "$(uname)" == "SunOS" ]]; then
   OS="Solaris"
-  if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
+  ### if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   if [[ -f "/var/opt/oracle/oraInst.loc" ]]; then ORA_INST="/var/opt/oracle/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
   ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
   CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'    | uniq                         | sort               | wc -l          | xargs)"
   OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'   | uniq                         | sort               | wc -l          | xargs)"
   OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'   | uniq                         | sort               | wc -l          | xargs)"
+  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'    | uniq                         | sort               | wc -l          | xargs)"
   DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | uniq           | sort  | wc -l | xargs)"
   LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"    | awk '{ print $9 }'           | uniq               | sort           | wc -l | xargs)"
   AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl" | uniq                         | sort               | wc -l          | xargs)"
@@ -39,13 +40,14 @@ if [[ "$(uname)" == "SunOS" ]]; then
   OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
 elif [[ "$(uname)" == "AIX" ]]; then
   OS="AIX"
-  if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
+  ### if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   if [[ -f "/opt/oracle/etc/oraInst.loc" ]]; then ORA_INST="/opt/oracle/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
   ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
   CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'    | uniq                         | sort               | wc -l          | xargs)"
   OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'   | uniq                         | sort               | wc -l          | xargs)"
   OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'   | uniq                         | sort               | wc -l          | xargs)"
+  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'    | uniq                         | sort               | wc -l          | xargs)"
   DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | uniq           | sort  | wc -l | xargs)"
   LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"    | awk '{ print $9 }'           | uniq               | sort           | wc -l | xargs)"
   AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl" | uniq                         | sort               | wc -l          | xargs)"
@@ -59,13 +61,14 @@ elif [[ "$(uname)" == "AIX" ]]; then
   OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
 elif [[ "$(uname)" == "Linux" ]]; then
   OS="Linux"
-  if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
+  ### if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   if [[ -f "/etc/oraInst.loc" ]]; then ORA_INST="/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
   ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
   CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'    | uniq                         | sort               | wc -l          | xargs)"
   OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'   | uniq                         | sort               | wc -l          | xargs)"
   OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'   | uniq                         | sort               | wc -l          | xargs)"
+  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'    | uniq                         | sort               | wc -l          | xargs)"
   DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | uniq           | sort  | wc -l | xargs)"
   LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"    | awk '{ print $9 }'           | uniq               | sort           | wc -l | xargs)"
   AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl" | uniq                         | sort               | wc -l          | xargs)"
@@ -115,13 +118,14 @@ OracleServices() {
 # CRSD OK
 # OCSSD OK
 # OHASD OK
+# DG OBS OK
 # LISTENERS OK
 # AGENT OK
 # MIDDLEWARE OK
 # GOLDENGATE OK
 # DATABASE OK
 #
-if [[ "${ASM_PROC}" != "0" ]] || [[ "${CRSD_PROC}" != "0" ]] || [[ "${OCSSD_PROC}" != "0" ]] || [[ "${OHASD_PROC}" != "0" ]] || [[ "${LISTENER_PROC}" != "0" ]] || [[ "${AGENT_PROC}" != "0" ]] || [[ "${OMS_PROC}" != "0" ]] || [[ "${OGG_PROC}" != "0" ]] || [[ "${DATABASE_PROC}" != "0" ]]; then
+if [[ "${ASM_PROC}" != "0" ]] || [[ "${CRSD_PROC}" != "0" ]] || [[ "${OCSSD_PROC}" != "0" ]] || [[ "${OHASD_PROC}" != "0" ]] || [[ "${DGOBS_PROC}" != "0" ]] || [[ "${LISTENER_PROC}" != "0" ]] || [[ "${AGENT_PROC}" != "0" ]] || [[ "${OMS_PROC}" != "0" ]] || [[ "${OGG_PROC}" != "0" ]] || [[ "${DATABASE_PROC}" != "0" ]]; then
 #
 printf "+%-50s+\n"    "--------------------------------------------------"
 printf "|%-50s%-s|\n" " ORACLE SERVICES RUNNING                          "
@@ -167,6 +171,15 @@ if [[ "${OHASD_PROC}" != "0" ]]; then
   printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
 fi
 #
+# DGMGRL OBSERVER
+#
+if [[ "${DGOBS_PROC}" != "0" ]]; then
+  for DGOBS_SERVICE in $(ps -ef | egrep -v "grep|egrep" | egrep "observer" | awk '{ print $15 }' | uniq | sort); do
+    DGOBS_STARTED="$(ps -ef | egrep -v "grep|egrep" | egrep "${DGOBS_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
+    printf "|%-22s|%-22s|%-22s|%-60s|\n" " OBSERVER " " RUNNING " " UP SINCE: ${DGOBS_STARTED} " " ${DGOBS_SERVICE}"
+    printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
+  done
+fi
 # LISTENER
 #
 if [[ "${LISTENER_PROC}" != "0" ]]; then
