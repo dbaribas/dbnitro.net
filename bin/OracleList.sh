@@ -19,7 +19,7 @@ ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
 #
 if [[ "$(uname)" == "SunOS" ]]; then
   OS="Solaris"
-  ### if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
+  if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; continue; fi
   if [[ -f "/var/opt/oracle/oraInst.loc" ]]; then ORA_INST="/var/opt/oracle/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
   ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
@@ -40,7 +40,7 @@ if [[ "$(uname)" == "SunOS" ]]; then
   OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
 elif [[ "$(uname)" == "AIX" ]]; then
   OS="AIX"
-  ### if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
+  if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; continue; fi
   if [[ -f "/opt/oracle/etc/oraInst.loc" ]]; then ORA_INST="/opt/oracle/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
   ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
@@ -61,7 +61,7 @@ elif [[ "$(uname)" == "AIX" ]]; then
   OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
 elif [[ "$(uname)" == "Linux" ]]; then
   OS="Linux"
-  ### if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
+  if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; continue; fi
   if [[ -f "/etc/oraInst.loc" ]]; then ORA_INST="/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
   ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
