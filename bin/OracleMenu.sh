@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.115"
+SoftwareVersion="1.0.117"
 DateCreation="07/01/2021"
-DateModification="13/08/2024"
+DateModification="20/08/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -106,8 +106,8 @@ ORA_HOMES_IGNORE_6="grep|egrep|zabbix|webmin"
 #
 if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
-  ORATAB="/var/opt/oracle/oratab"
-  ORA_INST="/var/opt/oracle/oraInst.loc"
+  if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
+  if [[ -f "/var/opt/oracle/oraInst.loc" ]]; then ORA_INST="/var/opt/oracle/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
   ORA_OCR="/var/opt/oracle/ocr.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
@@ -142,8 +142,8 @@ if [[ $(uname) == "SunOS" ]]; then
   BLA="\033[m"
 elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
-  ORATAB="/etc/oratab"
-  ORA_INST="/opt/oracle/etc/oraInst.loc"
+  if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
+  if [[ -f "/opt/oracle/etc/oraInst.loc" ]]; then ORA_INST="/opt/oracle/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
   ORA_OCR="/etc/oracle/ocr.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="AUTHSTATE|DSM_LOG|EDITOR|ENV|EXTENDED_HISTORY|FCEDIT|HISTDATEFMT|HISTFILE|HISTSIZE|HOME|HOST|LANG|LC__FASTMSG|LOCPATH|LOGIN|LOGONNAME|MAIL|MAILMSG|MANPATH|MISSINGPV_VARYON|NLSPATH|NMON|ODMDIR|RES_RETRY|RES_TIMEOUT|SHELL|SSH_CLIENT|SSH_CONNECTION|SSH_TTY|TERM|TZ|USER|XAUTHORITY"
@@ -178,8 +178,8 @@ elif [[ $(uname) == "AIX" ]]; then
   BLA="\033[m"
 elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
-  ORATAB="/etc/oratab"
-  ORA_INST="/etc/oraInst.loc"
+  if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
+  if [[ -f "/etc/oraInst.loc" ]]; then ORA_INST="/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
   ORA_OCR="/etc/oracle/ocr.loc"
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
@@ -222,7 +222,7 @@ if [[ ! -f ${ORA_INST} ]]; then
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
   SepLine
- return 1
+  return 1
 fi
 #
 # ------------------------------------------------------------------------
@@ -255,6 +255,32 @@ fi
 for FUNC in $(ls ${FUNCTIONS}/*_Functions); do
   source ${FUNC}
 done
+#
+DBA() {
+select DBA in $(ls ${DBNITRO}/sql/DBA_[0-9]*.sql); do
+  echo "@${DBA};" | sqlplus -S / as sysdba
+done
+}
+PDB() {
+select PDB in $(ls ${DBNITRO}/sql/PDB_[0-9]*.sql); do
+  echo "@${PDB};" | sqlplus -S / as sysdba
+done
+}
+ODG() {
+select ODG in $(ls ${DBNITRO}/sql/ODG_[0-9]*.sql); do
+  echo "@${ODG};" | sqlplus -S / as sysdba
+done
+}
+OGG() {
+select OGG in $(ls ${DBNITRO}/sql/OGG_[0-9]*.sql); do
+  echo "@${OGG};" | sqlplus -S / as sysdba
+done
+}
+ASM() {
+select ASM in $(ls ${DBNITRO}/sql/ASM_[0-9]*.sql); do
+  echo "@${ASM};" | sqlplus -S / as sysasm
+done
+}
 #
 # ------------------------------------------------------------------------
 # Listener Services
