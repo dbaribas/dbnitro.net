@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.117"
+SoftwareVersion="1.0.119"
 DateCreation="07/01/2021"
-DateModification="20/08/2024"
+DateModification="27/08/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -549,7 +549,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-  echo "@${DBNITRO}/sql/Oracle_SQL_DBA_Info.sql;" | sqlplus -S / as sysdba
+  echo "@${DBNITRO}/sql/DBA_INFO.sql;" | sqlplus -S / as sysdba
 fi
 }
 #
@@ -564,7 +564,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-  echo "@/opt/dbnitro/sql/Oracle_Create_Dashboard.sql;" | sqlplus -S / as sysdba
+  echo "@/opt/dbnitro/sql/DBA_CREATE_DASHBOARD.sql;" | sqlplus -S / as sysdba
 fi
 }
 #
@@ -604,7 +604,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-  echo "@${DBNITRO}/sql/Oracle_SQL_DBA_Options_Packs_Usage_Statistics.sql;" | sqlplus -S / as sysdba
+  echo "@${DBNITRO}/sql/DBA_OPTIONS_PACKS_USAGE_STATISTICS.sql;" | sqlplus -S / as sysdba
 fi
 }
 #
@@ -619,7 +619,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-  echo "@${DBNITRO}/sql/Oracle_SQL_DBA_Dataguard_Status.sql;" | sqlplus -S / as sysdba
+  echo "@${DBNITRO}/sql/DBA_DATAGUARD_STATUS.sql;" | sqlplus -S / as sysdba
 fi
 }
 #
@@ -634,7 +634,7 @@ elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF
   echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
   return 0
 else
-  echo "@${DBNITRO}/sql/Oracle_SQL_DBA_Report_v.3.0.1.sql;" | sqlplus -S / as sysdba
+  echo "@${DBNITRO}/sql/DBA_REPORT_V.3.0.1.sql;" | sqlplus -S / as sysdba
 fi
 }
 #
