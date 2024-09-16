@@ -10,11 +10,10 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 prompt # ASM: VERIFY DISKS TYPE AND STATUS
 prompt ##############################################################
-prompt
-col PATH for a60
+col PATH for a40
 col DG_NAME for a15
 col DG_STATE for a10
-col FAILGROUP for a10
+col FAILGROUP for a20
 select dg.name dg_name
   , dg.state dg_state
   , dg.type

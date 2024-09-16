@@ -10,7 +10,6 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 prompt # ASM: VERIFY DISK GROUP % USAGE
 prompt ##############################################################
-prompt
 column "Diskgroup" format A30
 column "Imbalance" format 99.9 Heading "Percent|Imbalance"
 column "Variance" format 99.9 Heading "Percent|Disk Size|Variance"

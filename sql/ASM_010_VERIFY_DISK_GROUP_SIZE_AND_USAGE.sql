@@ -8,18 +8,13 @@
 
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # ASM: VERIFY DISKS READ AND WRITE VALUES
+prompt # ASM: VERIFY DISK GROUP SIZE AND USAGE
 prompt ##############################################################
-SELECT SUBSTR(dgs.name,1,20) AS diskgroup
-  , SUBSTR(ds.name,1,20) AS asmdisk
-  , ds.mount_status
-  , ds.state
-  , ds.reads
-  , ds.writes
-  , ds.read_time
-  , ds.write_time
-  , bytes_read
-  , bytes_written
-FROM V$ASM_DISKGROUP_STAT dgs, V$ASM_DISK_STAT ds
-WHERE dgs.group_number = ds.group_number
-order by 1,2,3,4,5;
+prompt
+SELECT name
+  , type
+  , total_mb
+  , free_mb
+  , required_mirror_free_mb
+  , usable_file_mb 
+FROM V$ASM_DISKGROUP;
