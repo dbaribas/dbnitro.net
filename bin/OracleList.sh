@@ -1,8 +1,8 @@
-#!/bin/sh
+ #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.17"
+SoftwareVersion="1.0.21"
 DateCreation="18/09/2023"
-DateModification="19/08/2024"
+DateModification="20/09/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -11,75 +11,81 @@ WEBSITE="http://dbnitro.net"
 # Verify OS Parameters and Variables
 #
 ORA_HOMES_IGNORE_0="^#|^$|REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin"
-ORA_HOMES_IGNORE_1="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|middleware|agent"
+ORA_HOMES_IGNORE_1="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|middleware|agent|OracleHome1"
 ORA_HOMES_IGNORE_2="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|middleware"
 ORA_HOMES_IGNORE_3="${ORA_HOMES_IGNORE_0}|middleware|agent"
 ORA_HOMES_IGNORE_4="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|agent"
-ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
+ORA_HOMES_IGNORE_5="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|agent"
 #
 if [[ "$(uname)" == "SunOS" ]]; then
   OS="Solaris"
   if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; continue; fi
   if [[ -f "/var/opt/oracle/oraInst.loc" ]]; then ORA_INST="/var/opt/oracle/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
-  ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
-  CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'    | uniq                         | sort               | wc -l          | xargs)"
-  OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'   | uniq                         | sort               | wc -l          | xargs)"
-  OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'   | uniq                         | sort               | wc -l          | xargs)"
-  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'    | uniq                         | sort               | wc -l          | xargs)"
-  DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | uniq           | sort  | wc -l | xargs)"
-  LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"    | awk '{ print $9 }'           | uniq               | sort           | wc -l | xargs)"
-  AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl" | uniq                         | sort               | wc -l          | xargs)"
-  OMS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"    | uniq                         | sort               | wc -l          | xargs)"
-  OGG_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|qmgr|clmgrs|dgmgrl" | egrep -i "mgr|prm"     | uniq                         | sort               | wc -l          | xargs)"
-  ASM_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraGI"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  DATABASE_HOME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraDB|OraHome"     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  CLIENT_HOME="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraClient"         | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  AGENT_HOME="$(cat ${ORA_INVENTORY}    | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  OMS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "oms"               | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"            | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq              | sort  | wc -l | xargs)"
+  CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'            | uniq                         | sort               | wc -l             | xargs)"
+  OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'           | uniq                         | sort               | wc -l             | xargs)"
+  OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'           | uniq                         | sort               | wc -l             | xargs)"
+  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'            | uniq                         | sort               | wc -l             | xargs)"
+  DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon|db_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | sed s/db_pmon_//g | uniq  | sort  | wc -l | xargs)"
+  LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"            | awk '{ print $9 }'           | uniq               | sort              | wc -l | xargs)"
+  AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl"         | uniq                         | sort               | wc -l             | xargs)"
+  OMS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"            | uniq                         | sort               | wc -l             | xargs)"
+  WLS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"            | uniq                         | sort               | wc -l             | xargs)"
+  OGG_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|qmgr|clmgrs|dgmgrl" | egrep -i "mgr|prm"             | uniq                         | sort               | wc -l             | xargs)"
+  ASM_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraGI"             | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  DATABASE_HOME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraDB|OraHome"     | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  CLIENT_HOME="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraClient"         | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  AGENT_HOME="$(cat ${ORA_INVENTORY}    | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  OMS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "oms"               | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  WLS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
 elif [[ "$(uname)" == "AIX" ]]; then
   OS="AIX"
   if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; continue; fi
   if [[ -f "/opt/oracle/etc/oraInst.loc" ]]; then ORA_INST="/opt/oracle/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
-  ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
-  CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'    | uniq                         | sort               | wc -l          | xargs)"
-  OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'   | uniq                         | sort               | wc -l          | xargs)"
-  OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'   | uniq                         | sort               | wc -l          | xargs)"
-  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'    | uniq                         | sort               | wc -l          | xargs)"
-  DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | uniq           | sort  | wc -l | xargs)"
-  LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"    | awk '{ print $9 }'           | uniq               | sort           | wc -l | xargs)"
-  AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl" | uniq                         | sort               | wc -l          | xargs)"
-  OMS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"    | uniq                         | sort               | wc -l          | xargs)"
-  OGG_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|qmgr|clmgrs|dgmgrl" | egrep -i "mgr|prm"     | uniq                         | sort               | wc -l          | xargs)"
-  ASM_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraGI"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  DATABASE_HOME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraDB|OraHome"     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  CLIENT_HOME="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraClient"         | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  AGENT_HOME="$(cat ${ORA_INVENTORY}    | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  OMS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "oms"               | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"            | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq              | sort  | wc -l | xargs)"
+  CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'            | uniq                         | sort               | wc -l             | xargs)"
+  OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'           | uniq                         | sort               | wc -l             | xargs)"
+  OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'           | uniq                         | sort               | wc -l             | xargs)"
+  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'            | uniq                         | sort               | wc -l             | xargs)"
+  DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon|db_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | sed s/db_pmon_//g | uniq  | sort  | wc -l | xargs)"
+  LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"            | awk '{ print $9 }'           | uniq               | sort              | wc -l | xargs)"
+  AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl"         | uniq                         | sort               | wc -l             | xargs)"
+  OMS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"            | uniq                         | sort               | wc -l             | xargs)"
+  WLS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"            | uniq                         | sort               | wc -l             | xargs)"
+  OGG_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|qmgr|clmgrs|dgmgrl" | egrep -i "mgr|prm"             | uniq                         | sort               | wc -l             | xargs)"
+  ASM_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraGI"             | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  DATABASE_HOME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraDB|OraHome"     | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  CLIENT_HOME="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraClient"         | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  AGENT_HOME="$(cat ${ORA_INVENTORY}    | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  OMS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "oms"               | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  WLS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
 elif [[ "$(uname)" == "Linux" ]]; then
   OS="Linux"
   if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; continue; fi
   if [[ -f "/etc/oraInst.loc" ]]; then ORA_INST="/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"; exit 1; fi
   ORA_INVENTORY="$(cat ${ORA_INST}      | egrep -i "inventory_loc"                           | cut -f2 -d '=')/ContentsXML/inventory.xml"
-  ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"    | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq           | sort  | wc -l | xargs)"
-  CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'    | uniq                         | sort               | wc -l          | xargs)"
-  OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'   | uniq                         | sort               | wc -l          | xargs)"
-  OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'   | uniq                         | sort               | wc -l          | xargs)"
-  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'    | uniq                         | sort               | wc -l          | xargs)"
-  DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | uniq           | sort  | wc -l | xargs)"
-  LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"    | awk '{ print $9 }'           | uniq               | sort           | wc -l | xargs)"
-  AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl" | uniq                         | sort               | wc -l          | xargs)"
-  OMS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"    | uniq                         | sort               | wc -l          | xargs)"
-  OGG_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|qmgr|clmgrs|dgmgrl" | egrep -i "mgr|prm"     | uniq                         | sort               | wc -l          | xargs)"
-  ASM_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraGI"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  DATABASE_HOME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraDB|OraHome"     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  CLIENT_HOME="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "OraClient"         | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  AGENT_HOME="$(cat ${ORA_INVENTORY}    | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  OMS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "oms"               | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"         | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ASM_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|sed"                       | egrep -i "asm_pmon"            | awk '{ print $NF }'          | sed s/asm_pmon_//g | uniq              | sort  | wc -l | xargs)"
+  CRSD_PROC="$(ps -ef                   | egrep -i -v 'grep|egrep'                           | egrep -i 'crsd.bin'            | uniq                         | sort               | wc -l             | xargs)"
+  OCSSD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ocssd.bin'           | uniq                         | sort               | wc -l             | xargs)"
+  OHASD_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'ohasd.bin'           | uniq                         | sort               | wc -l             | xargs)"
+  DGOBS_PROC="$(ps -ef                  | egrep -i -v 'grep|egrep'                           | egrep -i 'observer'            | uniq                         | sort               | wc -l             | xargs)"
+  DATABASE_PROC="$(ps -ef               | egrep -i -v "grep|egrep|sed"                       | egrep -i "ora_pmon|db_pmon"    | awk '{ print $NF }'          | sed s/ora_pmon_//g | sed s/db_pmon_//g | uniq  | sort  | wc -l | xargs)"
+  LISTENER_PROC="$(ps -ef               | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "listener"            | awk '{ print $9 }'           | uniq               | sort              | wc -l | xargs)"
+  AGENT_PROC="$(ps -ef                  | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "agent_|perl"         | uniq                         | sort               | wc -l             | xargs)"
+  OMS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"            | uniq                         | sort               | wc -l             | xargs)"
+  WLS_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|webmin"             | egrep -i "wlserver"            | uniq                         | sort               | wc -l             | xargs)"
+  OGG_PROC="$(ps -ef                    | egrep -i -v "grep|egrep|zabbix|qmgr|clmgrs|dgmgrl" | egrep -i "mgr|prm"             | uniq                         | sort               | wc -l             | xargs)"
+  ASM_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraGI"             | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  DATABASE_HOME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraDB|OraHome"     | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  CLIENT_HOME="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OraClient"         | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  AGENT_HOME="$(cat ${ORA_INVENTORY}    | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "agent"             | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  OMS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "oms"               | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  WLS_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
+  OGG_HOME="$(cat ${ORA_INVENTORY}      | egrep -i -v "${ORA_HOMES_IGNORE_0}"                | egrep -i "LOC"                 | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '='    | cut -f2 -d '"' | uniq | sort)"
 else
   echo " -- OS Not Supported --"
   exit 1
@@ -122,10 +128,11 @@ OracleServices() {
 # LISTENERS OK
 # AGENT OK
 # MIDDLEWARE OK
+# WEBLOGIC OK
 # GOLDENGATE OK
 # DATABASE OK
 #
-if [[ "${ASM_PROC}" != "0" ]] || [[ "${CRSD_PROC}" != "0" ]] || [[ "${OCSSD_PROC}" != "0" ]] || [[ "${OHASD_PROC}" != "0" ]] || [[ "${DGOBS_PROC}" != "0" ]] || [[ "${LISTENER_PROC}" != "0" ]] || [[ "${AGENT_PROC}" != "0" ]] || [[ "${OMS_PROC}" != "0" ]] || [[ "${OGG_PROC}" != "0" ]] || [[ "${DATABASE_PROC}" != "0" ]]; then
+if [[ "${ASM_PROC}" != "0" ]] || [[ "${CRSD_PROC}" != "0" ]] || [[ "${OCSSD_PROC}" != "0" ]] || [[ "${OHASD_PROC}" != "0" ]] || [[ "${DGOBS_PROC}" != "0" ]] || [[ "${LISTENER_PROC}" != "0" ]] || [[ "${AGENT_PROC}" != "0" ]] || [[ "${OMS_PROC}" != "0" ]] || [[ "${WLS_PROC}" != "0" ]] || [[ "${OGG_PROC}" != "0" ]] || [[ "${DATABASE_PROC}" != "0" ]]; then
 #
 printf "+%-50s+\n"    "--------------------------------------------------"
 printf "|%-50s%-s|\n" " ORACLE SERVICES RUNNING                          "
@@ -212,6 +219,16 @@ if [[ "${OMS_PROC}" != "0" ]]; then
   done
 fi
 #
+# WEBLOGIC
+#
+if [[ "${WLS_PROC}" != "0" ]]; then
+  for WLS_SERVICE in $(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "OracleHome1" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort); do
+    WLS_STARTED="$(ps -ef | egrep -i "grep|egrep|zabbix" | egrep -i -w "${WLS_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
+    printf "|%-22s|%-22s|%-22s|%-60s|\n" " WEBLOGIC " " RUNNING " " UP SINCE: ${WLS_STARTED} " " ${WLS_SERVICE}"
+    printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
+  done
+fi
+#
 # GOLDENGATE
 #
 if [[ "${OGG_PROC}" != "0" ]]; then
@@ -226,9 +243,9 @@ fi
 #
 if [[ "$(whoami)" == "oracle" ]] || [[ "$(whoami)" == "grid" ]] ; then
   if [[ "${DATABASE_PROC}" != "0" ]]; then
-    for DATABASE_SERVICE in $(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ora_pmon" | awk '{ print $NF }' | sed s/ora_pmon_//g | uniq | sort); do
+    for DATABASE_SERVICE in $(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ora_pmon|db_pmon" | awk '{ print $NF }' | sed s/ora_pmon_//g | sed s/db_pmon_//g | uniq | sort); do
       if [[ $(cat ${ORATAB} | awk '{ print $1 }' | cut -f1 -d ':' | egrep -w "${DATABASE_SERVICE}") != ${DATABASE_SERVICE} ]]; then
-        DATABASE_STARTED="$(ps -ef | egrep -i "ora_pmon" | egrep -i "${DATABASE_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
+        DATABASE_STARTED="$(ps -ef | egrep -i "ora_pmon|db_pmon" | egrep -i "${DATABASE_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
            DATABASE_TYPE="$(ps -ef | egrep -i "ora_mrp"  | egrep -i "${DATABASE_SERVICE}" | sort | wc -l | xargs | uniq)"
         printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${DATABASE_SERVICE} " " RUNNING " " UP SINCE: ${DATABASE_STARTED} " " ${DATABASE_TYPE}"
         printf "+%-16s+%-16s+%-16s+%-50s+\n" "----------------------" "----------------------" "----------------------" "------------------------------------------------------------"
@@ -262,8 +279,8 @@ DATABASE_STARTED="$(echo "select to_char(startup_time, 'DD/MM/YYYY') from v\$ins
   fi
 else 
   if [[ "${DATABASE_PROC}" != "0" ]]; then
-    for DATABASE_SERVICE in $(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ora_pmon" | awk '{ print $NF }' | sed s/ora_pmon_//g | uniq | sort); do
-      DATABASE_STARTED="$(ps -ef | egrep -i "ora_pmon" | egrep -i "${DATABASE_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
+    for DATABASE_SERVICE in $(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ora_pmon|db_pmon" | awk '{ print $NF }' | sed s/ora_pmon_//g | sed s/db_pmon_//g | uniq | sort); do
+      DATABASE_STARTED="$(ps -ef | egrep -i "ora_pmon|db_pmon" | egrep -i "${DATABASE_SERVICE}" | awk '{ print $5 }' | uniq | tail -2)"
          DATABASE_TYPE="$(ps -ef | egrep -i "ora_mrp" | egrep -i "${DATABASE_SERVICE}" | sort | wc -l | xargs | uniq)"
       if [[ "$(cat ${ORATAB} | awk '{ print $1 }' | cut -f1 -d ':' | egrep -w "${DATABASE_SERVICE}" | wc -l | xargs | uniq)" == "0" ]]; then
         printf "|%-22s|%-22s|%-22s|%-60s|\n" " ${DATABASE_SERVICE} " " RUNNING " " UP SINCE: ${DATABASE_STARTED}" " $(if [[ "${DATABASE_TYPE}" == "0" ]]; then echo "[ PRIMARY ]"; else echo "[ STANDBY ]"; fi) "
@@ -290,9 +307,10 @@ OracleProducts() {
 # CLIENT OK
 # AGENT OK
 # MIDDLEWARE OK
+# WEBLOGIC OK
 # GOLDENGATE OK
 #
-if [[ "$(echo ${ASM_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${DATABASE_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${CLIENT_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${AGENT_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${OMS_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${OGG_HOME} | wc -l | xargs)" != "0" ]]; then
+if [[ "$(echo ${ASM_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${DATABASE_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${CLIENT_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${AGENT_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${OMS_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${WLS_HOME} | wc -l | xargs)" != "0" ]] || [[ "$(echo ${OGG_HOME} | wc -l | xargs)" != "0" ]]; then
 #
 printf "+%-50s+\n"    "--------------------------------------------------"
 printf "|%-50s%-s|\n" " ORACLE PRODUCTS INSTALLED                        "
@@ -353,6 +371,17 @@ if [[ "$(echo ${OMS_HOME} | wc -l | xargs)" != "0" ]]; then
         OMS_OWNER="$(ls -l ${OMS_INVENTORY} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
     OMS_HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${OMS_INVENTORY}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
     printf "|%-22s|%-60s|%-22s|\n" " ${OMS_HOME_NAME} "     " ${OMS_INVENTORY} "                                           " ${OMS_OWNER}"
+    printf "+%-16s+%-50s+%-16s+\n" "----------------------" "------------------------------------------------------------" "----------------------"
+  done
+fi
+#
+# WEBLOGIC HOME AND OWNER
+#
+if [[ "$(echo ${WLS_HOME} | wc -l | xargs)" != "0" ]]; then
+  for WLS_INVENTORY in ${WLS_HOME}; do
+        WLS_OWNER="$(ls -l ${WLS_INVENTORY} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
+    WLS_HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${WLS_INVENTORY}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+    printf "|%-22s|%-60s|%-22s|\n" " ${WLS_HOME_NAME} "     " ${WLS_INVENTORY} "                                           " ${WLS_OWNER}"
     printf "+%-16s+%-50s+%-16s+\n" "----------------------" "------------------------------------------------------------" "----------------------"
   done
 fi
