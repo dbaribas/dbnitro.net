@@ -1,8 +1,8 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.119"
+SoftwareVersion="1.0.123"
 DateCreation="07/01/2021"
-DateModification="27/08/2024"
+DateModification="19/09/2024"
 EMAIL_1="dba.ribas@gmail.com"
 EMAIL_2="andre.ribas@icloud.com"
 WEBSITE="http://dbnitro.net"
@@ -85,6 +85,11 @@ HELP() {
   printf "|%-16s|%-100s|\n" "                       REPORT " " YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})"
   printf "|%-16s|%-100s|\n" "                      OPTIONS " " YOU CAN SEE THE ORACLE DATABASE OPTIONS"
   printf "|%-16s|%-100s|\n" "                    HUGEPAGES " " YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
+  printf "|%-16s|%-100s|\n" "                          DBA " " SHOW ALL DBA OPTIONS"
+  printf "|%-16s|%-100s|\n" "                          PDB " " SHOW ALL PDB OPTIONS"
+  printf "|%-16s|%-100s|\n" "                          ASM " " SHOW ALL ASM OPTIONS"
+  printf "|%-16s|%-100s|\n" "                          ODG " " SHOW ALL ODG OPTIONS"
+  printf "|%-16s|%-100s|\n" "                          OGG " " SHOW ALL OGG OPTIONS"
   printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 }
 #
@@ -97,7 +102,7 @@ IGNORE_ERRORS="OGG-00987"
 # Verify OS Parameters and Variables
 #
 ORA_HOMES_IGNORE_0="^#|^$|REMOVED|REFHOME|DEPHOME|PLUGINS|/usr/lib/oracle/sbin"
-ORA_HOMES_IGNORE_1="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|middleware|agent"
+ORA_HOMES_IGNORE_1="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|middleware|agent|OracleHome1"
 ORA_HOMES_IGNORE_2="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|middleware"
 ORA_HOMES_IGNORE_3="${ORA_HOMES_IGNORE_0}|middleware|agent"
 ORA_HOMES_IGNORE_4="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|agent"
@@ -108,7 +113,7 @@ if [[ $(uname) == "SunOS" ]]; then
   OS="Solaris"
   if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
   if [[ -f "/var/opt/oracle/oraInst.loc" ]]; then ORA_INST="/var/opt/oracle/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
-  ORA_OCR="/var/opt/oracle/ocr.loc"
+  if [[ -f "/var/opt/oracle/ocr.loc" ]];     then ORA_OCR="/var/opt/oracle/ocr.loc";      else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       fi
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
@@ -123,6 +128,7 @@ if [[ $(uname) == "SunOS" ]]; then
   ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_WLS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
   ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
   LSNRCTL="$(ps -ef                 | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
@@ -144,7 +150,7 @@ elif [[ $(uname) == "AIX" ]]; then
   OS="AIX"
   if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
   if [[ -f "/opt/oracle/etc/oraInst.loc" ]]; then ORA_INST="/opt/oracle/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
-  ORA_OCR="/etc/oracle/ocr.loc"
+  if [[ -f "/etc/oracle/ocr.loc" ]];         then ORA_OCR="/etc/oracle/ocr.loc";          else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       fi
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="AUTHSTATE|DSM_LOG|EDITOR|ENV|EXTENDED_HISTORY|FCEDIT|HISTDATEFMT|HISTFILE|HISTSIZE|HOME|HOST|LANG|LC__FASTMSG|LOCPATH|LOGIN|LOGONNAME|MAIL|MAILMSG|MANPATH|MISSINGPV_VARYON|NLSPATH|NMON|ODMDIR|RES_RETRY|RES_TIMEOUT|SHELL|SSH_CLIENT|SSH_CONNECTION|SSH_TTY|TERM|TZ|USER|XAUTHORITY"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which|autoload|command|history|integer|local"
@@ -159,6 +165,7 @@ elif [[ $(uname) == "AIX" ]]; then
   ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_WLS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
   ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
   LSNRCTL="$(ps -ef                 | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
@@ -178,9 +185,9 @@ elif [[ $(uname) == "AIX" ]]; then
   BLA="\033[m"
 elif [[ $(uname) == "Linux" ]]; then
   OS="Linux"
-  if [[ -f "/etc/oratab" ]];      then ORATAB="/etc/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
-  if [[ -f "/etc/oraInst.loc" ]]; then ORA_INST="/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
-  ORA_OCR="/etc/oracle/ocr.loc"
+  if [[ -f "/etc/oratab" ]];         then ORATAB="/etc/oratab";          else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
+  if [[ -f "/etc/oraInst.loc" ]];    then ORA_INST="/etc/oraInst.loc";   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
+  if [[ -f "/etc/oracle/ocr.loc" ]]; then ORA_OCR="/etc/oracle/ocr.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE GRID INSTALLATION YET --";       fi
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
@@ -195,6 +202,7 @@ elif [[ $(uname) == "Linux" ]]; then
   ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_WLS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
   ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
   LSNRCTL="$(ps -ef                 | egrep -i -v "${ORA_HOMES_IGNORE_6}" | egrep -i "tnslsnr"  | wc -l)"
@@ -257,34 +265,38 @@ for FUNC in $(ls ${FUNCTIONS}/*_Functions); do
 done
 #
 DBA() {
-select DBA in $(ls ${DBNITRO}/sql/DBA_[0-9]*.sql); do
-  echo "@${DBA};" | sqlplus -S / as sysdba
+select DBA_SQL in $(ls ${DBNITRO}/sql/DBA_[0-9]*.sql) QUIT; do
+  if [[ ${DBA_SQL} == "QUIT" ]]; then break 1; else echo "@${DBA_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+#
 PDB() {
-select PDB in $(ls ${DBNITRO}/sql/PDB_[0-9]*.sql); do
-  echo "@${PDB};" | sqlplus -S / as sysdba
+select PDB_SQL in $(ls ${DBNITRO}/sql/PDB_[0-9]*.sql) QUIT; do
+  if [[ ${PDB_SQL} == "QUIT" ]]; then break 1; else echo "@${PDB_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+#
 ODG() {
-select ODG in $(ls ${DBNITRO}/sql/ODG_[0-9]*.sql); do
-  echo "@${ODG};" | sqlplus -S / as sysdba
+select ODG_SQL in $(ls ${DBNITRO}/sql/ODG_[0-9]*.sql) QUIT; do
+  if [[ ${ODG_SQL} == "QUIT" ]]; then break 1; else echo "@${ODG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+#
 OGG() {
-select OGG in $(ls ${DBNITRO}/sql/OGG_[0-9]*.sql); do
-  echo "@${OGG};" | sqlplus -S / as sysdba
+select OGG_SQL in $(ls ${DBNITRO}/sql/OGG_[0-9]*.sql) QUIT; do
+  if [[ ${OGG_SQL} == "QUIT" ]]; then break 1; else echo "@${OGG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+# 
 ASM() {
-select ASM in $(ls ${DBNITRO}/sql/ASM_[0-9]*.sql); do
-  echo "@${ASM};" | sqlplus -S / as sysasm
+select ASM_SQL in $(ls ${DBNITRO}/sql/ASM_[0-9]*.sql) QUIT; do
+  if [[ ${ASM_SQL} == "QUIT" ]]; then break 1; else echo "@${ASM_SQL};" | sqlplus -S / as sysasm; fi
 done
 }
 #
 # ------------------------------------------------------------------------
 # Listener Services
-#
+# 
 ListenerService() {
 if [[ "${LSNRCTL}" != 0 ]]; then 
   for LISTENER_SERVICE in $(ps -ef | egrep -i -v "sshd|grep|egrep|zabbix|webmin" | egrep -i "listener"               | awk '{ print $9 }' | uniq | sort); do
@@ -1104,11 +1116,11 @@ fi
 #
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
-PROC="$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g)"
+PROC="$(ps -ef | egrep -i "ora_pmon|db_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | sed s/db_pmon_//g)"
 #
 if [[ "${PROC[@]}" =~ "${ORACLE_SID}"* ]]; then DB_STATUS="ONLINE"; else DB_STATUS="OFFLINE"; fi
 #
-if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l | xargs)" != "0" ]]; then
+if [[ "$(ps -ef | egrep -i "ora_pmon|db_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | sed s/db_pmon_//g | wc -l | xargs)" != "0" ]]; then
   V_INSTANCE_STATUS="$(echo "select to_char(status) from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
   if [[ "${V_INSTANCE_STATUS}" == "OPEN" ]] || [[ "${V_INSTANCE_STATUS}" == "OPEN READ ONLY" ]] || [[ "${V_INSTANCE_STATUS}" == "OPEN RESTRICTED" ]]; then
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
@@ -1174,7 +1186,7 @@ if [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print 
     printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
   fi
 #
-elif [[ "$(ps -ef | egrep -i "ora_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l | xargs)" == "0" ]]; then
+elif [[ "$(ps -ef | egrep -i "ora_pmon|db_pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | sed s/db_pmon_//g | wc -l | xargs)" == "0" ]]; then
   printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
   printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
   printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
@@ -1241,6 +1253,49 @@ umask 0022
 }
 #
 # ------------------------------------------------------------------------
+# Set the WLS Home
+#
+set_WLS() {
+unset_var
+unalias_var
+alias_var
+local OPT=$1
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+export OH="${ORACLE_HOME}"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+export CLASSPATH=${ORACLE_HOME}/jlib
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
+alias oh='cd ${ORACLE_HOME}'
+alias hpg='grep HugePages_ /proc/meminfo'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "wlserver"'
+alias list='${DBNITRO}/bin/OracleList.sh'
+#
+OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
+#
+WLS_STATUS="$(ps -ef | egrep -i -v "grep|egrep" | egrep -i "wlserver" | wc -l | xargs)"
+if [[ "${WLS_STATUS}" != 0 ]]; then WLS="ONLINE"; else WLS="OFFLINE"; fi
+#
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+printf "|%-22s|%-100s|\n" "                 [ WLS_HOME ] " " [ ${ORACLE_HOME} ]"
+printf "|%-22s|%-100s|\n" "                [ WLS_OWNER ] " " [ ${OWNER} ]"
+printf "|%-22s|%-100s|\n" "               [ WLS_STATUS ] " " [ ${WLS} ]"
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+#
+HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+#
+export PS1=$'[ ${HOME_NAME} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
+}
+#
+# ------------------------------------------------------------------------
 # Set AGENT Home
 #
 set_AGENT() {
@@ -1295,7 +1350,7 @@ printf "+%-30s+%-100s+\n" "------------------------------" "--------------------
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: Select an Option "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 PS3="Select the Option: "
-select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_AGENT} ${DBLIST} HELP QUIT; do
+select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_WLS} ${ORA_AGENT} ${DBLIST} HELP QUIT; do
 if [[ "${OPT}" == "+ASM"* ]]; then
   if [[ "${ASM_USER}" == "YES" ]]; then
     SELECTION="ASM"
@@ -1311,6 +1366,9 @@ elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
 elif [[ "${ORA_OMS[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   SELECTION="OMS"
   set_OMS ${OPT}
+elif [[ "${ORA_WLS[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  SELECTION="WLS"
+  set_WLS ${OPT}
 elif [[ "${ORA_AGENT[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   SELECTION="AGENT"
   set_AGENT ${OPT}
