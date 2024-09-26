@@ -31,7 +31,7 @@ select t1.GROUP#
    , t1.IS_RECOVERY_DEST_FILE
    , to_char(t2.bytes/1024/1024, '9G999G999D999') TOTAL_MB
    , to_char(t2.bytes/1024/1024/1024, '999D999') TOTAL_GB
-from v$logfile t1, v\$log t2
+from v$logfile t1, v$log t2
 where t1.group# = t2.group#
 order by 1,2,3,4;
 prompt

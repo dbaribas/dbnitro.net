@@ -32,7 +32,7 @@ prompt ##############################################################
 prompt # PSU History                                                #
 prompt ##############################################################
 col action for a20
-col namespace for a20
+col namespace for a40
 col version for a30
 col comments for a100
 select to_char(action_time,'yyyy-mm-dd HH24:MI:SS') as TIME
@@ -47,6 +47,8 @@ order by action_time;
 prompt ##############################################################
 prompt # Product Components                                         #
 prompt ##############################################################
+col version for a40
+col status for a50
 select PRODUCT
   , VERSION
   , status
