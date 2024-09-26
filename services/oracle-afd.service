@@ -1,13 +1,49 @@
+# Copyright (c) 2016, 2024, Oracle and/or its affiliates.
+#
+# Oracle AFD startup
+
 [Unit]
 Description=ASM Filter Driver
-Before=oracle-ohasd.service
+# Before=oracle-ohasd.service
 After=network.target
 
 [Service]
-Type=forking
+Type=simple
 ExecStart=/u01/app/19.3.0.1/grid/bin/afdload start
 ExecStop=/u01/app/19.3.0.1/grid/bin/afdload stop
 RemainAfterExit=yes
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
+
+
+
+
+
+
+
+
+
+systemctl daemon-reload
+
+
+
+journalctl -u oracle-afd
+
+setenforce 0
+
+systemctl disable --now firewalld
+
+
+chown -R postgres.postgres /data/cluster/
+chown -R postgres.postgres /etc/patroni/
+
+
+systemctl start patroni.service
+
+ss -ltn
+
+systemctl stop patroni.service
+systemctl start patroni.service
+systemctl status patroni.service

@@ -1,0 +1,14 @@
+[Unit]
+Description = Enterprise Manager Cloud Control
+After = network.target
+ 
+[Service]
+Type=oneshot
+ExecStart = /u01/app/oracle/emcc/start_all.sh
+RemainAfterExit=true
+StandardOutput=journal
+Group=dba
+User=oracle
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,40 @@
+# Copyright (c) 2016, 2024, Oracle and/or its affiliates.
+#
+# Oracle WebLogis Server Service
+
+[Unit]
+Description=WebLogic Admin Server service
+ 
+[Service]
+Type=simple
+WorkingDirectory=/u01/app/oracle/product/14.1.1/wls/user_projects/domains
+ExecStart=/u01/app/oracle/product/14.1.1/wls/user_projects/domains/base_domain/bin/startWebLogic.sh
+ExecStop=/u01/app/oracle/product/14.1.1/wls/user_projects/domains/base_domain/bin/stopWebLogic.sh
+User=oracle
+Group=oinstall
+KillMode=process
+LimitNOFILE=65535
+ 
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
+
+systemctl daemon-reload
+
+
+
+journalctl -u wls-server.service
+
+systemctl start wls-server.service
+systemctl enable wls-server.service
+
+
+ss -ltn
+
+systemctl stop wls-server.service
+systemctl start wls-server.service
+systemctl status wls-server.service
