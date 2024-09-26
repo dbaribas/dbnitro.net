@@ -16,10 +16,10 @@ SetClear() {
 }
 #
 OGG_HELP() {
-SetClear
-SepLine
-???
-SepLine
+  SetClear
+  SepLine
+  ls ${DBNITRO}/sql/OGG_[0-9]*.sql
+  SepLine
 }
 #
 #########################################################################################################
@@ -27,11 +27,13 @@ SepLine
 # OGG Funtions
 #
 #########################################################################################################
+#
 OGG() {
-select OGG in $(ls ${DBNITRO/}sql/OGG_[0-9]*.sql); do
-  echo "@${OGG};" | sqlplus -S / as sysdba
+select OGG_SQL in $(cd ${DBNITRO}/sql/; ls ${DBNITRO}/sql/OGG_[0-9]*.sql) QUIT; do
+  if [[ ${OGG_SQL} == "QUIT" ]]; then break 1; else echo "@${OGG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+#
 #########################################################################################################
 # Finish of the System
 #########################################################################################################

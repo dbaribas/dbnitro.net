@@ -16,10 +16,10 @@ SetClear() {
 }
 #
 ASM_HELP() {
-SetClear
-SepLine
-???
-SepLine
+  SetClear
+  SepLine
+  ls ${DBNITRO}/sql/ODG_[0-9]*.sql
+  SepLine
 }
 #
 #########################################################################################################
@@ -27,11 +27,13 @@ SepLine
 # ODG Funtions
 #
 #########################################################################################################
+#
 ODG() {
-select ODG in $(ls ${DBNITRO/}sql/ODG_[0-9]*.sql); do
-  echo "@${ODG};" | sqlplus -S / as sysdba
+select ODG_SQL in $(cd ${DBNITRO}/sql/; ls ${DBNITRO}/sql/ODG_[0-9]*.sql) QUIT; do
+  if [[ ${ODG_SQL} == "QUIT" ]]; then break 1; else echo "@${ODG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+#
 #########################################################################################################
 # Finish of the System
 #########################################################################################################

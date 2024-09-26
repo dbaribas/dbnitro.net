@@ -16,10 +16,10 @@ SetClear() {
 }
 #
 DBA_HELP() {
-SetClear
-SepLine
-???
-SepLine
+  SetClear
+  SepLine
+  ls ${DBNITRO}/sql/DBA_[0-9]*.sql
+  SepLine
 }
 #
 #########################################################################################################
@@ -27,11 +27,47 @@ SepLine
 # DATABASE Funtions
 #
 #########################################################################################################
+#
 DBA() {
-select DBA in $(ls ${DBNITRO/}sql/DBA_[0-9]*.sql); do
-  echo "@${OPT};" | sqlplus -S / as sysdba
+select DBA_SQL in $(cd ${DBNITRO}/sql/; ls DBA_[0-9]*.sql) QUIT; do
+  if [[ ${DBA_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${DBA_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
+#
+#########################################################################################################
+# SQLID
+#########################################################################################################
+#
+SQLID() {
+local SQLID=$1
+if [[ "${SQLID}" == "" ]]; then
+  echo ""
+  echo " -- YOU NEED TO EXECUTE THIS FUNCTION WITH THE SQL_ID AFTER THE NAME: EXAMPLE: SQLID xxx000xxx000xxx"
+  echo ""
+else
+sqlplus -S / as sysdba <<EOF
+set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
+prompt ##############################################################
+prompt # SQL ID
+prompt ##############################################################
+col sql_id for a15
+col sql_text for a40
+SELECT sql_id
+  , sql_text
+  , elapsed_time / 1000000 AS elapsed_seconds
+  , cpu_time / 1000000 AS cpu_seconds
+  , executions
+  , buffer_gets
+  , disk_reads
+  , optimizer_cost
+  , plan_hash_value
+FROM gv$sql
+WHERE sql_id = '${SQLID}';
+quit;
+EOF
+fi
+}
+#
 #########################################################################################################
 # Finish of the System
 #########################################################################################################
