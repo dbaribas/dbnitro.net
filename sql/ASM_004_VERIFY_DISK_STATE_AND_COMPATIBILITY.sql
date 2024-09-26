@@ -10,7 +10,6 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 prompt # ASM: VERIFY DISK STATE AND COMPATIBILITY
 prompt ##############################################################
-prompt
 col compatibility for a13
 col database_compatibility for a22
 select GROUP_NUMBER
