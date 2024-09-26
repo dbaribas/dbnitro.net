@@ -7,7 +7,9 @@
 -- WEBSITE..........: http://dbnitro.net
 
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-
+prompt ########################################################
+prompt # Check Statistics Collection - Standard, Stale and Full
+prompt ########################################################
 col owner for a20
 col job_name for a30
 col program_name for a40
@@ -26,8 +28,6 @@ COL JOB_DURATION FOR A23
 COL JOB_INFO FOR A2
 COL JOB_STATUS FOR A10
 COL JOB_START_TIME FOR A20
-prompt
-prompt # Check Statistics Collection - Standard, Stale and Full
 SELECT owner
   , job_name
   , TO_CHAR(actual_start_date, 'YYYY-MM-DD hh24:mi:ss') as actual_start_date

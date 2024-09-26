@@ -181,6 +181,7 @@ BEGIN DBMS_SCHEDULER.CREATE_JOB(
 END;
 /
 
+
 prompt
 prompt #######################################################################
 prompt # ENABLE PROGRAM GATHER_STATS_STALE_CUSTOM
