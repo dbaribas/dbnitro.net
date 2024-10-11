@@ -265,32 +265,32 @@ for FUNC in $(ls ${FUNCTIONS}/*_Functions); do
 done
 #
 DBA() {
-select DBA_SQL in $(ls ${DBNITRO}/sql/DBA_[0-9]*.sql) QUIT; do
-  if [[ ${DBA_SQL} == "QUIT" ]]; then break 1; else echo "@${DBA_SQL};" | sqlplus -S / as sysdba; fi
+select DBA_SQL in $(cd ${DBNITRO}/sql/; ls DBA_[0-9]*.sql) QUIT; do
+  if [[ ${DBA_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${DBA_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 #
 PDB() {
-select PDB_SQL in $(ls ${DBNITRO}/sql/PDB_[0-9]*.sql) QUIT; do
-  if [[ ${PDB_SQL} == "QUIT" ]]; then break 1; else echo "@${PDB_SQL};" | sqlplus -S / as sysdba; fi
+select PDB_SQL in $(cd ${DBNITRO}/sql/; ls PDB_[0-9]*.sql) QUIT; do
+  if [[ ${PDB_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${PDB_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 #
 ODG() {
-select ODG_SQL in $(ls ${DBNITRO}/sql/ODG_[0-9]*.sql) QUIT; do
-  if [[ ${ODG_SQL} == "QUIT" ]]; then break 1; else echo "@${ODG_SQL};" | sqlplus -S / as sysdba; fi
+select ODG_SQL in $(cd ${DBNITRO}/sql/; ls ODG_[0-9]*.sql) QUIT; do
+  if [[ ${ODG_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${ODG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 #
 OGG() {
-select OGG_SQL in $(ls ${DBNITRO}/sql/OGG_[0-9]*.sql) QUIT; do
-  if [[ ${OGG_SQL} == "QUIT" ]]; then break 1; else echo "@${OGG_SQL};" | sqlplus -S / as sysdba; fi
+select OGG_SQL in $(cd ${DBNITRO}/sql/; ls OGG_[0-9]*.sql) QUIT; do
+  if [[ ${OGG_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${OGG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 # 
 ASM() {
-select ASM_SQL in $(ls ${DBNITRO}/sql/ASM_[0-9]*.sql) QUIT; do
-  if [[ ${ASM_SQL} == "QUIT" ]]; then break 1; else echo "@${ASM_SQL};" | sqlplus -S / as sysasm; fi
+select ASM_SQL in $(cd ${DBNITRO}/sql/; ls ASM_[0-9]*.sql) QUIT; do
+  if [[ ${ASM_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${ASM_SQL};" | sqlplus -S / as sysasm; fi
 done
 }
 #
@@ -419,6 +419,17 @@ SelectDGLogV() {
   DGLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")
   ALERTDGLOG="$(adrci exec="set base ${BASE}; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   vim ${BASE}/${ALERTDGLOG}
+}
+#
+# ------------------------------------------------------------------------
+# WEBLOGIC DOMAINS
+#
+wls_Domains() {
+PS3="Select the Option: "
+select OPT in $(ls ${WL_HOME}/user_projects/domains/base_domain/servers/); do
+  cd "${WL_HOME}/user_projects/domains/base_domain/servers/${OPT}"
+  break
+done
 }
 #
 # ------------------------------------------------------------------------
@@ -1262,19 +1273,25 @@ alias_var
 local OPT=$1
 export ORACLE_HOSTNAME="${HOST}"
 export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+export WL_HOME="${ORACLE_HOME}"
 export OH="${ORACLE_HOME}"
 export OPATCH="${ORACLE_HOME}/OPatch"
 export JAVA_HOME="${ORACLE_HOME}/jdk"
-export CLASSPATH=${ORACLE_HOME}/jlib
+export CLASSPATH="${ORACLE_HOME}/jlib:${FMWCONFIG_CLASSPATH}${CLASSPATHSEP}${CLASSPATH}"
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
-export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
+export M2_HOME=${MW_HOME}/oracle_common/modules/thirdparty/apache-maven_bundle/3.6.1.0.0/apache-maven-3.6.1
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin:${PATH}${PATHSEP}${M2_HOME}/bin"
 alias oh='cd ${ORACLE_HOME}'
 alias hpg='grep HugePages_ /proc/meminfo'
 alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
 alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
 alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
+alias wld='wls_Domains'
+alias startWLS='${WL_HOME}/user_projects/domains/base_domain/bin/startWebLogic.sh &'
+alias stopWLS='${WL_HOME}/user_projects/domains/base_domain/bin/stopWebLogic.sh'
 alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "wlserver"'
 alias list='${DBNITRO}/bin/OracleList.sh'
+##### . "${WL_HOME}/../oracle_common/common/bin/commEnv.sh"
 #
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
 #
