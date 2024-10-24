@@ -8,14 +8,23 @@
 
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # PDB: CHECK STARTUP AND UPTIME OF ALL PDBS
+prompt # DBA: SHOW CONNECTION CLIENT VERSIONS
 prompt ##############################################################
-col name for a20
-col open_time for a33
-select con_id
-  , name
-  , dbid
-  , open_mode
-  , to_char(open_time, 'dd/mm/yyyy hh24:mi:ss') as open_time
-from v$containers
-order by 1,2,3;
+col OSUSER for a20
+col CLIENT_CONNECTION_STRING for a20
+col NETWORK_SERVICE_BANNER for a80
+col CLIENT_CHARSET for a15
+col CLIENT_VERSION for a15
+select INST_ID
+  , SID
+  , SERIAL#
+  , AUTHENTICATION_TYPE
+  , OSUSER
+  , NETWORK_SERVICE_BANNER
+  , CLIENT_CHARSET
+  , CLIENT_CONNECTION
+  , CLIENT_OCI_LIBRARY
+  , CLIENT_VERSION
+  , CLIENT_DRIVER
+--  , CLIENT_CONNECTION_STRING
+ from gv$session_connect_info;

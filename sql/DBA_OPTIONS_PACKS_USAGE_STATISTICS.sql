@@ -81,6 +81,7 @@ col CURRENT_CONTAINER_NAME format a30 wrap
 col CURRENT_CONTAINER_ID   format a20 wrap
 col PARAMETER              format a30 wrap
 col VALUE                  format a20 wrap
+col PRODUCT                format a50 wrap
 alter session set nls_date_format='YYYY-MM-DD_HH24:MI';
 -- spool options_packs_usage_statistics.txt
 prompt OVERALL INFORMATION

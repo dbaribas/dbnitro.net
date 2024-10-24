@@ -8,14 +8,20 @@
 
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
 prompt ##############################################################
-prompt # PDB: CHECK STARTUP AND UPTIME OF ALL PDBS
+prompt # PDB: SHOW HISTORY OF PDBS
 prompt ##############################################################
-col name for a20
-col open_time for a33
-select con_id
-  , name
-  , dbid
-  , open_mode
-  , to_char(open_time, 'dd/mm/yyyy hh24:mi:ss') as open_time
-from v$containers
-order by 1,2,3;
+COLUMN DB_NAME FORMAT A10
+COLUMN CON_ID FORMAT 999
+COLUMN PDB_NAME FORMAT A15
+COLUMN OPERATION FORMAT A16
+COLUMN OP_TIMESTAMP FORMAT A20
+COLUMN CLONED_FROM_PDB_NAME FORMAT A15
+ SELECT DB_NAME
+   , CON_ID
+   , PDB_NAME
+   , OPERATION
+   , to_char(OP_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') as OP_TIMESTAMP
+   , CLONED_FROM_PDB_NAME
+FROM CDB_PDB_HISTORY
+WHERE CON_ID > 2
+ORDER BY CON_ID;
