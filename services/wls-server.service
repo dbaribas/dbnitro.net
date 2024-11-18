@@ -7,9 +7,9 @@ Description=WebLogic Admin Server service
  
 [Service]
 Type=simple
-WorkingDirectory=/u01/app/oracle/product/14.1.1/wls/user_projects/domains
-ExecStart=/u01/app/oracle/product/14.1.1/wls/user_projects/domains/base_domain/bin/startWebLogic.sh
-ExecStop=/u01/app/oracle/product/14.1.1/wls/user_projects/domains/base_domain/bin/stopWebLogic.sh
+WorkingDirectory=/u01/app/oracle/product/14.1.1/wls-server/user_projects/domains
+ExecStart=/u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/wl_server/bin/startWebLogic.sh
+ExecStop=/u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/wl_server/bin/stopWebLogic.sh
 User=oracle
 Group=oinstall
 KillMode=process
@@ -38,3 +38,61 @@ ss -ltn
 systemctl stop wls-server.service
 systemctl start wls-server.service
 systemctl status wls-server.service
+
+
+
+/u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/wl_server/bin/stopWebLogic.sh
+/u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/wl_server/bin/startWebLogic.sh
+
+
+cat > /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/weblogic/security/boot.properties <<EOF
+username=weblogic
+password=Welcome1+
+EOF
+
+cat > /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties <<EOF
+username=weblogic
+password=Welcome1+
+EOF
+
+
+cat /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/weblogic/security/boot.properties
+cat /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties
+
+
+vim /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/weblogic/security/boot.properties
+vim /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties
+
+
+stat /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/weblogic/security/boot.properties
+stat /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties
+
+
+rm -rf /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/weblogic/security/boot.properties
+rm -rf /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties
+
+cd /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/servers/AdminServer/data
+rm -rf ldap
+
+
+cd /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/security
+sudo chown oracle.oinstall DefaultAuthenticatorInit.ldift
+
+
+
+
+
+
+cd /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain/bin:
+. ./setDomainEnv.sh
+
+cd /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain: ]$ 
+java weblogic.security.Encrypt weblogic
+{AES256}58YTZVbt+WBWOCfyUpaFZQHNc7YDPAk+qN6cJLHdVaA=
+
+cd /u01/app/oracle/product/14.1.1/wls-server/user_projects/domains/base_domain: ]$ 
+java weblogic.security.Encrypt Welcome1+
+{AES256}tUF0t3n5gR82WweM4+iemXmNfyaDN7aAorxMPCX9ue4=
+
+
+

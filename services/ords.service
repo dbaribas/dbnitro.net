@@ -1,0 +1,18 @@
+cat /etc/systemd/system/ords.service 
+[Unit]
+Description=Oracle REST Data Services
+After=network.target remote-fs.target
+
+[Service]
+Type=forking
+GuessMainPID=no
+PIDFile=/var/run/ords/pid
+ExecStart=/usr/bin/bash -c '/etc/init.d/ords start'
+ExecReload=/usr/bin/bash -c '/etc/init.d/ords restart'
+ExecStop=/usr/bin/bash -c '/etc/init.d/ords stop'
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target graphical.target
