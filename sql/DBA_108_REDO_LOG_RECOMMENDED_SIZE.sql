@@ -10,12 +10,12 @@ set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on ve
 prompt ##############################################################
 prompt # REDO LOG RECOMMENDED SIZE
 prompt ##############################################################
-prompt Peak Redo Rate   Recommended Redo Log Size
-prompt <= 1 MB/s        1 GB
-prompt <= 5 MB/s        4 GB
-prompt <= 25 MB/s       16 GB
-prompt <= 50 MB/s       32 GB
-prompt  > 50 MB/s       64 GB
+prompt # Peak Redo Rate   Recommended Redo Log Size
+prompt # <= 1 MB/s        1 GB
+prompt # <= 5 MB/s        4 GB
+prompt # <= 25 MB/s       16 GB
+prompt # <= 50 MB/s       32 GB
+prompt #  > 50 MB/s       64 GB
 prompt ##############################################################
 SELECT thread#
   , sequence#
