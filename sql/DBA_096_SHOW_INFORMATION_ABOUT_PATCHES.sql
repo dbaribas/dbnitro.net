@@ -2,8 +2,8 @@
 -- SoftwareVersion..: 1.0.1"
 -- DateCreation.....: 20/02/2024
 -- DateModification.: 20/02/2024
--- EMAIL_1..........: dba.ribas@gmail.com
--- EMAIL_2..........: andre.ribas@icloud.com
+-- EMAIL............: ribas@dbnitro.net
+-- GitHub...........: https://github.com/dbaribas/dbnitro.net
 -- WEBSITE..........: http://dbnitro.net
 
 set feedback off timing off
@@ -103,4 +103,3 @@ SELECT con_id
 FROM containers(sys.registry$sqlpatch)
 GROUP BY con_id
 ORDER BY con_id;
-quit;
