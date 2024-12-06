@@ -2,8 +2,8 @@
 -- SoftwareVersion..: 1.0.1"
 -- DateCreation.....: 20/02/2024
 -- DateModification.: 20/02/2024
--- EMAIL_1..........: dba.ribas@gmail.com
--- EMAIL_2..........: andre.ribas@icloud.com
+-- EMAIL............: ribas@dbnitro.net
+-- GitHub...........: https://github.com/dbaribas/dbnitro.net
 -- WEBSITE..........: http://dbnitro.net
 
 SET TERMOUT ON TERMOUT ON ECHO OFF FEEDBACK 6 HEADING ON LINESIZE 256 PAGESIZE 50000 TERMOUT ON TIMING ON TRIMOUT ON TRIMSPOOL ON VERIFY OFF timing on colsep '|'

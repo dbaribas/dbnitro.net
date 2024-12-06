@@ -2,8 +2,8 @@
 -- SoftwareVersion..: 1.0.1"
 -- DateCreation.....: 20/02/2024
 -- DateModification.: 20/02/2024
--- EMAIL_1..........: dba.ribas@gmail.com
--- EMAIL_2..........: andre.ribas@icloud.com
+-- EMAIL............: ribas@dbnitro.net
+-- GitHub...........: https://github.com/dbaribas/dbnitro.net
 -- WEBSITE..........: http://dbnitro.net
 
 set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
@@ -51,7 +51,7 @@ select substr(A.tablespace_name,1,20) "Tablespace"
    , MAX(A.status) "Status"
 -- , MAX(A.max_extents) "Max extents"
 -- , MAX(A.pct_increase) "Pct_increase"
-   , (SUM(B.BYTES)*COUNT(DISTINCT B.FILE_ID)/COUNT(B.FILE_ID)/1024/1024)-(ROUND(SUM(C.BYTES)/1024/1024/COUNT(DISTINCT B.FILE_ID))) "USED SIZE(MB)"
+   , (SUM(B.BYTES) * COUNT(DISTINCT B.FILE_ID) / COUNT(B.FILE_ID)/1024/1024) - (ROUND(SUM(C.BYTES)/1024/1024/COUNT(DISTINCT B.FILE_ID))) "USED SIZE(MB)"
    , ROUND(SUM(C.BYTES)/1024/1024/COUNT(DISTINCT B.FILE_ID)) "FREE SIZE(MB)"
    , SUM(B.BYTES)*COUNT(DISTINCT B.FILE_ID)/COUNT(B.FILE_ID)/1024/1024 "TOTAL SIZE(MB)"
    , (SUM(B.BYTES)*COUNT(DISTINCT B.FILE_ID)/COUNT(B.FILE_ID)/1024/1024/1024)-(ROUND(SUM(C.BYTES)/1024/1024/1024/COUNT(DISTINCT B.FILE_ID))) "USED SIZE(GB)"
@@ -67,8 +67,8 @@ select substr(A.tablespace_name,1,20) "Tablespace"
 -- , SUM(B.BLOCKS)*COUNT(DISTINCT B.FILE_ID)/COUNT(B.FILE_ID) "TOTAL BLOCKS"
    , SUM(B.MAXBYTES)*COUNT(DISTINCT B.FILE_ID)/COUNT(B.FILE_ID)/1024/1024/1024 "MAX SIZE(GB)"
    , case
-       when TO_CHAR(100-(SUM(C.BLOCKS)*100*COUNT(B.FILE_ID)/(SUM(B.BLOCKS)*COUNT(DISTINCT B.FILE_ID)))/COUNT(DISTINCT B.FILE_ID)) < 80 then 'Size OK'
-       when TO_CHAR(100-(SUM(C.BLOCKS)*100*COUNT(B.FILE_ID)/(SUM(B.BLOCKS)*COUNT(DISTINCT B.FILE_ID)))/COUNT(DISTINCT B.FILE_ID)) < 90 then 'Warning'
+       when TO_CHAR(100 - (SUM(C.BLOCKS) * 100 * COUNT(B.FILE_ID) / (SUM(B.BLOCKS) * COUNT(DISTINCT B.FILE_ID))) / COUNT(DISTINCT B.FILE_ID)) < 80 then 'Size OK'
+       when TO_CHAR(100 - (SUM(C.BLOCKS) * 100 * COUNT(B.FILE_ID) / (SUM(B.BLOCKS) * COUNT(DISTINCT B.FILE_ID))) / COUNT(DISTINCT B.FILE_ID)) between 80 and 90 then 'Warning'
        else 'Critical' end as "Status Size"
 from dba_tablespaces A, DBA_DATA_FILES B, DBA_FREE_SPACE C
 WHERE A.TABLESPACE_NAME=B.TABLESPACE_NAME
