@@ -22,7 +22,7 @@ send_mail_and_exit () {
 # Hostname and Script Variable
 #
 HOSTNAME="$(hostname)"
-RECEIPIENT="andre.ribas@umb.ch"
+# RECEIPIENT="dba.ribas"
 ORATAB="/etc/oratab"
 SCRIPT_FULL_NAME="$0"
 SCRIPT_NAME="$(basename ${0})"
