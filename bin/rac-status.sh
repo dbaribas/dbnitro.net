@@ -19,10 +19,21 @@
 #
 # More info and git repo: https://bit.ly/2MFkzDw -- https://github.com/freddenis/oracle-scripts
 #
-# The current script version is 20220121
+# The current script version is 20240629
 #
 # History :
 #
+# 20240629 - Fred Denis - Adapt to 2 node Flex clusters; indeed, a Flex cluster will always have 3 ASM instances and one will remains offline forever as there is only 2 nodes
+#                         More details on https://unknowndba.blogspot.com/2022/01/rac-statussh-whats-new.html date June 29th 2024
+# 20240220 - Fred Denis - Fixed a bug with the default LONG_NAMES; you can also now only show the services (-ns); code is tested GI 23c
+# 20230317 - Fred Denis - Fixed a bug with cluster name not like db, this was a bad leftover sorry
+# 20230307 - Fred Denis - Automatically use the part of the nodenames before any "db" pattern to shorten the hostnames and no more the cluster name
+#                         Indeed, let's say you have a cluster named "crs19" and your nodenames are "dbproddb01, dbproddb02, etc.."; shortening using
+#                         If your hosts do not have a "db" pattern in their names, use the -C option to shorten them differently
+#                         More info in the FAQ: https://bit.ly/34lcFZo
+# 20221222 - Fred Denis - -C option to provide a string to shorten the hostnames (when the default shortening method does not suit you)
+#                         Remove a leftover i which was preventing sorting
+#                         Fixed a bug which was impacting the databases which had the clustername in their name
 # 20220209 - Fred Denis - Fixed a bug due to awk non math context with DIFF_HOURS which was badly showing services
 #                           recently restarted -- Thanks Steve for bringing this bug to my attention
 # 20220121 - Fred Denis - We use USR_ORA_OPEN_MODE and no more STATE and TARGET for the databases
@@ -142,16 +153,19 @@ WITH_COLORS="YES"                                                         # Outp
 #
 # Choose the information what you want to see -- the last uncommented value wins
 # ./rac-status.sh -h for more information
-   SHOW_DB="YES"                 # Databases
-  #SHOW_DB="NO"
-  SHOW_PDB="YES"                 # PDBs
- #SHOW_PDB="NO"
- SHOW_LSNR="YES"                 # Listeners
+  SHOW_DB="YES"                 # Databases
+ #SHOW_DB="NO"
+ SHOW_PDB="YES"                 # PDBs
+#SHOW_PDB="NO"
+SHOW_LSNR="YES"                 # Listeners
 #SHOW_LSNR="NO"
-  SHOW_SVC="YES"                 # Services
- #SHOW_SVC="NO"
- SHOW_TECH="YES"                 # Tech (DGs, ONS, etc ...)
-#SHOW_TECH="NO"
+ SHOW_SVC="YES"                 # Services
+ SHOW_SVC="NO"
+SHOW_TECH="YES"                 # Tech (DGs, ONS, etc ...)
+SHOW_TECH="NO"
+# Collect the databases information: not same as SHOW_DB as services need to collect DB info
+# but not necessarily show the databases  information (-ns for example)
+COLL_DB="YES"
 #
 # Number of spaces between the status and the "|" of the column - this applies before and after the status
 # A value of 2 would print 2 spaces before and after the status and like |  Open  |
@@ -163,151 +177,160 @@ COL_NODE_OFFSET=99
 # Different OS support
 #
 OS=$(uname)
+if [[ "${OS}" =~ "CYGWIN" ]]; then OS="Linux"; fi
 case ${OS} in
     SunOS)
-        ORATAB="/var/opt/oracle/oratab"                  ;
-           AWK=$(which gawk)                             ;
-           SED=$(which gsed)                             ;;
+        ORATAB="/var/opt/oracle/oratab"                 ;
+           AWK=`which gawk`                             ;
+           SED=`which gsed`                             ;;
     Linux)
-        ORATAB="/etc/oratab"                             ;
-           AWK=$(which awk)                              ;
-           SED=$(which sed)                              ;;
+        ORATAB="/etc/oratab"                            ;
+           AWK=`which awk`                              ;
+           SED=`which sed`                              ;;
      HP-UX)
-        ORATAB="/etc/oratab"                             ;
-           AWK=$(which awk)                              ;
-           SED=$(which sed)                              ;;
+        ORATAB="/etc/oratab"                            ;
+           AWK=`which awk`                              ;
+           SED=`which sed`                              ;;
      AIX)
-        ORATAB="/etc/oratab"                             ;
-           AWK=$(which gawk)                             ;
-           SED=$(which sed)                              ;;
+        ORATAB="/etc/oratab"                            ;
+           AWK=`which gawk`                             ;
+           SED=`which sed`                              ;;
        *)  printf "\n\t\033[1;31m%s\033[m\n\n" "Unsupported OS, cannot continue."           ;
-           exit 666                                      ;;
+           exit 666                                     ;;
 esac
 #
 # Check if we have an AWK and a SED to continue
 #
 if [[ ! -f "${AWK}" ]]; then
-  printf "\n\t\033[1;31m%s" "No awk found on your system, cannot continue, if you run Solaris, please ensure that gawk is in your path"
-  printf "\t%s\033[m\n\n" "${AWK}"
-  exit 678
+    printf "\n\t\033[1;31m%s" "No awk found on your system, cannot continue, if you run Solaris, please ensure that gawk is in your path"
+    printf "\t%s\033[m\n\n" "${AWK}"
+    exit 678
 fi
-#
 if [[ ! -f "${SED}" ]]; then
-  printf "\n\t\033[1;31m%s" "No sed found on your system, cannot continue, if you run Solaris, please ensure that gsed is in your path"
-  printf "\t%s\033[m\n\n" "${SED}"
-  exit 679
+    printf "\n\t\033[1;31m%s" "No sed found on your system, cannot continue, if you run Solaris, please ensure that gsed is in your path"
+    printf "\t%s\033[m\n\n" "${SED}"
+    exit 679
 fi
 #
 # Show the version of the script (-V)
 #
 show_version() {
-  VERSION=`${AWK} '{if ($0 ~ /^# 20[0-9][0-9][0-1][0-9]/) {print $2; exit}}' $0`
-  printf "\n\t\033[1;36m%s\033[m\n" "The current version of "`basename $0`" is "$VERSION"."          ;
+    VERSION=`${AWK} '{if ($0 ~ /^# 20[0-9][0-9][0-1][0-9]/) {print $2; exit}}' $0`
+    printf "\n\t\033[1;36m%s\033[m\n" "The current version of "`basename $0`" is "$VERSION"."          ;
 }
 #
 # An usage function
 #
 usage() {
-  printf "\n\033[1;37m%-8s\033[m\n" "NAME"                ;
-  cat << END
-  rac-status.sh - an overview of your Oracle RAC / GI 11g, 12c, 18c ,19c, 21c+ resources in a glimpse (https://bit.ly/2MFkzDw)
+    printf "\n\033[1;37m%-8s\033[m\n" "NAME"                ;
+    cat << END
+    rac-status.sh - an overview of your Oracle RAC / GI 11g, 12c, 18c ,19c, 21c+ resources in a glimpse (https://bit.ly/2MFkzDw)
 END
-  printf "\n\033[1;37m%-8s\033[m\n" "SYNOPSIS"            ;
-  cat << END
-  $0 [-a] [-n] [-d] [-p] [-l] [-s] [-t] [-g] [-v] [-D] [-S] [-c] [-o] [-f] [-e] [-L] [-r] [-u] [-k] [-K] [-w] [-h]
+
+    printf "\n\033[1;37m%-8s\033[m\n" "SYNOPSIS"            ;
+    cat << END
+    $0 [-a] [-n] [-d] [-p] [-l] [-s] [-t] [-g] [-v] [-D] [-S] [-c] [-o] [-f] [-e] [-L] [-r] [-u] [-k] [-K] [-w] [-h]
 END
-#
-printf "\n\033[1;37m%-8s\033[m\n" "DESCRIPTION"         ;
-cat << END
-  `basename $0` needs to be executed with a user allowed to query GI using crsctl; oraenv also has to be working
-  `basename $0` will show what is running or not running accross all the nodes of a GI 12c :
-      - The databases instances (and the ORACLE_HOME they are running against)
-      - The type of database : Primary, Standby, RAC One node, Single
-      - The listeners (SCAN Listener and regular listeners)
-      - The services
-  With no option, `basename $0` will show what is defined by the variables :
-      - SHOW_DB       # To show the databases instances
-      - SHOW_PDB      # To show the PDBs (only if your GI is >= 21c)
-      - SHOW_LSNR     # To show the listeners
-      - SHOW_SVC      # To show the services
-      - SHOW_TECH     # To show the tech stuff (DGs, ONS, etc ...)
-      These variables can be modified in the script itself or you can use command line option to revert their value (see below)
+
+    printf "\n\033[1;37m%-8s\033[m\n" "DESCRIPTION"         ;
+    cat << END
+    `basename $0` needs to be executed with a user allowed to query GI using crsctl; oraenv also has to be working
+    `basename $0` will show what is running or not running accross all the nodes of a GI 12c :
+        - The databases instances (and the ORACLE_HOME they are running against)
+        - The type of database : Primary, Standby, RAC One node, Single
+        - The listeners (SCAN Listener and regular listeners)
+        - The services
+    With no option, `basename $0` will show what is defined by the variables :
+        - SHOW_DB       # To show the databases instances
+        - SHOW_PDB      # To show the PDBs (only if your GI is >= 21c)
+        - SHOW_LSNR     # To show the listeners
+        - SHOW_SVC      # To show the services
+        - SHOW_TECH     # To show the tech stuff (DGs, ONS, etc ...)
+        These variables can be modified in the script itself or you can use command line option to revert their value (see below)
+
 END
-  printf "\n\033[1;37m%-8s\033[m\n" "OPTIONS"             ;
-  cat << END
-  -a    Show everything regardless of the default behavior defined with SHOW_DB, SHOW_LSNR, SHOW_SVC and SHOW_TECH
-  -n    Show nothing    regardless of the default behavior defined with SHOW_DB, SHOW_LSNR, SHOW_SVC and SHOW_TECH
-  -a and -n are handy to erase the defaults values:
-        $ ./rac-status.sh -n -d                         # Show the databases output only
-        $ ./rac-status.sh -a -s                         # Show everything but the services (then the listeners and the databases)
 
-  -d    Revert the behavior defined by SHOW_DB  ; if SHOW_DB   is set to YES to show the databases by default, then the -d option will hide the databases
-  -p    Revert the behavior defined by SHOW_PDB ; if SHOW_PDB  is set to YES to show the databases by default, then the -p option will hide the PDBs
-  -l    Revert the behavior defined by SHOW_LSNR; if SHOW_LSNR is set to YES to show the listeners by default, then the -l option will hide the listeners
-  -s    Revert the behavior defined by SHOW_SVC ; if SHOW_SVC  is set to YES to show the services  by default, then the -s option will hide the services
-  -t    Revert the behavior defined by SHOW_TECH; if SHOW_TECH is set to YES to show the tech resources  by default, then the -t option will hide the tech resources
+    printf "\n\033[1;37m%-8s\033[m\n" "OPTIONS"             ;
+    cat << END
+    -a    Show everything regardless of the default behavior defined with SHOW_DB, SHOW_LSNR, SHOW_SVC and SHOW_TECH
+    -n    Show nothing    regardless of the default behavior defined with SHOW_DB, SHOW_LSNR, SHOW_SVC and SHOW_TECH
+    -a and -n are handy to erase the defaults values:
+          $ ./rac-status.sh -n -d                         # Show the databases output only
+          $ ./rac-status.sh -a -s                         # Show everything but the services (then the listeners and the databases)
 
-  -g    Act as a grep command to grep a pattern from the output (key sensitive)
-  -v    Act as "grep -v" to ungrep from the output
-  -g and -v examples :
-        $ ./rac-status.sh -g Open                       # Show only the lines with "Open" on it
-        $ ./rac-status.sh -g Open                       # Show only the lines with "Open" on it
-        $ ./rac-status.sh -g "Open|Online"              # Show only the lines with "Open" or "Online" on it
-        $ ./rac-status.sh -g "Open|Online" -v 12        # Show only the lines with "Open" or "Online" on it but no those containing 12
+    -d    Revert the behavior defined by SHOW_DB  ; if SHOW_DB   is set to YES to show the databases by default, then the -d option will hide the databases
+    -p    Revert the behavior defined by SHOW_PDB ; if SHOW_PDB  is set to YES to show the databases by default, then the -p option will hide the PDBs
+    -l    Revert the behavior defined by SHOW_LSNR; if SHOW_LSNR is set to YES to show the listeners by default, then the -l option will hide the listeners
+    -s    Revert the behavior defined by SHOW_SVC ; if SHOW_SVC  is set to YES to show the services  by default, then the -s option will hide the services
+    -t    Revert the behavior defined by SHOW_TECH; if SHOW_TECH is set to YES to show the tech resources  by default, then the -t option will hide the tech resources
 
-  -D    Comma separated list of databases (key sensitive) to show -- only the services related to these DBs will be shown:
-        $ ./rac-status.sh -D prod                       # Show only the "prod" database
-        $ ./rac-status.sh -D prod1,prod2,prod3          # Show only the prod1, prod2 and prod3 databases
+    -g    Act as a grep command to grep a pattern from the output (key sensitive)
+    -v    Act as "grep -v" to ungrep from the output
+    -g and -v examples :
+          $ ./rac-status.sh -g Open                       # Show only the lines with "Open" on it
+          $ ./rac-status.sh -g Open                       # Show only the lines with "Open" on it
+          $ ./rac-status.sh -g "Open|Online"              # Show only the lines with "Open" or "Online" on it
+          $ ./rac-status.sh -g "Open|Online" -v 12        # Show only the lines with "Open" or "Online" on it but no those containing 12
 
-  -S    Comma separated list of services (key sensitive) to show -- default is we show all the services:
-        $ ./rac-status.sh -D prod -S svc1,svc4          # Show only the svc1 and svc4 services
+    -D    Comma separated list of databases (key sensitive) to show -- only the services related to these DBs will be shown:
+          $ ./rac-status.sh -D prod                       # Show only the "prod" database
+          $ ./rac-status.sh -D prod1,prod2,prod3          # Show only the prod1, prod2 and prod3 databases
 
-  -c    Column to sort by, please have a look at "Sort the database output" in http://bit.ly/2MFkzDw for more details on this -c option
+    -S    Comma separated list of services (key sensitive) to show -- default is we show all the services:
+          $ ./rac-status.sh -D prod -S svc1,svc4          # Show only the svc1 and svc4 services
 
-  -o    Specify a file to save the crsctl commands output
-        $ ./rac-status.sh -o /tmp/rac-status_output.log
-  -f    A file to use as input file (one generated by the -o option for example)
-        $ ./rac-status.sh -f /tmp/rac-status_output.log
+    -c    Column to sort by, please have a look at "Sort the database output" in http://bit.ly/2MFkzDw for more details on this -c option
 
-  -e    Do not use olr.loc to set the ASM environment but relies on the current environment
-        Set USE_ORAENV="NO" on top of the script to have a permanent -e option
+    -o    Specify a file to save the crsctl commands output
+          $ ./rac-status.sh -o /tmp/rac-status_output.log
+    -f    A file to use as input file (one generated by the -o option for example)
+          $ ./rac-status.sh -f /tmp/rac-status_output.log
 
-  -L    Do not try to shorten the host names, show the entire host names
+    -e    Do not use olr.loc to set the ASM environment but relies on the current environment
+          Set USE_ORAENV="NO" on top of the script to have a permanent -e option
 
-  -r    Reverse the colors (useful for clear terminal backgrounds)
+    -L    Do not try to shorten the host names, show the entire host names
 
-  -u    Shows the Uncolored output (no colors); set WITH_COLORS="NO" on top of the script to have it permanently
+    -r    Reverse the colors (useful for clear terminal backgrounds)
 
-  -k    Shows the ADVM devices on the same line as the ACFS FS (handy to remount some FS), default is ${ADVM_DEV}
-  -K    Do not show the ACFS FS nor the ADVM devices, default is ${HIDE_DEV}
+    -u    Shows the Uncolored output (no colors); set WITH_COLORS="NO" on top of the script to have it permanently
 
-  -w    Shows a yellow background when a resource has been restarted less than the number of hours in parameter (default is ${DIFF_HOURS})
-            h for hours (default) d for day, w for week, m for month and y for year can be used to specify the delay:
-            $ ./rac-status.sh -w 24         # 24 hours
-            $ ./rac-status.sh -w 24h        # 24 hours
-            $ ./rac-status.sh -w 2d         # 2 days
-            $ ./rac-status.sh -w 3m         # 3 months
-  -V        Shows the version of the script
-  -h        Shows this help
+    -k    Shows the ADVM devices on the same line as the ACFS FS (handy to remount some FS), default is ${ADVM_DEV}
+    -K    Do not show the ACFS FS nor the ADVM devices, default is ${HIDE_DEV}
 
-  Note: the options are cumulative and can be combined with a "the last one wins" behavior :
-        $ $0 -a -l              # Show everything but the listeners (-a will force show everything then -l will hide the listeners)
-        $ $0 -n -d              # Show only the databases           (-n will force hide everything then -d with show the databases)
+    -w    Shows a yellow background when a resource has been restarted less than the number of hours in parameter (default is ${DIFF_HOURS})
+              h for hours (default) d for day, w for week, m for month and y for year can be used to specify the delay:
+              $ ./rac-status.sh -w 24         # 24 hours
+              $ ./rac-status.sh -w 24h        # 24 hours
+              $ ./rac-status.sh -w 2d         # 2 days
+              $ ./rac-status.sh -w 3m         # 3 months
 
-  Experiment and enjoy  !
+    -C    Use the string provided to -C to shorten the hostnames if the default shortening method does not suit you. By default, we remove everything before
+           a "db" pattern in the hostnames (dbproddb01 becomes db01); if your hosts do not contain "db" in their names, use -C to shorten as you wish.
+           As an example, if your hosts are named oracleprod01, oracleprod02, etc... using -C oracle would shorten the names to prod01, prod02, etc...
+
+    -V        Shows the version of the script
+    -h        Shows this help
+
+    Note: the options are cumulative and can be combined with a "the last one wins" behavior :
+          $ $0 -a -l              # Show everything but the listeners (-a will force show everything then -l will hide the listeners)
+          $ $0 -n -d              # Show only the databases           (-n will force hide everything then -d with show the databases)
+
+    Experiment and enjoy  !
+
 END
 exit 123
 }
 #
 # Options
 #
-while getopts "andpslLhg:v:o:f:eruw:c:tkKVD:S:" OPT; do
+while getopts "andpslLhg:v:o:f:eruw:c:tkKVD:S:C:" OPT; do
     case ${OPT} in
-    a)         SHOW_DB="YES"; SHOW_LSNR="YES"; SHOW_SVC="YES"; SHOW_TECH="YES"; SHOW_PDB="YES"      ;;
-    n)         SHOW_DB="NO" ; SHOW_LSNR="NO" ; SHOW_SVC="NO" ; SHOW_TECH="NO" ; SHOW_PDB="NO"       ;;
-    d)         if [[ "${SHOW_DB}"   == "YES" ]]; then   SHOW_DB="NO"; else   SHOW_DB="YES"; fi      ;;
+    a)         SHOW_DB="YES"; SHOW_LSNR="YES"; SHOW_SVC="YES"; SHOW_TECH="YES"; SHOW_PDB="YES"; COLL_DB="YES"     ;;
+    n)         SHOW_DB="NO" ; SHOW_LSNR="NO" ; SHOW_SVC="NO" ; SHOW_TECH="NO" ; SHOW_PDB="NO" ; COLL_DB="NO"      ;;
+    d)         if [[ "${SHOW_DB}"   == "YES" ]]; then   SHOW_DB="NO"; else   SHOW_DB="YES"; fi                    ;;
     p)         if [[ "${SHOW_PDB}"  == "YES" ]]; then  SHOW_PDB="NO"; else  SHOW_PDB="YES"; fi      ;;
-    s)         if [[ "${SHOW_SVC}"  == "YES" ]]; then  SHOW_SVC="NO"; else  SHOW_SVC="YES"; fi      ;;
+    s)         if [[ "${SHOW_SVC}"  == "YES" ]]; then  SHOW_SVC="NO"; else  SHOW_SVC="YES"; COLL_DB="YES"; fi     ;;
     l)         if [[ "${SHOW_LSNR}" == "YES" ]]; then SHOW_LSNR="NO"; else SHOW_LSNR="YES"; fi      ;;
     t)         if [[ "${SHOW_TECH}" == "YES" ]]; then SHOW_TECH="NO"; else SHOW_TECH="YES"; fi      ;;
     D)         LISTDB="${OPTARG}"                                                                   ;;
@@ -324,11 +347,22 @@ while getopts "andpslLhg:v:o:f:eruw:c:tkKVD:S:" OPT; do
     u)    WITH_COLORS="NO"                                                                          ;;
     k)       ADVM_DEV="True"                                                                        ;;
     K)       HIDE_DEV="True"                                                                        ;;
+    C)      P_CLUSTER="${OPTARG}"                                                                   ;;
     V)      show_version; exit 567                                                                  ;;
     h)         usage                                                                                ;;
     \?)        echo "Invalid option: -${OPTARG}" >&2; usage                                         ;;
     esac
 done
+#
+# If cluster is empty, we set a random value for it not to be able to find it in the hostnames
+# not to mess up the LONG_NAMES=NO
+#
+if [[ -z "${P_CLUSTER}" ]]; then
+     P_CLUSTER=$$
+else
+    LONG_NAMES="NO"                                         # If -C specified, we do not want long names
+fi
+P_CLUSTER_L="${P_CLUSTER,,}"
 #
 # Manage the diff hours depending on the unit in the -w option
 #
@@ -362,7 +396,7 @@ fi
 if [[ "${REVERSE}" == "YES" ]]; then
     WHITE="30m"     ;           # Black
 fi
-if [ -n "${FILE}" ]; then       # Input file specified, we wont run any crsctl command and rely on the file as input
+if [ -n "$FILE" ]; then       # Input file specified, we wont run any crsctl command and rely on the file as input
     if [ ! -f ${FILE} ]; then
         printf "\n\t\033[1;31m%s\033[m\n\n" "Cannot find the ${FILE} input file; cannot continue"
         exit 222
@@ -370,7 +404,7 @@ if [ -n "${FILE}" ]; then       # Input file specified, we wont run any crsctl c
         printf "\n\t\033[1;34m%s\033[m\n\n" "Proceeding with the ${FILE} file as input file"
     fi
 fi
-if [[ -z "${FILE}" ]]; then               # This is not needed when using an input file
+if [[ -z "$FILE" ]]; then               # This is not needed when using an input file
     if [[ "${USE_ORAENV}" == "YES" ]]; then
         #
         # Set the ASM env to be able to use crsctl commands
@@ -378,7 +412,7 @@ if [[ -z "${FILE}" ]]; then               # This is not needed when using an inp
         if [[ -f "${OLR}" ]]; then
             export ORACLE_HOME=$(cat "${OLR}" | grep "^crs_home" | awk -F "=" '{print $2}')
             export ORACLE_BASE=$(${ORACLE_HOME}/bin/orabase)
-            export PATH="${PATH}:${ORACLE_HOME}/bin"
+            export        PATH="${PATH}:${ORACLE_HOME}/bin"
         else
             ORACLE_SID=$(ps -ef | grep pmon | grep asm | ${AWK} '{print $NF}' | sed s'/asm_pmon_//' | egrep "^[+]")
             if [[ -f "${ORATAB}" ]]; then
@@ -398,13 +432,22 @@ if [[ -z "${FILE}" ]]; then               # This is not needed when using an inp
     fi
     #
     # List of the nodes of the cluster
-    # Try to find if there is "db" in the hostname, if yes we can delete the common "<clustername>" pattern from the hosts for visibility
+    # Try to find if there is "db" or a custom cluster name (option -C) in the hostname
+    # If yes we can delete the common "<clustername>" pattern from the hosts for visibility
     #
     SHORT_NAMES="NO"
-    if [[ $(olsnodes | head -1 | sed s'/,.*$//g' | tr '[:upper:]' '[:lower:]') == *"db"* && "${LONG_NAMES}" == "NO" ]]; then
-               NODES=$(olsnodes | sed s'/^.*db/db/g' | ${AWK} '{if (NR<2){txt=$0} else{txt=txt","$0}} END {print txt}')
-        CLUSTER_NAME=$(olsnodes | head -1 | sed s'/db.*$//g')
-         SHORT_NAMES="YES"
+    if [[ ($(olsnodes | head -1 | sed s'/,.*$//g' | tr '[:upper:]' '[:lower:]') == *"db"* || $(olsnodes | head -1 | sed s'/,.*$//g' | tr '[:upper:]' '[:lower:]') == *"${P_CLUSTER_L}"*) && "${LONG_NAMES}" == "NO" ]]; then
+        if [[ -n "${P_CLUSTER}" ]]; then       # We have a custom cluster name
+                   NODES=$(olsnodes | sed s"/^.*${P_CLUSTER}//g" | ${AWK} '{if (NR<2){txt=$0} else{txt=txt","$0}} END {print txt}')
+            CLUSTER_NAME="${P_CLUSTER}"
+        else
+                   NODES=$(olsnodes | sed s'/^.*db/db/g' | ${AWK} '{if (NR<2){txt=$0} else{txt=txt","$0}} END {print txt}')
+#            CLUSTER_NAME=$(olsnodes | head -1 | sed s'/db.*$//g')
+            # Actually we need the first part of the node name which maybe different than the cluster name; cluster can be "crs19" and nodes "dbproddb01, dbproddb02, etc..."
+            # We then need "dbprod" here to shorten the names and not "crs19:
+            CLUSTER_NAME=$(olsnodes | head -1 | rev | sed -E 's/.*bd(.)/\1/' | rev)
+        fi
+        SHORT_NAMES="YES"
     else
                NODES=$(olsnodes | ${AWK} '{if (NR<2){txt=$0} else{txt=txt","$0}} END {print txt}')
         CLUSTER_NAME=$(olsnodes -c)
@@ -477,7 +520,7 @@ if [[ -z "${FILE}" ]]; then               # This is not needed when using an inp
            TECHATTRP="NAME,TYPE,ACL,ENABLED,VOLUME_DEVICE,USR_ORA_VIP,${ENABLEDATSERVER}"                                # Tech      crsctl -p
            TECHATTRV="NAME,TYPE,LAST_SERVER,STATE,TARGET,LAST_RESTART,LAST_STATE_CHANGE"                                 # Tech      crsctl -v
 
-    if [[ "${SHOW_DB}" == "YES" ]]; then
+    if [[ "${SHOW_DB}" == "YES" || "${COLL_DB}" == "YES" ]]; then
         crsctl stat res -p -w "${DBCRSFILTER}"          -attr "${DBATTRP}"  | grep -v "^CRS-" >> "${TMP}"
         crsctl stat res -v -w "${DBCRSFILTER}"          -attr "${DBATTRV}"  | grep -v "^CRS-" >> "${TMP}"
     fi
@@ -503,7 +546,8 @@ if [[ -z "${FILE}" ]]; then               # This is not needed when using an inp
     cp "${TMP2}" "${TMP}"
 
     if [[ "${SHORT_NAMES}" == "YES" ]]; then
-        "${SED}" -i "s/$CLUSTER_NAME//" "${TMP}"
+#        "${SED}" -i "s/$CLUSTER_NAME//" "${TMP}"
+        "${SED}" -i "/^NAME=/! s/${CLUSTER_NAME}//g" "${TMP}"
     fi
     NB_NODES=$(olsnodes | wc -l)
 else            # If we use an input file
@@ -515,7 +559,7 @@ fi      # End if [ -z "$FILE" ]
 # Define the offset to apply to the status column depending on the number of nodes to make the tables visible for big implementations
 #
 if [[ "${COL_NODE_OFFSET}" == "99" ]]; then
-         COL_NODE_OFFSET=3       ;
+    COL_NODE_OFFSET=3       ;
     if [ "$NB_NODES" -eq "2" ]; then COL_NODE_OFFSET=6      ;       fi      ;
     if [ "$NB_NODES" -eq "4" ]; then COL_NODE_OFFSET=5      ;       fi      ;
     if [ "$NB_NODES" -gt "4" ]; then COL_NODE_OFFSET=3      ;       fi      ;
@@ -931,10 +975,10 @@ function set_color_status(i_db, i_node, i_status, i_target) {
         while (getline) {
             if ($1 == "LAST_SERVER")        {       SERVER = $2                             ;}
             if ($1 == "STATE")              {       gsub(" on .*$", "", $2)                 ;
-                status[DB,SERVER] = $2                  ;
+                if (status[DB,SERVER] == ""){       status[DB,SERVER] = $2                  ; }
                 if (length(status[DB,SERVER]) > COL_NODE) { COL_NODE = length(status[DB,SERVER]) + COL_NODE_OFFSET;}
             }
-            if ($1 == "TARGET")             {       target[DB,SERVER]=$2                    ;}
+        if ($1 == "TARGET")             {       if (target[DB,SERVER]=="") {target[DB,SERVER]=$2;}}
             # We use USR_ORA_OPEN_MODE instead of STATE and TARGET for the databases
             if ($1 == "USR_ORA_OPEN_MODE")  {    if (tolower($2) ~ "mount")     {target[DB,SERVER]="Mounted"  ;}
                                                  if (tolower($2) ~ "read only") {target[DB,SERVER]="Readonly" ;}
@@ -1427,7 +1471,7 @@ if [[ -n "${SORT_BY}" ]]; then                                                  
         SORT_NODE=${SORT_COL}
          SORT_COL="c"
     fi
-    if [[ "${SORT_ORDER}" != "r" ]]; then                     i                            # Sort order can only be "r" for reverse or "" for normal
+    if [[ "${SORT_ORDER}" != "r" ]]; then                                                  # Sort order can only be "r" for reverse or "" for normal
          SORT_ORDER=""
     else SORT_ORDER="r"
     fi

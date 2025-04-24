@@ -4,8 +4,8 @@ Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.1"
 DateCreation="05/10/2023"
 DateModification="05/10/2023"
-EMAIL_1="dba.ribas@gmail.com"
-EMAIL_2="andre.ribas@icloud.com"
+EMAIL="dba.ribas@gmail.com"
+GITHUB="https://github.com/dbaribas/dbnitro.net"
 WEBSITE="http://dbnitro.net"
 #
 # Execution of purgeTFA

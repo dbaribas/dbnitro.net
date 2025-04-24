@@ -4,8 +4,8 @@ Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.7"
 DateCreation="28/09/2021"
 DateModification="12/04/2024"
-EMAIL_1="dba.ribas@gmail.com"
-EMAIL_2="andre.ribas@icloud.com"
+EMAIL="dba.ribas@gmail.com"
+GITHUB="https://github.com/dbaribas/dbnitro.net"
 WEBSITE="http://dbnitro.net"
 #
 # Usage:

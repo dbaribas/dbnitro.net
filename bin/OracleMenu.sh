@@ -1,10 +1,10 @@
 #!/bin/sh
 Author="Andre Augusto Ribas"
-SoftwareVersion="1.0.123"
+SoftwareVersion="1.0.131"
 DateCreation="07/01/2021"
-DateModification="19/09/2024"
-EMAIL_1="dba.ribas@gmail.com"
-EMAIL_2="andre.ribas@icloud.com"
+DateModification="16/04/2025"
+EMAIL="ribas@dbnitro.net"
+GITHUB="https://github.com/dbaribas/dbnitro.net"
 WEBSITE="http://dbnitro.net"
 #
 # ------------------------------------------------------------------------
@@ -24,19 +24,19 @@ SetClear() {
 # ------------------------------------------------------------------------
 # DBNITRO Script Folder
 #           # ===> HERE YOU HAVE TO CONFIGURE THE PATH OF DBNITRO, WHERE IT WILL BE INSTALLED
-      FOLDER=/opt                   
-     DBNITRO=${FOLDER}/dbnitro
-        LOGS=${DBNITRO}/logs
-      BACKUP=${DBNITRO}/backup
-     REPORTS=${DBNITRO}/reports
-    BINARIES=${DBNITRO}/bin
-    SERVICES=${DBNITRO}/services
-   VARIABLES=${DBNITRO}/var
-   FUNCTIONS=${DBNITRO}/functions
- ENVIRONMENT=${DBNITRO}/environments
-  STATEMENTS=${DBNITRO}/sql
+      FOLDER="/opt"
+     DBNITRO="${FOLDER}/dbnitro"
+        LOGS="${DBNITRO}/logs"
+      BACKUP="${DBNITRO}/backup"
+     REPORTS="${DBNITRO}/reports"
+    BINARIES="${DBNITRO}/bin"
+    SERVICES="${DBNITRO}/services"
+   VARIABLES="${DBNITRO}/var"
+   FUNCTIONS="${DBNITRO}/functions"
+ ENVIRONMENT="${DBNITRO}/environments"
+  STATEMENTS="${DBNITRO}/sql"
 #
-if [[ ! -d ${DBNITRO} ]]; then
+if [[ ! -d "${DBNITRO}" ]]; then
   SetClear
   SepLine
   echo " -- YOUR SCRIPT FOLDER DOES NOT EXISTS, YOU HAVE TO CREATE THAT BEFORE YOU CONTINUE --"
@@ -46,7 +46,7 @@ fi
 # ------------------------------------------------------------------------
 # Verify ROOT User
 #
-if [[ $(whoami) == "root" ]]; then
+if [[ "$(whoami)" == "root" ]]; then
   SetClear
   SepLine
   echo " -- YOUR USER IS ROOT, YOU CAN NOT USE THIS SCRIPT WITH ROOT USER --"
@@ -57,7 +57,7 @@ fi
 # ------------------------------------------------------------------------
 # Verify if all pre-reqs Softwares are installed
 #
-if [[ $(which rlwrap | wc -l | awk '{ print $1 }') == 0 ]]; then
+if [[ "$(which rlwrap | wc -l | awk '{ print $1 }')" == "0" ]]; then
   SetClear
   SepLine
   echo " -- You need to install rlwrap app --"
@@ -84,6 +84,7 @@ HELP() {
   printf "|%-16s|%-100s|\n" "                 DASH_INSTALL " " YOU CAN INSTALL THE ORACLE DATABASE DASHBOARD"
   printf "|%-16s|%-100s|\n" "                       REPORT " " YOU CAN SEE THE ORACLE DATABASE REPORT (SAVED ON ${REPORTS})"
   printf "|%-16s|%-100s|\n" "                      OPTIONS " " YOU CAN SEE THE ORACLE DATABASE OPTIONS"
+  printf "|%-16s|%-100s|\n" "                   COMPONENTS " " YOU CAN SEE THE ORACLE DATABASE COMPONENTS"
   printf "|%-16s|%-100s|\n" "                    HUGEPAGES " " YOU CAN SEE THE ORACLE DATABASE HUGEPAGES RECOMMENDATIONS"
   printf "|%-16s|%-100s|\n" "                          DBA " " SHOW ALL DBA OPTIONS"
   printf "|%-16s|%-100s|\n" "                          PDB " " SHOW ALL PDB OPTIONS"
@@ -109,7 +110,7 @@ ORA_HOMES_IGNORE_4="${ORA_HOMES_IGNORE_0}|goldengate|ogg|gg|agent"
 ORA_HOMES_IGNORE_5="+apx|-mgmtdb"
 ORA_HOMES_IGNORE_6="grep|egrep|zabbix|webmin"
 #
-if [[ $(uname) == "SunOS" ]]; then
+if [[ "$(uname)" == "SunOS" ]]; then
   OS="Solaris"
   if [[ -f "/var/opt/oracle/oratab" ]];      then ORATAB="/var/opt/oracle/oratab";        else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
   if [[ -f "/var/opt/oracle/oraInst.loc" ]]; then ORA_INST="/var/opt/oracle/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
@@ -127,7 +128,7 @@ if [[ $(uname) == "SunOS" ]]; then
   ORA_HOMES="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware|oms"    | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_WLS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
   ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
@@ -146,7 +147,7 @@ if [[ $(uname) == "SunOS" ]]; then
   BLU2="\033[0;44m"
   GRE="\033[1;32m"
   BLA="\033[m"
-elif [[ $(uname) == "AIX" ]]; then
+elif [[ "$(uname)" == "AIX" ]]; then
   OS="AIX"
   if [[ -f "/etc/oratab" ]];                 then ORATAB="/etc/oratab";                   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
   if [[ -f "/opt/oracle/etc/oraInst.loc" ]]; then ORA_INST="/opt/oracle/etc/oraInst.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
@@ -164,7 +165,7 @@ elif [[ $(uname) == "AIX" ]]; then
   ORA_HOMES="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware|oms"    | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_WLS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
   ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
@@ -183,11 +184,11 @@ elif [[ $(uname) == "AIX" ]]; then
   BLU2="\033[0;44m"
   GRE="\033[1;32m"
   BLA="\033[m"
-elif [[ $(uname) == "Linux" ]]; then
+elif [[ "$(uname)" == "Linux" ]]; then
   OS="Linux"
   if [[ -f "/etc/oratab" ]];         then ORATAB="/etc/oratab";          else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE DATABASE INSTALLED YET --"; exit 1; fi
   if [[ -f "/etc/oraInst.loc" ]];    then ORA_INST="/etc/oraInst.loc";   else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --";       exit 1; fi
-  if [[ -f "/etc/oracle/ocr.loc" ]]; then ORA_OCR="/etc/oracle/ocr.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE GRID INSTALLATION YET --";       fi
+  if [[ -f "/etc/oracle/ocr.loc" ]]; then ORA_OCR="/etc/oracle/ocr.loc"; else echo " -- THIS SERVER DOES NOT HAVE AN ORACLE GRID INSTALLATION YET --";  fi
   ORA_INVENTORY="$(cat ${ORA_INST} | egrep -i "inventory_loc" | cut -f2 -d '=')/ContentsXML/inventory.xml"
   VARIABLES_IGNORE="HISTCONTROL|HISTSIZE|HOME|HOSTNAME|DISPLAY|LANG|LESSOPEN|LOGNAME|LS_COLORS|MAIL|OLDPWD|PWD|SHELL|SHLVL|TERM|USER|XDG_SESSION_ID"
   ALIASES_IGNORE="db|egrep|fgrep|grep|l.|ll|ls|vi|which"
@@ -201,7 +202,7 @@ elif [[ $(uname) == "Linux" ]]; then
   ORA_HOMES="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_1}" | egrep -i "LOC"                                     | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_AGENT="$(cat ${ORA_INVENTORY} | egrep -i -v "${ORA_HOMES_IGNORE_2}" | egrep -i "LOC"      | egrep -i "agent"             | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   OGG_HOME="$(cat ${ORA_INVENTORY}  | egrep -i -v "${ORA_HOMES_IGNORE_3}" | egrep -i "LOC"      | egrep -i "goldengate|ogg|gg" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
-  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware"        | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
+  ORA_OMS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "middleware|oms"    | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   ORA_WLS="$(cat ${ORA_INVENTORY}   | egrep -i -v "${ORA_HOMES_IGNORE_4}" | egrep -i "LOC"      | egrep -i "OracleHome1"       | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"' | uniq | sort)"
   DBLIST="$(cat ${ORATAB}           | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i ":N|:Y"    | cut -f1 -d ':'               | uniq               | sort)"
   ASM="$(cat ${ORATAB}              | egrep -i -v "${ORA_HOMES_IGNORE_5}" | egrep -i "+ASM*"    | cut -f1 -d ':'               | uniq               | sort           | wc -l)"
@@ -225,7 +226,7 @@ fi
 # ------------------------------------------------------------------------
 # Verify oraInst.loc file
 #
-if [[ ! -f ${ORA_INST} ]]; then
+if [[ ! -f "${ORA_INST}" ]]; then
   SetClear
   SepLine
   echo " -- THIS SERVER DOES NOT HAVE AN ORACLE INSTALLATION YET --"
@@ -236,7 +237,7 @@ fi
 # ------------------------------------------------------------------------
 # Verify ORATAB
 #
-if [[ ! -f ${ORATAB} ]]; then
+if [[ ! -f "${ORATAB}" ]]; then
   SetClear
   SepLine
   echo " -- YOU DO NOT HAVE THE ORATAB CONFIGURED --"
@@ -248,7 +249,7 @@ fi
 # ------------------------------------------------------------------------
 # Set ORACLE Inventory
 #
-if [[ ! -f ${ORA_INVENTORY} ]]; then
+if [[ ! -f "${ORA_INVENTORY}" ]]; then
   SetClear
   SepLine
   echo " -- YOU DO NOT HAVE THE ORACLE INVENTORY IN YOUR ENVIRONMENT --"
@@ -266,31 +267,31 @@ done
 #
 DBA() {
 select DBA_SQL in $(cd ${DBNITRO}/sql/; ls DBA_[0-9]*.sql) QUIT; do
-  if [[ ${DBA_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${DBA_SQL};" | sqlplus -S / as sysdba; fi
+  if [[ "${DBA_SQL}" == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${DBA_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 #
 PDB() {
 select PDB_SQL in $(cd ${DBNITRO}/sql/; ls PDB_[0-9]*.sql) QUIT; do
-  if [[ ${PDB_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${PDB_SQL};" | sqlplus -S / as sysdba; fi
+  if [[ "${PDB_SQL}" == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${PDB_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 #
 ODG() {
 select ODG_SQL in $(cd ${DBNITRO}/sql/; ls ODG_[0-9]*.sql) QUIT; do
-  if [[ ${ODG_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${ODG_SQL};" | sqlplus -S / as sysdba; fi
+  if [[ "${ODG_SQL}" == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${ODG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 #
 OGG() {
 select OGG_SQL in $(cd ${DBNITRO}/sql/; ls OGG_[0-9]*.sql) QUIT; do
-  if [[ ${OGG_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${OGG_SQL};" | sqlplus -S / as sysdba; fi
+  if [[ "${OGG_SQL}" == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${OGG_SQL};" | sqlplus -S / as sysdba; fi
 done
 }
 # 
 ASM() {
 select ASM_SQL in $(cd ${DBNITRO}/sql/; ls ASM_[0-9]*.sql) QUIT; do
-  if [[ ${ASM_SQL} == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${ASM_SQL};" | sqlplus -S / as sysasm; fi
+  if [[ "${ASM_SQL}" == "QUIT" ]]; then break 1; else echo "@${DBNITRO}/sql/${ASM_SQL};" | sqlplus -S / as sysasm; fi
 done
 }
 #
@@ -313,11 +314,12 @@ fi
 # Select Listener LOG
 #
 SelectListenerLog() {
+### IGNORE_LISTENER_LOG=""
 BASE="$(${ORACLE_HOME}/bin/orabase)"
 select LISTENER_LOG in $(echo "set base ${BASE}; show homes" | adrci | egrep -i "listener" | sort); do
 if [[ -n "${LISTENER_LOG}" ]]; then
   LSNRCTL_LOG="$(adrci exec="set base ${BASE}; set home ${LISTENER_LOG}; show tracefile" | tail -1 | awk '{ print $1 }')"
-  tail -f -n 100 ${BASE}/${LSNRCTL_LOG}
+  tail -f -n 100 ${BASE}/${LSNRCTL_LOG} ### | egrep -v ${IGNORE_LISTENER_LOG}
   break
 else
   echo "Invalid selection. Please try again."
@@ -342,11 +344,11 @@ done
 }
 #
 # ------------------------------------------------------------------------
-# Select ASM LOG
+# Select ASM LOG ### locate -b 'crsdata' | egrep -i -v "orainventory" | sed 's/crsdata//g'
 #
 SelectASMLog() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  ASMLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm")
+      BASE="$(${ORACLE_HOME}/bin/orabase)"
+    ASMLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm")"
   ALERTASM="$(adrci exec="set base ${BASE}; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
   tail -f -n 100 ${BASE}/${ALERTASM}
 }
@@ -355,18 +357,29 @@ SelectASMLog() {
 # Edit ASM LOG
 #
 SelectASMLogV() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  ASMLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm")
+      BASE="$(${ORACLE_HOME}/bin/orabase)"
+    ASMLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm")"
   ALERTASM="$(adrci exec="set base ${BASE}; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
   vim ${BASE}/${ALERTASM}
+}
+#
+# ------------------------------------------------------------------------
+# Monitoring ASM LOG
+#
+SelectASMLogM() {
+### IGNORE_ASM_LOG=""
+      BASE="$(${ORACLE_HOME}/bin/orabase)"
+    ASMLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -v "host_" | egrep -w "+asm")"
+  ALERTASM="$(adrci exec="set base ${BASE}; set home ${ASMLOG}; show tracefile" | egrep "alert_" | tail -1 | awk '{ print $1 }')"
+  tail -f -n 100 ${BASE}/${ALERTASM} ### | egrep -v ${IGNORE_ASM_LOG}
 }
 #
 # ------------------------------------------------------------------------
 # Select CRS LOG
 #
 SelectCRSLog() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  CRSLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/")
+      BASE="$(${ORACLE_HOME}/bin/orabase)"
+    CRSLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/")"
   ALERTCRS="$(adrci exec="set base ${BASE}; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
   tail -f -n 100 ${BASE}/${ALERTCRS}
 }
@@ -375,28 +388,71 @@ SelectCRSLog() {
 # EDIT CRS LOG
 #
 SelectCRSLogV() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  CRSLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/")
+      BASE="$(${ORACLE_HOME}/bin/orabase)"
+    CRSLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/")"
   ALERTCRS="$(adrci exec="set base ${BASE}; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
   vim ${BASE}/${ALERTCRS}
+}
+#
+# ------------------------------------------------------------------------
+# Monitoring CRS LOG
+#
+SelectCRSLogM() {
+### IGNORE_CRS_LOG=""
+      BASE="$(${ORACLE_HOME}/bin/orabase)"
+    CRSLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -i -v "crs_|_root" | egrep -i "/crs/")"
+  ALERTCRS="$(adrci exec="set base ${BASE}; set home ${CRSLOG}; show tracefile" | egrep "alert.log" | tail -1 | awk '{ print $1 }')"
+  tail -f -n 100 ${BASE}/${ALERTCRS} ### | egrep -v ${IGNORE_CRS_LOG}
+}
+#
+# ------------------------------------------------------------------------
+# Select DB ATTENTION LOG (21c or later)
+#
+SelectDBATTLog() {
+           BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DBATTLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
+  ALERTDBATTLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "attention_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  tail -f -n 100 ${BASE}/${ALERTDBATTLOG}
+}
+#
+# ------------------------------------------------------------------------
+# EDIT DB ATTENTION LOG (21c or later)
+#
+SelectDBATTLogV() {
+           BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DBATTLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
+  ALERTDBATTLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "attention_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  vim ${BASE}/${ALERTDBATTLOG}
+}
+#
+# ------------------------------------------------------------------------
+# EDIT DB ATTENTION LOG (21c or later)
+#
+SelectDBATTLogM() {
+### IGNORE_DBATT_LOG=""
+           BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DBATTLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
+  ALERTDBATTLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "attention_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
+  tail -f -n 100 ${BASE}/${ALERTDBATTLOG} ### | egrep -v ${IGNORE_DBATT_LOG}
 }
 #
 # ------------------------------------------------------------------------
 # Select DB LOG
 #
 SelectDBLog() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  DBLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")
+IGNORE_DB_LOG=""
+        BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DBLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
   ALERTDBLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
-  tail -f -n 100 ${BASE}/${ALERTDBLOG}
+  tail -f -n 100 ${BASE}/${ALERTDBLOG} | egrep -v ${IGNORE_DB_LOG}
 }
 #
 # ------------------------------------------------------------------------
 # EDIT DB LOG
 #
 SelectDBLogV() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  DBLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")
+        BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DBLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
   ALERTDBLOG="$(adrci exec="set base ${BASE}; set home ${DBLOG}; show tracefile" | egrep -w "alert_${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   vim ${BASE}/${ALERTDBLOG}
 }
@@ -405,18 +461,19 @@ SelectDBLogV() {
 # Select DG LOG
 #
 SelectDGLog() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  DGLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")
+### IGNORE_DG_LOG=""
+        BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DGLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
   ALERTDGLOG="$(adrci exec="set base ${BASE}; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
-  tail -f -n 100 ${BASE}/${ALERTDGLOG}
+  tail -f -n 100 ${BASE}/${ALERTDGLOG} ### | egrep -v ${IGNORE_DG_LOG}
 }
 #
 # ------------------------------------------------------------------------
 # EDIT DG LOG
 #
 SelectDGLogV() {
-  BASE="$(${ORACLE_HOME}/bin/orabase)"
-  DGLOG=$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")
+        BASE="$(${ORACLE_HOME}/bin/orabase)"
+       DGLOG="$(echo "set base ${BASE}; show homes" | adrci | egrep -w "${SID}")"
   ALERTDGLOG="$(adrci exec="set base ${BASE}; set home ${DGLOG}; show tracefile" | egrep "drc${SID}.log" | awk '{ print $1 }' | uniq | sort | head -n 1)"
   vim ${BASE}/${ALERTDGLOG}
 }
@@ -442,15 +499,15 @@ if [[ "${GRID}" != 0 ]]; then
   #
        CRSD="$(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "crsd.bin"  | uniq               | sort | wc -l)"
   CRSD_HOME="$(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "crsd.bin"  | awk '{ print $8 }' | uniq | sort)"
-  if [[ "${CRSD}" != 0 ]]; then GI_CRSD="ONLINE"; else GI_CRSD="OFFLINE"; fi
+  if [[ "${CRSD}" != "0" ]]; then GI_CRSD="ONLINE"; else GI_CRSD="OFFLINE"; fi
   #
        OCSSD="$(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ocssd.bin" | uniq               | sort | wc -l)"
   OCSSD_HOME="$(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ocssd.bin" | awk '{ print $8 }' | uniq | sort)"
-  if [[ "${OCSSD}" != 0 ]]; then GI_OCSSD="ONLINE"; else GI_OCSSD="OFFLINE"; fi
+  if [[ "${OCSSD}" != "0" ]]; then GI_OCSSD="ONLINE"; else GI_OCSSD="OFFLINE"; fi
   #
        OHASD="$(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ohasd.bin" | uniq               | sort | wc -l)"
   OHASD_HOME="$(ps -ef | egrep -i -v "grep|egrep|sed" | egrep -i "ohasd.bin" | awk '{ print $8 }' | uniq | sort)"
-  if [[ "${OHASD}" != 0 ]]; then GI_OHASD="ONLINE"; else GI_OHASD="OFFLINE"; fi
+  if [[ "${OHASD}" != "0" ]]; then GI_OHASD="ONLINE"; else GI_OHASD="OFFLINE"; fi
   #
   printf "|%-22s|%-100s|\n" "                 [ ASM/GRID ] " " [ ONLINE ] "
   printf "|%-22s|%-100s|\n" "                     [ CRSD ] " " [ ${GI_CRSD} ] [ $(if [[ "${GI_CRSD}" == "ONLINE" ]]; then echo "${CRSD_HOME}"; else echo "---"; fi) ] "
@@ -467,13 +524,13 @@ fi
 # ------------------------------------------------------------------------
 # Verify ASM
 #
-if [[ ${ASM} == 0 ]]; then
+if [[ "${ASM}" == "0" ]]; then
   ASM_EXISTS="NO"
 else
   ASM_EXISTS="YES"
-  G_SID=$(cat ${ORATAB}       | egrep -i -v "^#|^$" | egrep -i "+ASM*"   | cut -f1 -d ':')
-  G_HOME=$(cat ${ORATAB}      | egrep -i -v "^#|^$" | egrep -i "+ASM*"   | cut -f2 -d ':')
-  ASM_OWNER=$(ls -l ${G_HOME} | awk '{ print $3 }'  | egrep -i -v "root" | egrep -Ev "^$" | uniq)
+       G_SID="$(cat ${ORATAB}   | egrep -i -v "^#|^$" | egrep -i "+ASM*"   | cut -f1 -d ':')"
+      G_HOME="$(cat ${ORATAB}   | egrep -i -v "^#|^$" | egrep -i "+ASM*"   | cut -f2 -d ':')"
+   ASM_OWNER="$(ls -l ${G_HOME} | awk '{ print $3 }'  | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
   if [[ "${ASM_OWNER}" == "$(whoami)" ]]; then ASM_USER="YES"; else ASM_USER="NO"; fi
 fi
 #
@@ -562,103 +619,178 @@ alias list='${DBNITRO}/bin/OracleList.sh'
 }
 #
 # ------------------------------------------------------------------------
+# Show Database Status
+#
+get_DB_Status() {
+  DB_STATUS=""
+if [[ "${ORACLE_SID}" == "" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
+  DB_STATUS="0"
+  return 0
+elif [[ "$(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l)" == "0" ]]; then
+  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  DB_STATUS="0"
+  return 0
+else
+  DB_STATUS="1"
+fi
+}
+#
+# ------------------------------------------------------------------------
 # Show Database Info
 #
 get_INFO() {
-if [[ ${ORACLE_SID} == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-  echo "@${DBNITRO}/sql/DBA_INFO.sql;" | sqlplus -S / as sysdba
-fi
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_INFO.sql;" | sqlplus -S / as sysdba; fi
 }
 #
 # ------------------------------------------------------------------------
 # Install Database Dashboard
 #
 get_DASH_INSTALL() {
-if [[ ${ORACLE_SID} == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-  echo "@/opt/dbnitro/sql/DBA_CREATE_DASHBOARD.sql;" | sqlplus -S / as sysdba
-fi
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_CREATE_DASHBOARD.sql;" | sqlplus -S / as sysdba; fi
 }
 #
 # ------------------------------------------------------------------------
 # Show Database Dashboard
 #
 get_DASH() {
-if [[ ${ORACLE_SID} == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-sqlplus -S '/ as sysdba' <<EOF
-set pages 700 lines 700 timing on long 9999999 numwidth 20 heading on echo on verify on feedback on colsep '|'
-alter session set current_schema=system;
-SET LINESIZE 5000 pagesize 0 Arraysize 51 TAB OFF
-prompt ##############################################################
-prompt # ACCESSING THE DATABASE DASHBOARD
-prompt ##############################################################
-select * from table(jss.gtop(51));
-/
-quit;
-EOF
-fi
+  get_DB_Status
+if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_EXECUTE_DASHBOARD.sql" | sqlplus -S / as sysdba; fi
 }
 #
 # ------------------------------------------------------------------------
 # Show Database Options Usage Statistics
 #
 get_OPTIONS() {
-if [[ ${ORACLE_SID} == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-  echo "@${DBNITRO}/sql/DBA_OPTIONS_PACKS_USAGE_STATISTICS.sql;" | sqlplus -S / as sysdba
-fi
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_OPTIONS_PACKS_USAGE_STATISTICS.sql;" | sqlplus -S / as sysdba; fi
+}
+#
+# ------------------------------------------------------------------------
+# Show Database Components
+#
+get_COMPONENTS() {
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_COMPONENTS.sql;" | sqlplus -S / as sysdba; fi
 }
 #
 # ------------------------------------------------------------------------
 # Show Dataguard Status
 #
 get_ODG_STATUS() {
-if [[ ${ORACLE_SID} == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-  echo "@${DBNITRO}/sql/DBA_DATAGUARD_STATUS.sql;" | sqlplus -S / as sysdba
-fi
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_DATAGUARD_STATUS.sql;" | sqlplus -S / as sysdba; fi
 }
 #
 # ------------------------------------------------------------------------
 # Create Database Report
 #
 get_REPORT() {
-if [[ ${ORACLE_SID} == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then echo "@${DBNITRO}/sql/DBA_REPORT_V.3.0.1.sql;" | sqlplus -S / as sysdba; fi
+}
+#
+# ------------------------------------------------------------------------
+# Check and Set the GoldenGate Environment
+#
+set_OGG() {
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then OGG_STATUS="$(echo "show parameter enable_goldengate_replication;" | sqlplus -S / as sysdba | tail -2)"; fi
+#
+if [[ "$(echo ${OGG_STATUS} | awk '{ print $3 }')" == "FALSE" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE GOLDENGATE TECHNOLOGY --"
   return 0
 else
-  echo "@${DBNITRO}/sql/DBA_REPORT_V.3.0.1.sql;" | sqlplus -S / as sysdba
+  echo "Select the Option: "
+select OGGHOME in ${OGG_HOME} QUIT; do
+if [[ "${OGGHOME}" == "QUIT" ]]; then
+  echo " -- Exit Menu --"
+  return 1
+else
+  export OGG_HOME="${OGGHOME}"
+  export OGG="${OGGHOME}"
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${OGG_HOME}/lib
+  export PATH=${PATH}:${OGG_HOME}
+  export ALERTGG="${OGG_HOME}/ggserr.log"
+  alias ggsci='rlwrap ${OGG_HOME}/ggsci'
+  alias g='rlwrap ${OGG_HOME}/ggsci'
+  alias ggh='cd ${OGG_HOME}'
+  alias gglog='tail -f -n 100 ${ALERTGG} | egrep -i -v ${IGNORE_ERRORS}'
+  alias gglogv='vi ${ALERTGG}'
+  alias ggmon='${DBNITRO}/bin/OracleGoldenGateMonitor.sh'
+  echo " -- Golden Gate Environment: ${OGGHOME}"
+  return 1
 fi
+done
+fi
+}
+#
+# ------------------------------------------------------------------------
+# Check and Set the Database Version, Container and Pluggable Databases
+#
+set_PDB() {
+  get_DB_Status
+  if [[ "${DB_STATUS}" == "1" ]]; then
+   VERSION="$(echo "select substr(version,1,2) as version from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
+ CONTAINER="$(echo "select cdb from v\$database;" | sqlplus -S / as sysdba | tail -2)"
+PLUGGABLES="$(echo "select count(NAME) from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba | tail -2)"
+fi
+#
+# ------------------------------------------------------------------------
+# Verify the Version, CDB and PDB of the Database
+#
+if [[ "${VERSION}" < "12" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY --"
+  return 0
+elif [[ "${CONTAINER}" == "NO" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY CONFIGURED YET --"
+  return 0
+elif [[ "${PLUGGABLES}" == "0" ]]; then
+  echo " -- YOUR ENVIRONMENT DOES NOT HAVE PLUGGABLE DATABASES YET --"
+  return 0
+else
+sqlplus -S '/ as sysdba' > ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var <<EOF | tail -2
+set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
+select name as PDBS from v\$containers where con_id not in (0,1,2) order by 1;
+quit;
+EOF
+fi
+#
+# ------------------------------------------------------------------------
+# List of PDBs
+#
+list_PDBS() {
+  echo "@${DBNITRO}/sql/DBA_SHOW_LIST_PDBS.sql;" | sqlplus -S / as sysdba
+}
+#
+### PDBS="$(echo "select name || case when open_mode = 'READ WRITE' then ' [ RW ]' when open_mode = 'READ ONLY' then ' [ RO ]' when open_mode = 'MOUNTED' then ' [ MO ]' when open_mode = 'MIGRATE' then ' [ MI ]' else ' [ XX ]' end as info from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba  | sed s/INFO//g | sed s/-//g)"
+### select name || ' ' || case when OPEN_MODE = 'READ WRITE' then ' [ RW ]' when OPEN_MODE = 'READ ONLY' then ' [ RO ]' when OPEN_MODE = 'MOUNTED' then ' [ MO ]' when OPEN_MODE = 'MIGRATE' then ' [ MI ]' end as PDBS from v\$containers where con_id not in (0,1,2) order by 1;
+#
+# ------------------------------------------------------------------------
+# Select the CDB and PDB
+#
+list_PDBS
+SepLine
+PS3="Select the Option: "
+select PDBS in "CDB\$ROOT" $(cat ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var) QUIT; do # CHECK $ROOT if will work
+if [[ "${PDBS}" == "BACK TO CDB" ]]; then
+  export ORACLE_PDB_SID=""
+  echo "PLUGGABLE DATABASE: CDB\$ROOT"
+  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+  return 1
+elif [[ "${PDBS}" == "QUIT" ]]; then
+  echo " -- Exit Menu --"
+  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+  return 1
+else
+  export ORACLE_PDB_SID="${PDBS}"
+  echo "PLUGGABLE DATABASE: ${ORACLE_PDB_SID}"
+  export PS1=$'[ ${ORACLE_SID} ]|[ PDB:${ORACLE_PDB_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+  return 1
+fi
+done
 }
 #
 # ------------------------------------------------------------------------
@@ -703,119 +835,6 @@ EOF
 }
 #
 # ------------------------------------------------------------------------
-# Check and Set the GoldenGate Environment
-#
-set_OGG() {
-if [[ "${ORACLE_SID}" == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-  OGG_STATUS="$(echo "show parameter enable_goldengate_replication;" | sqlplus -S / as sysdba | tail -2)"
-fi
-#
-# ------------------------------------------------------------------------
-#
-if [[ $(echo ${OGG_STATUS} | awk '{ print $3 }') == "FALSE" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE GOLDENGATE TECHNOLOGY --"
-  return 0
-else
-  echo "Select the Option: "
-select OGGHOME in ${OGG_HOME} QUIT; do
-if [[ "${OGGHOME}" == "QUIT" ]]; then
-  echo " -- Exit Menu --"
-  return 1
-else
-  export OGG_HOME="${OGGHOME}"
-  export OGG="${OGGHOME}"
-  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${OGG_HOME}/lib
-  export PATH=${PATH}:${OGG_HOME}
-  export ALERTGG="${OGG_HOME}/ggserr.log"
-  alias ggsci='rlwrap ${OGG_HOME}/ggsci'
-  alias g='rlwrap ${OGG_HOME}/ggsci'
-  alias ggh='cd ${OGG_HOME}'
-  alias gglog='tail -f -n 100 ${ALERTGG} | egrep -i -v ${IGNORE_ERRORS}'
-  alias gglogv='vi ${ALERTGG}'
-  alias ggmon='${DBNITRO}/bin/OracleGoldenGateMonitor.sh'
-  echo " -- Golden Gate Environment: ${OGGHOME}"
-  return 1
-fi
-done
-fi
-}
-#
-# ------------------------------------------------------------------------
-# Check and Set the Database Version, Container and Pluggable Databases
-#
-set_PDB() {
-if [[ "${ORACLE_SID}" == "" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONFIGURED YET --"
-  return 0
-elif [[ $(ps -ef | egrep -i "pmon" | egrep -i "${ORACLE_SID}" | awk '{ print $NF }' | sed s/ora_pmon_//g | wc -l) == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT: ${ORACLE_SID} IS OFFLINE --"
-  return 0
-else
-#
-   VERSION="$(echo "select substr(version,1,2) as version from v\$instance;" | sqlplus -S / as sysdba | tail -2)"
- CONTAINER="$(echo "select cdb from v\$database;" | sqlplus -S / as sysdba | tail -2)"
-PLUGGABLES="$(echo "select count(NAME) from v\$containers where con_id not in (0,1,2);" | sqlplus -S / as sysdba | tail -2)"
-fi
-#
-# ------------------------------------------------------------------------
-# Verify the Version, CDB and PDB of the Database
-#
-if [[ "${VERSION}" < 12 ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY --"
-  return 0
-elif [[ "${CONTAINER}" == "NO" ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE CONTAINER TECHNOLOGY CONFIGURED YET --"
-  return 0
-elif [[ "${PLUGGABLES}" == 0 ]]; then
-  echo " -- YOUR ENVIRONMENT DOES NOT HAVE PLUGGABLE DATABASES YET --"
-  return 0
-else
-sqlplus -S '/ as sysdba' > ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var <<EOF | tail -2
-set define off trims on newp none heads off echo off feed off numwidth 20 pagesize 0 null null verify off wrap off timing off serveroutput off termout off heading off
-select name as PDBS from v\$containers where con_id not in (0,1,2) order by 1;
-quit;
-EOF
-fi
-#
-# ------------------------------------------------------------------------
-# List PDBs
-#
-list_PDBS() {
-  echo "@${DBNITRO}/sql/DBA_SHOW_LIST_PDBS.sql;" | sqlplus -S / as sysdba
-}
-#
-# ------------------------------------------------------------------------
-# Select the CDB and PDB
-#
-list_PDBS
-SepLine
-PS3="Select the Option: "
-select PDBS in "CDB\$ROOT" $(cat ${DBNITRO}/var/Pluggable_${ORACLE_SID}.var) QUIT; do # CHECK $ROOT if will work
-if [[ "${PDBS}" == "BACK TO CDB" ]]; then
-  export ORACLE_PDB_SID=""
-  echo "PLUGGABLE DATABASE: CDB\$ROOT"
-  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  return 1
-elif [[ "${PDBS}" == "QUIT" ]]; then
-  echo " -- Exit Menu --"
-  export PS1=$'[ ${ORACLE_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  return 1
-else
-  export ORACLE_PDB_SID="${PDBS}"
-  echo "PLUGGABLE DATABASE: ${ORACLE_PDB_SID}"
-  export PS1=$'[ ${ORACLE_SID} ]|[ PDB:${ORACLE_PDB_SID} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
-  return 1
-fi
-done
-}
-#
-# ------------------------------------------------------------------------
 # Set Oracle Home
 #
 set_HOME() {
@@ -847,8 +866,10 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
   alias crslog='SelectCRSLog'
   alias crslogv='SelectCRSLogV'
+  alias crslogm='SelectCRSLogM'
   alias asmlog='SelectASMLog'
   alias asmlogv='SelectASMLogV'
+  alias asmlogm='SelectASMLogM'
   alias res='crsctl stat res -t'
   alias rest='crsctl stat res -t -init'
   alias resp='crsctl stat res -p -init'
@@ -864,6 +885,7 @@ export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jl
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
 export HOME_ADR="$(echo "set base ${ORACLE_BASE}; show homes" | adrci | egrep -i "${OPT}")"
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
 alias ob='cd ${ORACLE_BASE}'
@@ -945,6 +967,7 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${TFA_HOME}/bin:${OCK_HOME}/:${DBNITRO}/bin"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 if [[ "$(cat ${ORA_OCR} | egrep -i "local_only" | cut -f2 -d '=')" == "true" ]]; then ASM_LOG="+ASM[0-9]*"; else ASM_LOG="+ASM*"; fi
 export GRID_ADR=$(echo "show homes" | adrci | egrep -i -w "listener")
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
@@ -954,8 +977,10 @@ alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
 alias asmlog='SelectASMLog'
 alias asmlogv='SelectASMLogV'
+alias asmlogm='SelectASMLogM'
 alias crslog='SelectCRSLog'
 alias crslogv='SelectCRSLogV'
+alias crslogm='SelectCRSLogM'
 alias res='crsctl stat res -t'
 alias rest='crsctl stat res -t -init'
 alias resp='crsctl stat res -p -init'
@@ -1064,9 +1089,11 @@ if [[ "${ASM_EXISTS}" == "YES" ]]; then
   alias asmcmd='rlwrap asmcmd'
   alias a='rlwrap asmcmd -p'
   alias asmlog='SelectASMLOG'
-  alias asmlogv='EditASMLOG'
+  alias asmlogv='SelectASMLogV'
+  alias asmlogm='SelectASMLogM'
   alias crslog='SelectCRSLOG'
-  alias crslogv='EditCRSLOG'
+  alias crslogv='SelectCRSLogV'
+  alias crslogm='SelectCRSLogM'
 fi
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/hs/lib"
 export CLASSPATH="${ORACLE_HOME}/JRE:${ORACLE_HOME}/jlib:${ORACLE_HOME}/rdbms/jlib"
@@ -1074,9 +1101,13 @@ export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA
 export TNS_ADMIN="${ORACLE_HOME}/network/admin"
 export HOME_ADR="$(echo "set base ${ORACLE_BASE}; show homes" | adrci | egrep -w "${OPT}")"
 export ORACLE_UNQNAME="$(echo ${HOME_ADR} | cut -f4 -d '/')"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 alias trc='cd ${ORACLE_BASE}/${HOME_ADR}/trace'
 alias lsnlog='SelectListenerLog'
 alias lsnlogv='SelectListenerLogV'
+alias dbatt='SelectDBATTLog'
+alias dbattv='SelectDBATTLogV'
+alias dbattm='SelectDBATTLogM'
 alias dblog='SelectDBLog'
 alias dblogv='SelectDBLogV'
 alias dglog='SelectDGLog'
@@ -1106,8 +1137,8 @@ alias l='lsnrctl status'
 alias orat='${ORATOP}/oratop -f -i 3 / as sysdba'
 alias oratop='${ORATOP}/oratop'
 alias odg-status='get_ODG_STATUS'
-alias pdb='set_PDB'
 alias ogg='set_OGG'
+alias pdbs='set_PDB'
 alias lsm='lsmod | egrep oracle'
 alias list='${DBNITRO}/bin/OracleList.sh'
 alias INFO='get_INFO'
@@ -1116,6 +1147,7 @@ alias DASH_INSTALL='get_DASH_INSTALL'
 alias REPORT='get_REPORT'
 alias DBNITRO='${DBNITRO}/bin/ribas.sh'
 alias OPTIONS='get_OPTIONS'
+alias COMPONENTS='get_COMPONENTS'
 alias HUGEPAGES='${DBNITRO}/bin/Oracle_DBA_Check_Hugepages.sh'
 #
 if [[ ! -f "${ORACLE_HOME}/install/orabasetab" ]]; then
@@ -1224,7 +1256,7 @@ unalias_var
 alias_var
 local OPT=$1
 export ORACLE_HOSTNAME="${HOST}"
-export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -w "${OPT}" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"')"
 export OH="${ORACLE_HOME}"
 export OMS_GC="$(locate -b gc_inst | uniq)"
 export OPATCH="${ORACLE_HOME}/OPatch"
@@ -1232,6 +1264,7 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 export CLASSPATH=${ORACLE_HOME}/jlib
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 alias oh='cd ${ORACLE_HOME}'
 alias hpg='grep HugePages_ /proc/meminfo'
 alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
@@ -1242,6 +1275,7 @@ alias emlog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias emlogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emctl.log'
 alias omslog='tail -f -n 100 ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
 alias omslogv='vi ${OMS_GC}/em/EMGC_OMS1/sysman/log/emoms.log'
+alias oms='emctl status oms -details'
 alias list='${DBNITRO}/bin/OracleList.sh'
 #
 OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
@@ -1255,6 +1289,52 @@ printf "+%-30s+%-100s+\n" "------------------------------" "--------------------
 printf "|%-22s|%-100s|\n" "                 [ OMS_HOME ] " " [ ${ORACLE_HOME} ]"
 printf "|%-22s|%-100s|\n" "                [ OMS_OWNER ] " " [ ${OWNER} ]"
 printf "|%-22s|%-100s|\n" "               [ OMS_STATUS ] " " [ ${OMS} ]"
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+#
+HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+#
+export PS1=$'[ ${HOME_NAME} ]|[ ${LOGNAME}@\h:$(pwd): ]$ '
+umask 0022
+}
+#
+# ------------------------------------------------------------------------
+# Set Golden Gate Home
+#
+set_OGG_HOME() {
+unset_var
+unalias_var
+alias_var
+local OPT="$1"
+export ORACLE_HOSTNAME="${HOST}"
+export ORACLE_HOME="$(cat ${ORA_INVENTORY} | egrep -i "${OPT}" | awk '{ print $3 }' | cut -f2 -d '=' | cut -f2 -d '"')"
+export OH="${ORACLE_HOME}"
+export OPATCH="${ORACLE_HOME}/OPatch"
+export JAVA_HOME="${ORACLE_HOME}/jdk"
+export CLASSPATH="${ORACLE_HOME}/jlib"
+export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
+export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+alias oh='cd ${ORACLE_HOME}'
+alias hpg='grep HugePages_ /proc/meminfo'
+alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
+alias opi='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lsinventory'
+alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
+alias adrci='rlwrap adrci'
+alias ad='rlwrap adrci'
+alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "agent"'
+alias list='${DBNITRO}/bin/OracleList.sh'
+#
+OWNER="$(ls -l ${ORACLE_HOME} | awk '{ print $3 }' | egrep -i -v "root" | egrep -Ev "^$" | uniq)"
+#
+OGG_STATUS="$(ps -ef | egrep -i -v "grep|egrep|zabbix" | egrep -i "ogg_|perl" | uniq | sort | wc -l | xargs)"
+if [[ "${OGG_STATUS}" != 0 ]]; then OGG="ONLINE"; else OGG="OFFLINE"; fi
+#
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: ${SELECTION} "
+printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
+printf "|%-22s|%-100s|\n" "                 [ OGG_HOME ] " " [ ${ORACLE_HOME} ]"
+printf "|%-22s|%-100s|\n" "                [ OGG_OWNER ] " " [ ${OWNER} ]"
+printf "|%-22s|%-100s|\n" "               [ OGG_STATUS ] " " [ ${OGG} ]"
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 #
 HOME_NAME="$(cat ${ORA_INVENTORY} | egrep -i -v "^#|^$|${ORA_HOMES_IGNORE_0}" | egrep -i "LOC" | egrep -i "${ORACLE_HOME}" | awk '{ print $2 }' | cut -f2 -d '=' | cut -f2 -d '"')"
@@ -1281,6 +1361,7 @@ export CLASSPATH="${ORACLE_HOME}/jlib:${FMWCONFIG_CLASSPATH}${CLASSPATHSEP}${CLA
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export M2_HOME=${MW_HOME}/oracle_common/modules/thirdparty/apache-maven_bundle/3.6.1.0.0/apache-maven-3.6.1
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin:${PATH}${PATHSEP}${M2_HOME}/bin"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 alias oh='cd ${ORACLE_HOME}'
 alias hpg='grep HugePages_ /proc/meminfo'
 alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
@@ -1289,6 +1370,7 @@ alias opl='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch lspatches | sort'
 alias wld='wls_Domains'
 alias startWLS='${WL_HOME}/user_projects/domains/base_domain/bin/startWebLogic.sh &'
 alias stopWLS='${WL_HOME}/user_projects/domains/base_domain/bin/stopWebLogic.sh'
+alias wls='emctl status oms -details'
 alias p='ps -ef | egrep -v "grep|egrep|ruby" | egrep "wlserver"'
 alias list='${DBNITRO}/bin/OracleList.sh'
 ##### . "${WL_HOME}/../oracle_common/common/bin/commEnv.sh"
@@ -1328,6 +1410,7 @@ export JAVA_HOME="${ORACLE_HOME}/jdk"
 export CLASSPATH="${ORACLE_HOME}/jlib"
 export LD_LIBRARY_PATH="/lib:/usr/lib:/usr/lib64:${ORACLE_HOME}/lib:${ORACLE_HOME}/perl/lib:${ORACLE_HOME}/instantclient"
 export PATH="${PATH}:${ORACLE_HOME}/bin:${OPATCH}:${ORACLE_HOME}/perl/bin:${JAVA_HOME}/bin:${DBNITRO}/bin"
+export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 alias oh='cd ${ORACLE_HOME}'
 alias hpg='grep HugePages_ /proc/meminfo'
 alias opv='echo ORACLE_HOME:${ORACLE_HOME}; ${OPATCH}/opatch version'
@@ -1367,11 +1450,11 @@ printf "+%-30s+%-100s+\n" "------------------------------" "--------------------
 printf "|%-16s|%-100s|\n" " DBNITRO.net                  " " ORACLE :: Select an Option "
 printf "+%-30s+%-100s+\n" "------------------------------" "----------------------------------------------------------------------------------------------------"
 PS3="Select the Option: "
-select OPT in ${ORA_HOMES} ${ORA_OMS} ${ORA_WLS} ${ORA_AGENT} ${DBLIST} HELP QUIT; do
+select OPT in ${ORA_HOMES} ${ORA_OMS} ${OGG_HOME} ${ORA_WLS} ${ORA_AGENT} ${DBLIST} HELP QUIT; do
 if [[ "${OPT}" == "+ASM"* ]]; then
   if [[ "${ASM_USER}" == "YES" ]]; then
     SELECTION="ASM"
-    set_ASM ${OPT}
+    set_ASM ${OPT} 
   else
     echo " -- ASM USER IS DIFFERENT AS ORACLE USER --"
     echo " -- YOU MUST CONNECT AS OS USER: ${ASM_OWNER} --"
@@ -1383,6 +1466,9 @@ elif [[ "${ORA_HOMES[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
 elif [[ "${ORA_OMS[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   SELECTION="OMS"
   set_OMS ${OPT}
+elif [[ "${OGG_HOME[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
+  SELECTION="OGG"
+  set_OGG_HOME ${OPT}
 elif [[ "${ORA_WLS[@]}" =~ "${OPT}" ]] && [[ "${OPT}" != "" ]]; then
   SELECTION="WLS"
   set_WLS ${OPT}

@@ -3,8 +3,8 @@ Author="Andre Augusto Ribas"
 SoftwareVersion="1.0.1"
 DateCreation="15/10/2021"
 DateModification="15/10/2021"
-EMAIL_1="dba.ribas@gmail.com"
-EMAIL_2="andre.ribas@icloud.com"
+EMAIL="ribas@dbnitro.net"
+GITHUB="https://github.com/dbaribas/dbnitro.net"
 WEBSITE="http://dbnitro.net"
 #
 #ORACLE_BASE=/u01/app/oracle

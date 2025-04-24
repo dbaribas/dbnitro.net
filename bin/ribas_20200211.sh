@@ -7,8 +7,8 @@ Author="Andre Augusto Ribas"
 SoftwareVersion="3.2.7"
 DateCreation="07/09/2013"
 DateModification="11/02/2020"
-EMAIL_1="dba.ribas@gmail.com"
-EMAIL_2="andre.ribas@icloud.com"
+EMAIL="dba.ribas@gmail.com"
+GITHUB="https://github.com/dbaribas/dbnitro.net"
 WEBSITE="http://dbnitro.net"
 #
 #########################################################################################################

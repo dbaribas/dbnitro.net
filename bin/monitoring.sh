@@ -14,7 +14,7 @@ fi
 #
 # Function to get databases from /etc/oratab
 get_databases() {
-  egrep -v '^#|^$|+ASM' /etc/oratab | cut -d: -f1 | uniq | sort
+  egrep -v '^#|^$|+ASM|+APEX' /etc/oratab | cut -d: -f1 | uniq | sort
 }
 #
 # Function to monitor a specific database
@@ -58,12 +58,12 @@ printf "|%-50s|%-70s|\n" " Database Dataguard..............................." " 
 printf "|%-50s|%-70s|\n" " Database Jobs...................................." " $(echo "select 'Jobs Success: ' || count(CASE WHEN status = 'SUCCEEDED' THEN 1 END) || ' | Jobs NOT Success: ' || count(CASE WHEN status != 'SUCCEEDED' THEN 1 END) from dba_scheduler_job_run_details WHERE log_date >= SYSDATE - 1;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Statistics.............................." " $(echo "select 'GATHER_STATS_JOB: ' || status FROM DBA_SCHEDULER_JOB_RUN_DETAILS WHERE job_name = 'GATHER_STATS_JOB' AND actual_start_date >= SYSTIMESTAMP - 1;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Archivelog Mode........................." " $(echo "select case when log_mode ='ARCHIVELOG' then 'YES' else 'NO' end from v\$database;" | ${V_CONN} | tail -2) "
-printf "|%-50s|%-70s|\n" " Database Archive Lag Target......................" " $(echo "select value || ' Seconds' from v\$parameter where name = 'archive_lag_target';" | ${V_CONN} | tail -2) "
-printf "|%-50s|%-70s|\n" " Database Undo Retention.........................." " $(echo "select value || ' Seconds' from v\$parameter where name = 'undo_retention';" | ${V_CONN} | tail -2) "
+printf "|%-50s|%-70s|\n" " Database Archive Lag Target......................" " $(echo "select 'Seconds: ' || value from v\$parameter where name = 'archive_lag_target';" | ${V_CONN} | tail -2) "
+printf "|%-50s|%-70s|\n" " Database Undo Retention.........................." " $(echo "select 'Seconds: ' || value from v\$parameter where name = 'undo_retention';" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Flash Recovery Area....................." " $(echo "select 'Total: ' || trim(to_char(space_limit/1024/1024/1024, '999,999.99')) || ' GB => Used: ' || trim(to_char(space_used/1024/1024/1024, '999,999.99')) || ' GB => ' || round((space_used/space_limit) * 100, 2) || '%' FROM v\$recovery_file_dest;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Flashback ON............................" " $(echo "select to_char(flashback_on) from v\$database;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Force Logging..........................." " $(echo "select to_char(force_logging) from v\$database;" | ${V_CONN} | tail -2) "
-printf "|%-50s|%-70s|\n" " Database Alert Log..............................." " $(echo "select count(*) || ' Oracle Errors' from sys.X\$DBGALERTEXT where (lower(MESSAGE_TEXT) like '%ora-%' or lower(MESSAGE_TEXT) like '%error%' or lower(MESSAGE_TEXT) like '%fail%') and ORIGINATING_TIMESTAMP > sysdate - 1;" | ${V_CONN} | tail -2) "
+printf "|%-50s|%-70s|\n" " Database Alert Log..............................." " $(echo "select 'Oracle Errors: ' || count(*) from sys.X\$DBGALERTEXT where (lower(MESSAGE_TEXT) like '%ora-%' or lower(MESSAGE_TEXT) like '%error%' or lower(MESSAGE_TEXT) like '%fail%') and ORIGINATING_TIMESTAMP > sysdate - 1;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Backup.................................." " $(echo "select 'Full: ' || (select count(*) from V\$RMAN_BACKUP_JOB_DETAILS WHERE INPUT_TYPE = 'DB FULL' AND START_TIME > SYSDATE - 1) || ' times | ' || 'Inc: ' || (select count(*) from V\$RMAN_BACKUP_JOB_DETAILS WHERE INPUT_TYPE = 'INCREMENTAL' AND START_TIME > SYSDATE - 1) || ' times | ' || 'Arch: ' || (SELECT COUNT(*) from V\$RMAN_BACKUP_JOB_DETAILS WHERE INPUT_TYPE = 'ARCHIVELOG' AND START_TIME > SYSDATE - 1) || ' times' AS backup_summary from dual;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Components Status......................." " $(echo "select 'Valid: ' || count(CASE WHEN status = 'VALID' THEN 1 END) || ' | Invalid: ' || count(CASE WHEN status = 'INVALID' THEN 1 END) || ' | OPTION OFF: ' || count(CASE WHEN status not in ('INVALID','VALID') THEN 1 END)  from DBA_REGISTRY;" | ${V_CONN} | tail -2) "
 printf "|%-50s|%-70s|\n" " Database Objects Status.........................." " $(echo "select 'Invalid Ojbects: ' || trim(count(*)) from all_objects where status != 'VALID';" | ${V_CONN} | tail -2) "

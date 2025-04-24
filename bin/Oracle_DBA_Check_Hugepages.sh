@@ -15,24 +15,16 @@
 
 # Welcome text
 echo "
-This script is provided by Doc ID 401749.1 from My Oracle Support
-(http://support.oracle.com) where it is intended to compute values for
-the recommended HugePages/HugeTLB configuration for the current shared
-memory segments on Oracle Linux. Before proceeding with the execution please note following:
+This script is provided by Doc ID 401749.1 from My Oracle Support (http://support.oracle.com) 
+Where it is intended to compute values for the recommended HugePages/HugeTLB configuration for the current shared memory segments on Oracle Linux. 
+Before proceeding with the execution please note following:
  * For ASM instance, it needs to configure ASMM instead of AMM.
- * The 'pga_aggregate_target' is outside the SGA and
-   you should accommodate this while calculating the overall size.
- * In case you changes the DB SGA size,
-   as the new SGA will not fit in the previous HugePages configuration,
-   it had better disable the whole HugePages,
-   start the DB with new SGA size and run the script again.
+ * The 'pga_aggregate_target' is outside the SGA and you should accommodate this while calculating the overall size.
+ * In case you changes the DB SGA size, as the new SGA will not fit in the previous HugePages configuration, it had better disable the whole HugePages, start the DB with new SGA size and run the script again.
 And make sure that:
  * Oracle Database instance(s) are up and running
- * Oracle Database Automatic Memory Management (AMM) is not setup
-   (See Doc ID 749851.1)
- * The shared memory segments can be listed by command:
-     # ipcs -m
-
+ * Oracle Database Automatic Memory Management (AMM) is not setup (See Doc ID 749851.1)
+ * The shared memory segments can be listed by command: # ipcs -m
 
 Press Enter to proceed..."
 
@@ -67,11 +59,10 @@ if [[ ${RES_BYTES} -lt 100000000 ]]; then
   echo "***********"
   echo "** ERROR **"
   echo "***********"
-  echo "Sorry! There are not enough total of shared memory segments allocated for HugePages configuration. HugePages can only be used for shared memory segments that you can list by command:
-
-    # ipcs -m
-
-of a size that can match an Oracle Database SGA. Please make sure that:
+  echo "
+Sorry! There are not enough total of shared memory segments allocated for HugePages configuration. 
+HugePages can only be used for shared memory segments that you can list by command: # ipcs -m
+Of a size that can match an Oracle Database SGA. Please make sure that:
  * Oracle Database instance is up and running
  * Oracle Database Automatic Memory Management (AMM) is not configured"
     exit 1
