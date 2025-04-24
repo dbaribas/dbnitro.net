@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+Author="Andre Augusto Ribas"
+SoftwareVersion="1.0.1"
+DateCreation="20/10/2023"
+DateModification="20/10/2023"
+EMAIL="dba.ribas@gmail.com"
+GITHUB="https://github.com/dbaribas/dbnitro.net"
+WEBSITE="http://dbnitro.net"
+#
+# Oracle Database Log Rotation
+#
+/u01/app/oracle/diag/rdbms/cvz001s/CVZ001S/trace/alert_CVZ001S.log {
+  weekly
+  rotate 4
+  compress
+  compresscmd /bin/bzip2
+  compressext .bz2
+  copytruncate
+  delaycompress
+  notifempty
+}
+
+/u01/app/oracle/diag/rdbms/cvz002s/CVZ002S/trace/alert_CVZ002S.log {
+  weekly
+  rotate 4
+  compress
+  compresscmd /bin/bzip2
+  compressext .bz2
+  copytruncate
+  delaycompress
+  notifempty
+}
+
+/u01/app/oracle/diag/rdbms/cvz003s/CVZ003S/trace/alert_CVZ003S.log {
+  weekly
+  rotate 4
+  compress
+  compresscmd /bin/bzip2
+  compressext .bz2
+  copytruncate
+  delaycompress
+  notifempty
+}
+
+/u01/app/oracle/diag/rdbms/cvz101t/CVZ101T/trace/alert_CVZ101T.log {
+  weekly
+  rotate 4
+  compress
+  compresscmd /bin/bzip2
+  compressext .bz2
+  copytruncate
+  delaycompress
+  notifempty
+}
+
+/u01/app/oracle/diag/rdbms/cvz102t/CVZ102T/trace/alert_CVZ102T.log {
+  weekly
+  rotate 4
+  compress
+  compresscmd /bin/bzip2
+  compressext .bz2
+  copytruncate
+  delaycompress
+  notifempty
+}
+#
+# --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
+# THE SCRIPT FINISHES HERE
+# --------------//--------------//--------------//--------------//--------------//--------------//--------------//-----
+#
+# /usr/sbin/logrotate /etc/logrotate.conf
+# logrotate -f oradblogs
+# logrotate -f oradblogs -d /home/oracle/
+# logrotate -f oradblogs -s /var/lib/logrotate/logrotate.status
+# logrotate -f oradblogs -d /home/oracle/ -s /var/lib/logrotate/logrotate.status
+# find /u01/ -name alert_*.log
+
+# /u01/app/grid/diag/kfod/srvdb01/kfod/trace/alert_+ASM1.log
+# /u01/app/grid/diag/kfod/srvdb01/kfod/trace/alert_ora19prd.log
+# /u01/app/grid/diag/asm/+asm/+ASM1/trace/alert_+ASM1.log
+# /u01/app/grid/diag/apx/+apx/+APX1/trace/alert_+APX1.log
+# /u01/app/oracle/diag/rdbms/ora19prd/ora19prd/trace/alert_ora19prd.log
+# /u01/app/19.3.0.1/grid/rdbms/log/alert_+ASM1.log
+
+# logrotate -f /etc/logrotate.d/oradblogs
+# logrotate -s /var/lib/logrotate/logrotate.status
+# logrotate -f /etc/logrotate.d/oradblogs -s /var/lib/logrotate/logrotate.status
